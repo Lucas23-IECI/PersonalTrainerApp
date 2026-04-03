@@ -23,6 +23,11 @@ import {
   getWarmupSets,
 } from "@/lib/progression";
 import {
+  sendWorkoutNotification,
+  clearWorkoutNotification,
+  requestNotificationPermission,
+} from "@/lib/native";
+import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
 } from "lucide-react";
 
@@ -176,7 +181,6 @@ function SessionContent() {
   // ── Persistent notification (update every 30s + on exercise changes) ──
   useEffect(() => {
     if (!started || finished) return;
-    if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') return;
 
     const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !s.isWarmup));
     const exName = currentEx?.name || exercises[exercises.length - 1]?.name || '';
@@ -189,7 +193,7 @@ function SessionContent() {
       const m = Math.floor(sec / 60);
       const s = sec % 60;
       const time = `${m}:${s.toString().padStart(2, '0')}`;
-      sendNotification(
+      sendWorkoutNotification(
         `${workout.name} — ${time}`,
         `${exName} · ${completedWorking}/${totalWorking} sets`
       );
@@ -198,6 +202,27 @@ function SessionContent() {
     const id = setInterval(update, 30_000);
     return () => clearInterval(id);
   }, [started, finished, exercises, sessionStart, workout.name]);
+
+  // ── Handle Android hardware back button ──
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let removeListener: (() => void) | undefined;
+
+    import('@capacitor/app').then(({ App }) => {
+      App.addListener('backButton', () => {
+        if (started && !finished) {
+          // Minimize session - navigate to workout page (session persists)
+          router.push('/workout');
+        } else {
+          router.back();
+        }
+      }).then(handle => {
+        removeListener = () => handle.remove();
+      });
+    }).catch(() => { /* not in Capacitor */ });
+
+    return () => { removeListener?.(); };
+  }, [started, finished, router]);
 
   // ── Computed stats ──
   const totalSets = exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.completed && !s.isWarmup).length, 0);
@@ -279,32 +304,12 @@ function SessionContent() {
   }
 
   // ── Notification helpers ──
-  function sendNotification(title: string, body: string) {
-    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.active?.postMessage({
-        type: 'WORKOUT_NOTIFICATION',
-        title,
-        body,
-        url: `/workout/session?day=${dayId}`,
-      });
-    });
-  }
-
-  function clearNotification() {
-    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.active?.postMessage({ type: 'CLEAR_WORKOUT_NOTIFICATION' });
-    });
-  }
+  // (Now using native.ts: sendWorkoutNotification / clearWorkoutNotification)
 
   function startSession() {
     setStarted(true);
     setSessionStart(Date.now());
-    // Request notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
+    requestNotificationPermission();
   }
 
   const finishSession = useCallback(() => {
@@ -330,7 +335,7 @@ function SessionContent() {
     };
     saveSession(session);
     clearActiveSession();
-    clearNotification();
+    clearWorkoutNotification();
     setSavedSession(session);
     setFinished(true);
   }, [exercises, sessionStart, workout]);
@@ -711,7 +716,7 @@ function SessionContent() {
             <p className="text-[0.78rem] mb-4" style={{ color: "var(--text-muted)" }}>Se va a perder todo el progreso de esta sesion.</p>
             <div className="flex gap-2">
               <button onClick={() => setConfirmDiscard(false)} className="btn btn-ghost flex-1">Cancelar</button>
-              <button onClick={() => { clearActiveSession(); clearNotification(); router.push("/workout"); }} className="btn btn-danger flex-1">Descartar</button>
+              <button onClick={() => { clearActiveSession(); clearWorkoutNotification(); router.push("/workout"); }} className="btn btn-danger flex-1">Descartar</button>
             </div>
           </div>
         </div>

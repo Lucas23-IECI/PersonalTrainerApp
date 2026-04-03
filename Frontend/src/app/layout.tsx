@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import OnboardingGate from "@/components/OnboardingGate";
 import PWAManager from "@/components/PWAManager";
 import ActiveWorkoutBar from "@/components/ActiveWorkoutBar";
+import UpdateChecker from "@/components/UpdateChecker";
 
 export const metadata: Metadata = {
   title: "MARK PT - Personal Trainer",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <OnboardingGate />
         <PWAManager />
+        <UpdateChecker />
         <div className="pb-[70px]">
           {children}
         </div>

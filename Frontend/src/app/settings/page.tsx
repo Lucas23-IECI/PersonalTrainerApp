@@ -6,6 +6,7 @@ import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
 import { exportAllData, importAllData } from "@/lib/storage";
 import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone } from "lucide-react";
 import Link from "next/link";
+import { APP_VERSION } from "@/lib/version";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -179,7 +180,7 @@ export default function SettingsPage() {
         <div className="text-[0.75rem] font-bold mb-2">Acerca de</div>
         <div className="text-[0.65rem] text-zinc-500 space-y-1">
           <div>MARK PT — Personal Trainer</div>
-          <div>Versión: 1.0.0</div>
+          <div>Versión: {APP_VERSION}</div>
           <div>Datos guardados localmente en tu dispositivo</div>
         </div>
       </div>

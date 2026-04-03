@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { getActiveSession, clearActiveSession, type ActiveSessionData } from '@/lib/storage';
+import { clearWorkoutNotification } from '@/lib/native';
 import { ChevronRight, Trash2 } from 'lucide-react';
 
 export default function ActiveWorkoutBar() {
@@ -32,13 +33,7 @@ export default function ActiveWorkoutBar() {
     return () => clearInterval(id);
   }, [session]);
 
-  function clearNotification() {
-    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.active?.postMessage({ type: 'CLEAR_WORKOUT_NOTIFICATION' });
-      });
-    }
-  }
+
 
   if (hidden || !session) return null;
 
@@ -61,10 +56,9 @@ export default function ActiveWorkoutBar() {
 
   return (
     <>
-      {/* Bar sits above the nav (70px nav height) */}
       <div
-        className="fixed left-0 right-0 z-40"
-        style={{ bottom: 70, background: 'var(--bg-card)', borderTop: '1px solid var(--border)' }}
+        className="fixed left-0 right-0 z-40 animate-slide-up"
+        style={{ bottom: 70, background: 'var(--bg-card)', borderTop: '1px solid var(--border)', boxShadow: '0 -2px 12px rgba(0,0,0,0.06)' }}
       >
         <div className="max-w-[540px] mx-auto flex items-center gap-2 px-3 py-2.5">
           {/* Green pulse dot */}
@@ -124,7 +118,7 @@ export default function ActiveWorkoutBar() {
               <button
                 onClick={() => {
                   clearActiveSession();
-                  clearNotification();
+                  clearWorkoutNotification();
                   setSession(null);
                   setConfirmDiscard(false);
                 }}

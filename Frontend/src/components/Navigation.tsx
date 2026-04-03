@@ -44,17 +44,27 @@ export default function Navigation() {
           <Link
             key={href}
             href={href}
-            className="flex flex-col items-center gap-0.5 no-underline transition-colors"
+            className="flex flex-col items-center gap-0.5 no-underline"
             style={{
-              color: active ? "#2C6BED" : "#AEAEB2",
-              fontSize: "0.6rem",
+              color: active ? "var(--accent)" : "var(--text-muted)",
+              fontSize: "0.58rem",
               fontWeight: active ? 700 : 500,
               letterSpacing: "0.04em",
               textTransform: "uppercase",
               minWidth: 48,
+              transition: "color 0.2s ease",
             }}
           >
-            <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
+            <div
+              className="flex items-center justify-center rounded-xl transition-all"
+              style={{
+                width: 36,
+                height: 28,
+                background: active ? "var(--ring)" : "transparent",
+              }}
+            >
+              <Icon size={19} strokeWidth={active ? 2.5 : 1.5} />
+            </div>
             {label}
           </Link>
         );
