@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
 import { exportAllData, importAllData } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon } from "lucide-react";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone } from "lucide-react";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -157,6 +158,20 @@ export default function SettingsPage() {
             <AlertTriangle size={14} /> Error al importar. Verificá el archivo.
           </div>
         )}
+      </div>
+
+      {/* DOWNLOAD APP */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">App Android</div>
+        <p className="text-[0.65rem] text-zinc-500 mb-3">
+          Descargá la app nativa para tu celular Android.
+        </p>
+        <Link
+          href="/descargar"
+          className="btn btn-primary w-full text-sm no-underline flex items-center justify-center gap-2"
+        >
+          <Smartphone size={14} /> Descargar APK
+        </Link>
       </div>
 
       {/* APP INFO */}
