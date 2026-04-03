@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { getWeeklyPlan } from "@/data/workouts";
 import { getCurrentPhaseInfo } from "@/data/profile";
-import { getActiveSession, clearActiveSession, type ActiveSessionData } from "@/lib/storage";
+import { getActiveSession, clearActiveSession } from "@/lib/storage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Play, Clock, ChevronDown, ChevronUp, Pencil, Trash2, ChevronRight } from "lucide-react";
+import { Play, Clock, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 
 export default function WorkoutPage() {
   const router = useRouter();
@@ -23,38 +23,11 @@ export default function WorkoutPage() {
 
   const phaseInfo = getCurrentPhaseInfo();
 
-  // Active session state
-  const [activeSession, setActiveSession] = useState<ActiveSessionData | null>(null);
-  const [activeElapsed, setActiveElapsed] = useState(0);
   const [confirmNewDay, setConfirmNewDay] = useState<string | null>(null);
 
-  // Load active session on mount
-  useEffect(() => {
-    setActiveSession(getActiveSession());
-  }, []);
-
-  // Live timer for active session bar
-  useEffect(() => {
-    if (!activeSession) return;
-    const tick = () => setActiveElapsed(Date.now() - activeSession.sessionStart);
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [activeSession]);
-
-  function formatDuration(ms: number) {
-    const sec = Math.floor(ms / 1000);
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    if (m >= 60) {
-      const h = Math.floor(m / 60);
-      return `${h}h ${m % 60}m`;
-    }
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  }
-
   function handleStartWorkout(dayId: string) {
-    if (activeSession && activeSession.dayId !== dayId) {
+    const active = getActiveSession();
+    if (active && active.dayId !== dayId) {
       setConfirmNewDay(dayId);
     } else {
       router.push(`/workout/session?day=${dayId}`);
@@ -63,30 +36,14 @@ export default function WorkoutPage() {
 
   function confirmDiscardAndStart() {
     clearActiveSession();
-    setActiveSession(null);
     if (confirmNewDay) {
       router.push(`/workout/session?day=${confirmNewDay}`);
     }
     setConfirmNewDay(null);
   }
 
-  function discardActiveSession() {
-    clearActiveSession();
-    setActiveSession(null);
-  }
-
-  // Current exercise name for active bar
-  const activeExName = activeSession
-    ? (() => {
-        const exs = activeSession.exercises;
-        // Find first exercise with incomplete sets
-        const current = exs.find((e) => e.sets.some((s) => !s.completed && !s.isWarmup));
-        return current?.name || exs[exs.length - 1]?.name || "";
-      })()
-    : "";
-
   return (
-    <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6" style={{ paddingBottom: activeSession ? 80 : undefined }}>
+    <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       <div className="flex items-center justify-between mb-0.5">
         <h1 className="text-xl font-extrabold tracking-tight">Plan Semanal</h1>
         <Link href="/workout/editor" className="flex items-center gap-1 text-[0.7rem] text-[#2C6BED] no-underline font-semibold">
@@ -240,53 +197,13 @@ export default function WorkoutPage() {
         })}
       </div>
 
-      {/* ── Active Workout Bar (Hevy-style) ── */}
-      {activeSession && (
-        <div
-          className="fixed bottom-0 left-0 right-0 z-40"
-          style={{ background: "var(--bg-card)", borderTop: "1px solid var(--border)" }}
-        >
-          <div className="max-w-[540px] mx-auto flex items-center gap-3 px-4 py-3">
-            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "#34C759" }} />
-            <button
-              onClick={() => router.push(`/workout/session?day=${activeSession.dayId}`)}
-              className="flex-1 text-left bg-transparent border-none cursor-pointer p-0"
-            >
-              <div className="text-[0.82rem] font-bold truncate" style={{ color: "var(--text)" }}>
-                {activeSession.workoutName}
-                <span className="text-[0.72rem] font-semibold ml-2" style={{ color: "#34C759" }}>
-                  {formatDuration(activeElapsed)}
-                </span>
-              </div>
-              <div className="text-[0.68rem] truncate" style={{ color: "var(--text-muted)" }}>
-                {activeExName}
-              </div>
-            </button>
-            <button
-              onClick={() => router.push(`/workout/session?day=${activeSession.dayId}`)}
-              className="bg-transparent border-none cursor-pointer p-1"
-              style={{ color: "var(--accent)" }}
-            >
-              <ChevronRight size={20} />
-            </button>
-            <button
-              onClick={discardActiveSession}
-              className="bg-transparent border-none cursor-pointer p-1"
-              style={{ color: "#FF3B30" }}
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* ── Confirm discard & start new ── */}
       {confirmNewDay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
           <div className="card mx-6 p-5 text-center" style={{ maxWidth: 320 }}>
             <h3 className="text-lg font-bold mb-2" style={{ color: "var(--text)" }}>Descartar entrenamiento?</h3>
             <p className="text-[0.78rem] mb-4" style={{ color: "var(--text-muted)" }}>
-              Hay un entrenamiento en progreso ({activeSession?.workoutName}). Se va a perder todo el progreso.
+              Hay un entrenamiento en progreso. Se va a perder todo el progreso si empezás uno nuevo.
             </p>
             <div className="flex gap-2">
               <button onClick={() => setConfirmNewDay(null)} className="btn btn-ghost flex-1">Cancelar</button>

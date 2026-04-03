@@ -3,6 +3,7 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import OnboardingGate from "@/components/OnboardingGate";
 import PWAManager from "@/components/PWAManager";
+import ActiveWorkoutBar from "@/components/ActiveWorkoutBar";
 
 export const metadata: Metadata = {
   title: "MARK PT - Personal Trainer",
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="pb-[70px]">
           {children}
         </div>
+        <ActiveWorkoutBar />
         <Navigation />
         <script
           dangerouslySetInnerHTML={{

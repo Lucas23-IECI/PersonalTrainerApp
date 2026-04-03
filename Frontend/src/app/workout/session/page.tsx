@@ -71,9 +71,13 @@ function SessionContent() {
   const [restTotal, setRestTotal] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
 
   // ── Initialize exercises (or restore active session) ──
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
     const active = getActiveSession();
     if (active && active.dayId === dayId) {
       // Restore from persisted active session
@@ -126,7 +130,8 @@ function SessionContent() {
       };
     });
     setExercises(exs);
-  }, [workout, programDay]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayId]);
 
   // ── Session timer ──
   useEffect(() => {
