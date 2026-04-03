@@ -1,4 +1,11 @@
-const CACHE_NAME = "mark-pt-1775195194035";
+// Stamps a unique build version into sw.js so browsers detect updates
+const fs = require("fs");
+const path = require("path");
+
+const version = `mark-pt-${Date.now()}`;
+const swPath = path.join(__dirname, "public", "sw.js");
+
+const sw = `const CACHE_NAME = "${version}";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -29,3 +36,7 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(request).then((cached) => cached || new Response("Offline", { status: 503 })))
   );
 });
+`;
+
+fs.writeFileSync(swPath, sw, "utf-8");
+console.log(`SW stamped: ${version}`);
