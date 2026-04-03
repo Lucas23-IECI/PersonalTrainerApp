@@ -263,3 +263,52 @@ tr:last-child td {
 .animate-slide-in[style*="reverse"] {
   animation: slideOut 0.3s ease-out both;
 }
+
+/* ===== PWA Install / Update Banners ===== */
+.pwa-banner {
+  position: fixed;
+  bottom: 80px;
+  left: 12px;
+  right: 12px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  color: var(--text);
+  font-size: 14px;
+}
+.pwa-update {
+  bottom: auto;
+  top: env(safe-area-inset-top, 12px);
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.pwa-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pwa-update .pwa-btn {
+  background: rgba(255,255,255,0.2);
+}
+.pwa-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}

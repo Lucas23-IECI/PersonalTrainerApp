@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import OnboardingGate from "@/components/OnboardingGate";
+import PWAManager from "@/components/PWAManager";
 
 export const metadata: Metadata = {
   title: "MARK PT - Personal Trainer",
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <OnboardingGate />
+        <PWAManager />
         <div className="pb-[70px]">
           {children}
         </div>
@@ -42,11 +44,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 var t = localStorage.getItem('mark-pt-theme');
                 if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
               })();
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js');
-                });
-              }
             `,
           }}
         />

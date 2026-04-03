@@ -3,10 +3,15 @@
   "short_name": "MARK PT",
   "description": "Tu entrenador personal inteligente",
   "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#09090b",
   "theme_color": "#0A84FF",
   "orientation": "portrait",
+  "lang": "es",
+  "categories": ["fitness", "health", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-512.svg",
