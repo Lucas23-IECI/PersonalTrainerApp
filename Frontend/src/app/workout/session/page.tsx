@@ -9,6 +9,9 @@ import {
   generateId,
   today,
   saveSession,
+  saveActiveSession,
+  getActiveSession,
+  clearActiveSession,
   type WorkoutSession,
   type LoggedExercise,
   type LoggedSet,
@@ -69,8 +72,17 @@ function SessionContent() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // ── Initialize exercises ──
+  // ── Initialize exercises (or restore active session) ──
   useEffect(() => {
+    const active = getActiveSession();
+    if (active && active.dayId === dayId) {
+      // Restore from persisted active session
+      setExercises(active.exercises as SessionExercise[]);
+      setSessionStart(active.sessionStart);
+      setStarted(true);
+      return;
+    }
+
     const exs: SessionExercise[] = workout.exercises.map((ex, i) => {
       const history = getExerciseHistory(ex.name, 1);
       const prev = history[0]?.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps })) || [];
@@ -135,6 +147,26 @@ function SessionContent() {
     const id = setInterval(() => setRestSeconds((s) => s - 1), 1000);
     return () => clearInterval(id);
   }, [restActive, restSeconds]);
+
+  // ── Auto-save active session to localStorage ──
+  useEffect(() => {
+    if (!started || finished || exercises.length === 0) return;
+    saveActiveSession({
+      dayId,
+      workoutName: workout.name,
+      sessionStart,
+      exercises: exercises.map((e) => ({
+        name: e.name,
+        exerciseRef: e.exerciseRef,
+        exIndex: e.exIndex,
+        notes: e.notes,
+        restSeconds: e.restSeconds,
+        sets: e.sets.map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, completed: s.completed, isWarmup: s.isWarmup })),
+        supersetTag: e.supersetTag,
+        previousSets: e.previousSets,
+      })),
+    });
+  }, [started, finished, exercises, sessionStart, dayId, workout.name]);
 
   // ── Computed stats ──
   const totalSets = exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.completed && !s.isWarmup).length, 0);
@@ -242,6 +274,7 @@ function SessionContent() {
       endTime: Date.now(),
     };
     saveSession(session);
+    clearActiveSession();
     setSavedSession(session);
     setFinished(true);
   }, [exercises, sessionStart, workout]);
@@ -363,7 +396,7 @@ function SessionContent() {
       <div className="sticky top-0 z-30" style={{ background: "var(--bg)" }}>
         <div className="flex items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.back()} className="bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
+            <button onClick={() => router.push("/workout")} className="bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
               <ChevronDown size={20} />
             </button>
             <span className="text-base font-bold" style={{ color: "var(--text)" }}>Log Workout</span>
@@ -622,7 +655,7 @@ function SessionContent() {
             <p className="text-[0.78rem] mb-4" style={{ color: "var(--text-muted)" }}>Se va a perder todo el progreso de esta sesion.</p>
             <div className="flex gap-2">
               <button onClick={() => setConfirmDiscard(false)} className="btn btn-ghost flex-1">Cancelar</button>
-              <button onClick={() => router.push("/workout")} className="btn btn-danger flex-1">Descartar</button>
+              <button onClick={() => { clearActiveSession(); router.push("/workout"); }} className="btn btn-danger flex-1">Descartar</button>
             </div>
           </div>
         </div>

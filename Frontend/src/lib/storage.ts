@@ -107,6 +107,22 @@ export interface ProgressPhoto {
   notes?: string;
 }
 
+export interface ActiveSessionData {
+  dayId: string;
+  workoutName: string;
+  sessionStart: number;
+  exercises: {
+    name: string;
+    exerciseRef: any;
+    exIndex: number;
+    notes: string;
+    restSeconds: number;
+    sets: { reps: number; weight?: number; rpe?: number; completed: boolean; isWarmup: boolean }[];
+    supersetTag?: string;
+    previousSets: { weight: number; reps: number }[];
+  }[];
+}
+
 const KEYS = {
   checkins: "mark-pt-checkins",
   sessions: "mark-pt-sessions",
@@ -118,6 +134,7 @@ const KEYS = {
   profile: "mark-pt-profile",
   bodyMeasurements: "mark-pt-body-measurements",
   progressPhotos: "mark-pt-progress-photos",
+  activeSession: "mark-pt-active-session",
 } as const;
 
 // === Helpers ===
@@ -186,6 +203,26 @@ export function saveSession(session: WorkoutSession) {
 
 export function deleteSession(id: string) {
   save(KEYS.sessions, getSessions().filter((s) => s.id !== id));
+}
+
+// === Active Session (in-progress workout) ===
+
+export function saveActiveSession(data: ActiveSessionData) {
+  localStorage.setItem(KEYS.activeSession, JSON.stringify(data));
+}
+
+export function getActiveSession(): ActiveSessionData | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(KEYS.activeSession);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearActiveSession() {
+  localStorage.removeItem(KEYS.activeSession);
 }
 
 // === Nutrition Entries ===
