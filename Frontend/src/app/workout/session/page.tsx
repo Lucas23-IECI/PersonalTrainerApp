@@ -173,6 +173,32 @@ function SessionContent() {
     });
   }, [started, finished, exercises, sessionStart, dayId, workout.name]);
 
+  // ── Persistent notification (update every 30s + on exercise changes) ──
+  useEffect(() => {
+    if (!started || finished) return;
+    if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') return;
+
+    const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !s.isWarmup));
+    const exName = currentEx?.name || exercises[exercises.length - 1]?.name || '';
+    const completedWorking = exercises.reduce((a, e) => a + e.sets.filter((s) => s.completed && !s.isWarmup).length, 0);
+    const totalWorking = exercises.reduce((a, e) => a + e.sets.filter((s) => !s.isWarmup).length, 0);
+
+    const update = () => {
+      const elMs = Date.now() - sessionStart;
+      const sec = Math.floor(elMs / 1000);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      const time = `${m}:${s.toString().padStart(2, '0')}`;
+      sendNotification(
+        `${workout.name} — ${time}`,
+        `${exName} · ${completedWorking}/${totalWorking} sets`
+      );
+    };
+    update();
+    const id = setInterval(update, 30_000);
+    return () => clearInterval(id);
+  }, [started, finished, exercises, sessionStart, workout.name]);
+
   // ── Computed stats ──
   const totalSets = exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.completed && !s.isWarmup).length, 0);
   const totalVolume = exercises.reduce(
@@ -252,9 +278,33 @@ function SessionContent() {
     );
   }
 
+  // ── Notification helpers ──
+  function sendNotification(title: string, body: string) {
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.active?.postMessage({
+        type: 'WORKOUT_NOTIFICATION',
+        title,
+        body,
+        url: `/workout/session?day=${dayId}`,
+      });
+    });
+  }
+
+  function clearNotification() {
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.active?.postMessage({ type: 'CLEAR_WORKOUT_NOTIFICATION' });
+    });
+  }
+
   function startSession() {
     setStarted(true);
     setSessionStart(Date.now());
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }
 
   const finishSession = useCallback(() => {
@@ -280,6 +330,7 @@ function SessionContent() {
     };
     saveSession(session);
     clearActiveSession();
+    clearNotification();
     setSavedSession(session);
     setFinished(true);
   }, [exercises, sessionStart, workout]);
@@ -660,7 +711,7 @@ function SessionContent() {
             <p className="text-[0.78rem] mb-4" style={{ color: "var(--text-muted)" }}>Se va a perder todo el progreso de esta sesion.</p>
             <div className="flex gap-2">
               <button onClick={() => setConfirmDiscard(false)} className="btn btn-ghost flex-1">Cancelar</button>
-              <button onClick={() => { clearActiveSession(); router.push("/workout"); }} className="btn btn-danger flex-1">Descartar</button>
+              <button onClick={() => { clearActiveSession(); clearNotification(); router.push("/workout"); }} className="btn btn-danger flex-1">Descartar</button>
             </div>
           </div>
         </div>

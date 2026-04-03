@@ -32,6 +32,14 @@ export default function ActiveWorkoutBar() {
     return () => clearInterval(id);
   }, [session]);
 
+  function clearNotification() {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.active?.postMessage({ type: 'CLEAR_WORKOUT_NOTIFICATION' });
+      });
+    }
+  }
+
   if (hidden || !session) return null;
 
   const sec = Math.floor(elapsed / 1000);
@@ -116,6 +124,7 @@ export default function ActiveWorkoutBar() {
               <button
                 onClick={() => {
                   clearActiveSession();
+                  clearNotification();
                   setSession(null);
                   setConfirmDiscard(false);
                 }}
