@@ -6,3 +6,6 @@ dist/
 data/*.json
 ~$*
 Public/Personal/
+out/
+*.apk
+android/app/build/

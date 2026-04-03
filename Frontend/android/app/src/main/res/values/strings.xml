@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MARK PT</string>
+    <string name="title_activity_main">MARK PT</string>
+    <string name="package_name">com.markpt.app</string>
+    <string name="custom_url_scheme">com.markpt.app</string>
+</resources>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "mark-pt-1775196975348";
+const CACHE_NAME = "mark-pt-1775197305800";
 
 self.addEventListener("install", () => {
   // Don't skipWaiting automatically — wait for user to accept the update
