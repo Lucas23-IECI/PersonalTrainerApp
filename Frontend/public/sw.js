@@ -1,7 +1,7 @@
-const CACHE_NAME = "mark-pt-1775195773709";
+const CACHE_NAME = "mark-pt-1775196065307";
 
 self.addEventListener("install", () => {
-  self.skipWaiting();
+  // Don't skipWaiting automatically — wait for user to accept the update
 });
 
 self.addEventListener("activate", (event) => {
@@ -11,6 +11,12 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("fetch", (event) => {

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Download, RefreshCw, Share, X } from 'lucide-react';
 
+const UPDATE_FLAG = 'mark-pt-update-available';
+
 export default function PWAManager() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstall, setShowInstall] = useState(false);
@@ -14,18 +16,45 @@ export default function PWAManager() {
       window.matchMedia('(display-mode: standalone)').matches ||
       (navigator as any).standalone === true;
 
+    // If a previous visit flagged an update, show banner immediately
+    if (localStorage.getItem(UPDATE_FLAG) === '1') {
+      setShowUpdate(true);
+    }
+
     // --- Service Worker registration + update detection ---
     if ('serviceWorker' in navigator) {
       let hadController = !!navigator.serviceWorker.controller;
 
       navigator.serviceWorker.register('/sw.js').then((reg) => {
+        // If there's already a waiting SW → update available
+        if (reg.waiting) {
+          localStorage.setItem(UPDATE_FLAG, '1');
+          setShowUpdate(true);
+        }
+
+        // Listen for new SW entering waiting state
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          if (!newSW) return;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              localStorage.setItem(UPDATE_FLAG, '1');
+              setShowUpdate(true);
+            }
+          });
+        });
+
         // Check for new deployments every 60 seconds
         setInterval(() => reg.update(), 60_000);
       });
 
-      // A new SW took over while page was open → update available
+      // A new SW took over while page was open
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (hadController) setShowUpdate(true);
+        if (hadController) {
+          // SW activated — update was applied, clear flag
+          localStorage.removeItem(UPDATE_FLAG);
+          setShowUpdate(false);
+        }
         hadController = true;
       });
     }
@@ -69,13 +98,26 @@ export default function PWAManager() {
     localStorage.setItem('mark-pt-install-dismissed', String(Date.now()));
   };
 
+  const handleUpdate = () => {
+    localStorage.removeItem(UPDATE_FLAG);
+    // Tell the waiting SW to activate immediately
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg?.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    }
+    window.location.reload();
+  };
+
   // --- Update banner (top, high priority) ---
   if (showUpdate) {
     return (
       <div className="pwa-banner pwa-update animate-fade-in">
         <RefreshCw size={18} />
         <span>Nueva versión disponible</span>
-        <button onClick={() => window.location.reload()} className="pwa-btn">
+        <button onClick={handleUpdate} className="pwa-btn">
           Actualizar
         </button>
       </div>

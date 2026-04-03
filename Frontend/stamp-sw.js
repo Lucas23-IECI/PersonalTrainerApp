@@ -8,7 +8,7 @@ const swPath = path.join(__dirname, "public", "sw.js");
 const sw = `const CACHE_NAME = "${version}";
 
 self.addEventListener("install", () => {
-  self.skipWaiting();
+  // Don't skipWaiting automatically — wait for user to accept the update
 });
 
 self.addEventListener("activate", (event) => {
@@ -18,6 +18,12 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("fetch", (event) => {
