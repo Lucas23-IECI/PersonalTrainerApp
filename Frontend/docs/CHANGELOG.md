@@ -30,6 +30,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - **2.1 Gráfico 1RM por Ejercicio**: Recharts `LineChart` con selector de ejercicio (dropdown), fórmula Epley (w × (1+r/30)), indicador de tendencia (+/- kg), últimos 3 valores. Dynamic import sin SSR.
 - **2.2 Volumen Semanal por Músculo**: `BarChart` horizontal por grupo muscular, distribución proporcional por músculos primarios, selector de rango temporal (7d/14d/30d), colores únicos por músculo.
 - **2.3 Volumen Total por Sesión**: `AreaChart` con gradiente verde mostrando volumen total (kg×reps) por sesión, stats row (máximo/promedio/sesiones), indicador de tendencia.
+- **2.4 Heatmap Frecuencia (GitHub-style)**: SVG puro estilo GitHub contributions, 16 semanas, intensidad verde por sesiones/día, leyenda y contador de días activos/sesiones totales.
+- **2.5 Peso Corporal + PRs Superpuestos**: Recharts `ComposedChart` con dual Y-axes — Line para peso corporal + Bar para mejores e1RM, toggle mostrar/ocultar PRs, últimos 30 días.
+- **2.6 Distribución Muscular Mejorada**: `RadarChart` con 10 grupos musculares, selector de rango temporal (7d/14d/30d/All), toggle sets vs volumen, normalizado a %, insights de músculo más fuerte/débil.
+- **2.7 Training Streak (🔥)**: Card con racha actual/récord, semana/mes actual, promedio/semana, barra de consistencia 12 semanas, intensidad de fuego dinámica por nivel de racha.
+- **2.8 PR System Completo (por rango reps)**: PRs categorizados por rango (1RM/3RM/5RM/8RM/10RM/12RM+), vista expandible por ejercicio, filtro all/recientes(14d), badges de PRs nuevos, e1RM calculado.
+
+### FASE 2 COMPLETADA ✅
 
 ---
 
