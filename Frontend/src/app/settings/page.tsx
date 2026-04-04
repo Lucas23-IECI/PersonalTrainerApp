@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
 import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus } from "lucide-react";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
 import { t } from "@/lib/i18n";
+import { scheduleDailyReminder, cancelDailyReminder } from "@/lib/native";
 
 const WEIGHT_INCREMENTS = [0.5, 1, 1.25, 2.5, 5];
 
@@ -27,6 +28,9 @@ export default function SettingsPage() {
   const [autoBackup, setAutoBackup] = useState(true);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [backupRestored, setBackupRestored] = useState(false);
+  const [reminderOn, setReminderOn] = useState(false);
+  const [reminderHour, setReminderHour] = useState(18);
+  const [reminderMinute, setReminderMinute] = useState(0);
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
@@ -40,6 +44,9 @@ export default function SettingsPage() {
     setLang(s.language);
     setAutoBackup(s.autoBackup);
     setLastBackup(getAutoBackupDate());
+    setReminderOn(s.dailyReminderEnabled);
+    setReminderHour(s.reminderHour);
+    setReminderMinute(s.reminderMinute);
   }, []);
 
   function toggleTheme() {
@@ -295,6 +302,77 @@ export default function SettingsPage() {
         {backupRestored && (
           <div className="flex items-center gap-1.5 text-[0.72rem] text-[#34C759] mt-2">
             <Check size={14} /> {t("settings.backupRestored")}
+          </div>
+        )}
+      </div>
+
+      {/* DAILY REMINDER — 7.15 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">Recordatorio Diario</div>
+        <p className="text-[0.65rem] text-zinc-500 mb-3">Recibí una notificación diaria para no olvidar tu entrenamiento.</p>
+        <button
+          onClick={async () => {
+            const next = !reminderOn;
+            setReminderOn(next);
+            const s = getSettings();
+            saveSettings({ ...s, dailyReminderEnabled: next });
+            if (next) {
+              await scheduleDailyReminder(reminderHour, reminderMinute);
+            } else {
+              await cancelDailyReminder();
+            }
+          }}
+          className="btn btn-ghost w-full text-sm justify-between mb-2"
+        >
+          <span className="flex items-center gap-2">
+            {reminderOn ? <Bell size={16} /> : <BellOff size={16} />}
+            Recordatorio
+          </span>
+          <span
+            className="w-10 h-5 rounded-full relative transition-colors inline-block"
+            style={{ background: reminderOn ? "var(--accent-green)" : "var(--bg-elevated)" }}
+          >
+            <span
+              className="w-4 h-4 rounded-full absolute top-0.5 transition-all inline-block"
+              style={{
+                background: "#fff",
+                left: reminderOn ? "calc(100% - 18px)" : "2px",
+              }}
+            />
+          </span>
+        </button>
+        {reminderOn && (
+          <div className="flex items-center gap-2 mt-1">
+            <Clock size={14} className="text-zinc-500" />
+            <select
+              value={reminderHour}
+              onChange={async (e) => {
+                const h = parseInt(e.target.value, 10);
+                setReminderHour(h);
+                saveSettings({ ...getSettings(), reminderHour: h });
+                await scheduleDailyReminder(h, reminderMinute);
+              }}
+              className="text-sm flex-1"
+            >
+              {Array.from({ length: 24 }, (_, i) => (
+                <option key={i} value={i}>{String(i).padStart(2, "0")}</option>
+              ))}
+            </select>
+            <span className="text-lg font-bold">:</span>
+            <select
+              value={reminderMinute}
+              onChange={async (e) => {
+                const m = parseInt(e.target.value, 10);
+                setReminderMinute(m);
+                saveSettings({ ...getSettings(), reminderMinute: m });
+                await scheduleDailyReminder(reminderHour, m);
+              }}
+              className="text-sm flex-1"
+            >
+              {[0, 15, 30, 45].map((m) => (
+                <option key={m} value={m}>{String(m).padStart(2, "0")}</option>
+              ))}
+            </select>
           </div>
         )}
       </div>
