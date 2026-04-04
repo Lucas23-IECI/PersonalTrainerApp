@@ -26,6 +26,10 @@ import {
   Camera,
   Trophy,
   CalendarDays,
+  Calculator,
+  Cloud,
+  Zap,
+  BarChart3,
 } from "lucide-react";
 
 const CIRCUM_FIELDS: { key: keyof BodyMeasurement; label: string }[] = [
@@ -176,6 +180,54 @@ export default function ProfilePage() {
         <div className="flex-1">
           <span className="font-bold text-sm">Resumen del Año</span>
           <p className="text-[0.6rem] text-zinc-500">Tu año en entrenamiento estilo Wrapped</p>
+        </div>
+        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+      </Link>
+
+      {/* CALCULATORS LINK — 7.12 */}
+      <Link href="/calculators" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#AF52DE] to-[#5856D6] flex items-center justify-center">
+          <Calculator size={18} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <span className="font-bold text-sm">Calculadoras</span>
+          <p className="text-[0.6rem] text-zinc-500">1RM, TDEE, Macros, Wilks</p>
+        </div>
+        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+      </Link>
+
+      {/* CLOUD SYNC LINK — 7.13 */}
+      <Link href="/cloud-sync" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#64D2FF] to-[#0A84FF] flex items-center justify-center">
+          <Cloud size={18} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <span className="font-bold text-sm">Cloud Sync</span>
+          <p className="text-[0.6rem] text-zinc-500">Backup y restauración de datos</p>
+        </div>
+        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+      </Link>
+
+      {/* QUICK STATS LINK — 7.14 */}
+      <Link href="/widgets" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF9500] to-[#FF3B30] flex items-center justify-center">
+          <BarChart3 size={18} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <span className="font-bold text-sm">Quick Stats</span>
+          <p className="text-[0.6rem] text-zinc-500">Widgets rápidos de estadísticas</p>
+        </div>
+        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+      </Link>
+
+      {/* QUICK ACTIONS LINK — 7.16 */}
+      <Link href="/quick-actions" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF2D55] to-[#FF375F] flex items-center justify-center">
+          <Zap size={18} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <span className="font-bold text-sm">Acciones Rápidas</span>
+          <p className="text-[0.6rem] text-zinc-500">Atajos a funciones principales</p>
         </div>
         <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
       </Link>
