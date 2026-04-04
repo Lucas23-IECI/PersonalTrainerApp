@@ -31,6 +31,8 @@ import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
+import RestTimer from "@/components/RestTimer";
+import { vibrateTimerComplete } from "@/lib/haptics";
 import type { LibraryExercise } from "@/data/exercises";
 
 // ── Types ──
@@ -154,7 +156,7 @@ function SessionContent() {
     if (!restActive || restSeconds <= 0) {
       if (restActive && restSeconds <= 0) {
         setRestActive(false);
-        if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        vibrateTimerComplete();
       }
       return;
     }
@@ -689,36 +691,14 @@ function SessionContent() {
         </button>
       </div>
 
-      {/* ── Rest Timer Bottom Bar ── */}
-      {restActive && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 animate-fade-in" style={{ background: "var(--accent)" }}>
-          <div className="h-[3px]" style={{ background: "rgba(255,255,255,0.2)" }}>
-            <div className="h-full transition-all duration-1000" style={{ width: `${(restSeconds / restTotal) * 100}%`, background: "#fff" }} />
-          </div>
-          <div className="max-w-[540px] mx-auto flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => setRestSeconds((s) => Math.max(0, s - 15))}
-              className="text-white text-[0.8rem] font-bold px-3 py-1.5 rounded-lg border-none cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.15)" }}
-            >-15</button>
-            <div className="text-white text-center">
-              <div className="text-2xl font-black tabular-nums">
-                {Math.floor(restSeconds / 60).toString().padStart(2, "0")}:{(restSeconds % 60).toString().padStart(2, "0")}
-              </div>
-            </div>
-            <button
-              onClick={() => setRestSeconds((s) => s + 15)}
-              className="text-white text-[0.8rem] font-bold px-3 py-1.5 rounded-lg border-none cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.15)" }}
-            >+15</button>
-            <button
-              onClick={() => setRestActive(false)}
-              className="text-[0.8rem] font-bold px-4 py-1.5 rounded-lg border-none cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.2)", color: "#fff" }}
-            >Skip</button>
-          </div>
-        </div>
-      )}
+      {/* ── Rest Timer ── */}
+      <RestTimer
+        seconds={restSeconds}
+        total={restTotal}
+        isActive={restActive}
+        onAdjust={(delta) => setRestSeconds((s) => Math.max(0, s + delta))}
+        onSkip={() => setRestActive(false)}
+      />
 
       {/* ── Add Exercise Modal ── */}
       <AddExerciseModal
