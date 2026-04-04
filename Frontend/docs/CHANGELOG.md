@@ -24,6 +24,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ---
 
+## [Unreleased] — Fase 2: Sistema de Progreso y Charts
+
+### Completado
+- **2.1 Gráfico 1RM por Ejercicio**: Recharts `LineChart` con selector de ejercicio (dropdown), fórmula Epley (w × (1+r/30)), indicador de tendencia (+/- kg), últimos 3 valores. Dynamic import sin SSR.
+- **2.2 Volumen Semanal por Músculo**: `BarChart` horizontal por grupo muscular, distribución proporcional por músculos primarios, selector de rango temporal (7d/14d/30d), colores únicos por músculo.
+- **2.3 Volumen Total por Sesión**: `AreaChart` con gradiente verde mostrando volumen total (kg×reps) por sesión, stats row (máximo/promedio/sesiones), indicador de tendencia.
+
+---
+
 ## [1.2.0] — 2025-06-XX
 
 ### Added
