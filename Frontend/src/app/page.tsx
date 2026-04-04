@@ -179,14 +179,14 @@ export default function Dashboard() {
               {prof.name ? prof.name.charAt(0) : "M"}
             </div>
           </Link>
-          <div>
+          <Link href="/profile" className="no-underline text-inherit">
             <h1 className="text-[1.05rem] font-extrabold tracking-tight leading-none">
               {prof.name ? `${getGreeting()}, ${prof.name.split(" ")[0]}` : "MARK PT"}
             </h1>
             <p className="text-[0.6rem] text-zinc-500 uppercase tracking-widest">
               Fase {phase.id} — {phase.name}
             </p>
-          </div>
+          </Link>
         </div>
         <div className="flex items-center gap-2">
           {streak > 0 && (
