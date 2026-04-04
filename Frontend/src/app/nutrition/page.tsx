@@ -21,32 +21,28 @@ import {
   generateId,
   getNutritionTargets,
   saveNutritionTargets,
-  getFoodFavorites,
-  addFoodFavorite,
-  removeFoodFavorite,
-  getRecentFoods,
   addRecentFood,
+  trackFoodFrequency,
   type NutritionEntry,
   type SelectedMeal,
   type CustomMeal,
   type MealTemplate,
   type NutritionTargets,
-  type FoodFavorite,
 } from "@/lib/storage";
 import {
   Check, Plus, ShoppingCart, Pill, ChefHat, UtensilsCrossed, Trash2,
-  Search, Droplets, Save, FolderOpen, Camera, TrendingDown, TrendingUp,
-  Minus, X, ChevronLeft, ChevronRight, Clock, Heart, Settings,
+  Droplets, Save, FolderOpen, TrendingDown, TrendingUp, Copy,
+  Minus, X, ChevronLeft, ChevronRight, Settings,
 } from "lucide-react";
 import { SwipeTabs } from "@/components/motion";
-import FoodSearchModal from "@/components/FoodSearchModal";
-import BarcodeScanner from "@/components/BarcodeScanner";
-import { calcMacros, type FoodItem } from "@/lib/openfoodfacts";
+import CalorieRing from "@/components/CalorieRing";
+import AddFoodScreen from "@/components/AddFoodScreen";
 
 type Tab = "tracker" | "plan" | "shopping" | "supps" | "cooking";
 
 const GLASS_ML = 250;
 const MEAL_SLOTS = ["Desayuno", "Almuerzo", "Cena", "Snacks"];
+const SLOT_ICONS: Record<string, string> = { Desayuno: "☀️", Almuerzo: "🍽️", Cena: "🌙", Snacks: "🍎" };
 
 export default function NutritionPage() {
   const [selectedDate, setSelectedDate] = useState(today());
@@ -55,21 +51,14 @@ export default function NutritionPage() {
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
   const [targets, setTargets] = useState<NutritionTargets>({ calories: 2300, protein: 170, carbs: 230, fat: 77, water: 3.0 });
 
-  // Add food to slot state
-  const [activeSlot, setActiveSlot] = useState<string | null>(null);
-  const [showManualForm, setShowManualForm] = useState(false);
-  const [customName, setCustomName] = useState("");
-  const [customCal, setCustomCal] = useState("");
-  const [customPro, setCustomPro] = useState("");
-  const [customCarbs, setCustomCarbs] = useState("");
-  const [customFat, setCustomFat] = useState("");
+  // AddFoodScreen
+  const [showAddFood, setShowAddFood] = useState(false);
+  const [addFoodSlot, setAddFoodSlot] = useState("Snacks");
+
+  // Suggestion expansion
+  const [showSuggestions, setShowSuggestions] = useState<string | null>(null);
 
   // Modals
-  const [showFoodSearch, setShowFoodSearch] = useState(false);
-  const [showBarcode, setShowBarcode] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState<string | null>(null);
-  const [showRecents, setShowRecents] = useState(false);
-  const [showFavorites, setShowFavorites] = useState(false);
   const [showTargetEditor, setShowTargetEditor] = useState(false);
 
   // Templates
@@ -78,17 +67,11 @@ export default function NutritionPage() {
   const [templateName, setTemplateName] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
 
-  // Favorites & recents
-  const [favorites, setFavorites] = useState<FoodFavorite[]>([]);
-  const [recents, setRecents] = useState<CustomMeal[]>([]);
-
   useEffect(() => {
     setEntry(getNutritionForDate(selectedDate));
     setCheckedItems(getShoppingChecked());
     setTemplates(getMealTemplates());
     setTargets(getNutritionTargets());
-    setFavorites(getFoodFavorites());
-    setRecents(getRecentFoods());
   }, [selectedDate]);
 
   const WATER_TARGET_ML = targets.water * 1000;
@@ -98,7 +81,6 @@ export default function NutritionPage() {
     setEntry(updated);
   }
 
-  // Date navigation
   function changeDate(offset: number) {
     const d = new Date(selectedDate);
     d.setDate(d.getDate() + offset);
@@ -109,7 +91,6 @@ export default function NutritionPage() {
     return date === today();
   }
 
-  // Get foods for a specific slot
   function getFoodsForSlot(slot: string): { type: "plan" | "custom"; index: number; name: string; calories: number; protein: number; carbs: number; fat: number }[] {
     if (!entry) return [];
     const planFoods = entry.meals
@@ -122,7 +103,6 @@ export default function NutritionPage() {
     return [...planFoods, ...customFoods];
   }
 
-  // Get custom meals with no slot (legacy)
   function getUnslottedCustomMeals() {
     if (!entry) return [];
     return entry.customMeals
@@ -130,7 +110,6 @@ export default function NutritionPage() {
       .filter((m) => !m.slot);
   }
 
-  // Toggle a plan meal in a slot
   function toggleMeal(slot: string, meal: Meal) {
     const current = entry || { date: selectedDate, meals: [], customMeals: [], waterMl: 0 };
     const exists = current.meals.find((m) => m.slot === slot && m.name === meal.name);
@@ -140,82 +119,51 @@ export default function NutritionPage() {
     updateEntry({ ...current, meals: newMeals });
   }
 
-  // Add custom food to a specific slot
   function addFoodToSlot(slot: string, name: string, calories: number, protein: number, carbs: number, fat: number) {
     const current = entry || { date: selectedDate, meals: [], customMeals: [], waterMl: 0 };
     const custom: CustomMeal = { name, calories, protein, carbs, fat, slot };
     updateEntry({ ...current, customMeals: [...current.customMeals, custom] });
     addRecentFood(custom);
-    setRecents(getRecentFoods());
+    trackFoodFrequency(name, calories, protein, carbs, fat);
   }
 
-  // Add manual food
-  function addManualFood() {
-    if (!customName || !customCal || !activeSlot) return;
-    addFoodToSlot(
-      activeSlot,
-      customName,
-      parseInt(customCal, 10),
-      parseInt(customPro, 10) || 0,
-      parseInt(customCarbs, 10) || 0,
-      parseInt(customFat, 10) || 0
-    );
-    setCustomName(""); setCustomCal(""); setCustomPro(""); setCustomCarbs(""); setCustomFat("");
-    setShowManualForm(false);
-    setActiveSlot(null);
+  function openAddFood(slot: string) {
+    setAddFoodSlot(slot);
+    setShowAddFood(true);
   }
 
-  // Remove plan meal
+  function handleAddFromScreen(name: string, calories: number, protein: number, carbs: number, fat: number) {
+    addFoodToSlot(addFoodSlot, name, calories, protein, carbs, fat);
+  }
+
   function removePlanMeal(slot: string, name: string) {
     if (!entry) return;
     updateEntry({ ...entry, meals: entry.meals.filter((m) => !(m.slot === slot && m.name === name)) });
   }
 
-  // Remove custom meal
   function removeCustom(idx: number) {
     if (!entry) return;
     updateEntry({ ...entry, customMeals: entry.customMeals.filter((_, i) => i !== idx) });
   }
 
-  // Food search → add to active slot
-  function handleFoodAdd(name: string, calories: number, protein: number, carbs: number, fat: number) {
-    if (activeSlot) {
-      addFoodToSlot(activeSlot, name, calories, protein, carbs, fat);
-    } else {
-      // Fallback: add to "Snacks"
-      addFoodToSlot("Snacks", name, calories, protein, carbs, fat);
-    }
-    setActiveSlot(null);
-  }
-
-  // Barcode scan found
-  function handleBarcodeFound(food: FoodItem) {
-    setShowBarcode(false);
-    const macros = calcMacros(food, 100);
-    const label = food.brand ? `${food.name} (${food.brand}) — 100g` : `${food.name} — 100g`;
-    handleFoodAdd(label, macros.calories, macros.protein, macros.carbs, macros.fat);
-  }
-
-  // Water tracker
   function addWater(ml: number) {
     const current = entry || { date: selectedDate, meals: [], customMeals: [], waterMl: 0 };
     const newWater = Math.max(0, (current.waterMl || 0) + ml);
     updateEntry({ ...current, waterMl: newWater });
   }
 
-  // Toggle favorite
-  function toggleFavorite(name: string, calories: number, protein: number, carbs: number, fat: number) {
-    const existing = favorites.find((f) => f.name === name);
-    if (existing) {
-      removeFoodFavorite(existing.id);
-    } else {
-      addFoodFavorite({ id: generateId(), name, calories, protein, carbs, fat });
-    }
-    setFavorites(getFoodFavorites());
-  }
-
-  function isFav(name: string) {
-    return favorites.some((f) => f.name === name);
+  // Copy foods from yesterday
+  function copyYesterday() {
+    const yesterday = new Date(selectedDate);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yEntry = getNutritionForDate(yesterday.toISOString().split("T")[0]);
+    if (!yEntry || (yEntry.meals.length === 0 && yEntry.customMeals.length === 0)) return;
+    const current = entry || { date: selectedDate, meals: [], customMeals: [], waterMl: 0 };
+    updateEntry({
+      ...current,
+      meals: [...current.meals, ...yEntry.meals],
+      customMeals: [...current.customMeals, ...yEntry.customMeals],
+    });
   }
 
   // Templates
@@ -255,7 +203,6 @@ export default function NutritionPage() {
     setShoppingChecked(updated);
   }
 
-  // Save custom targets
   function handleSaveTargets(cal: number, pro: number, carbs: number, fat: number, water: number) {
     const t: NutritionTargets = { calories: cal, protein: pro, carbs, fat, water };
     saveNutritionTargets(t);
@@ -271,16 +218,16 @@ export default function NutritionPage() {
   const waterMl = entry?.waterMl || 0;
   const remainingCal = targets.calories - totalCal;
   const weeklyData = getWeeklyCalories(targets.calories);
+  const dayIsEmpty = totalCal === 0;
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "tracker", label: "Hoy", icon: <UtensilsCrossed size={14} /> },
+    { id: "tracker", label: "Diario", icon: <UtensilsCrossed size={14} /> },
     { id: "plan", label: "Plan", icon: <ChefHat size={14} /> },
     { id: "shopping", label: "Compras", icon: <ShoppingCart size={14} /> },
     { id: "supps", label: "Supps", icon: <Pill size={14} /> },
     { id: "cooking", label: "Cocinar", icon: <ChefHat size={14} /> },
   ];
 
-  // Format date display
   const dateObj = new Date(selectedDate + "T12:00:00");
   const dateLabel = isToday(selectedDate)
     ? "Hoy"
@@ -288,6 +235,7 @@ export default function NutritionPage() {
 
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
+      {/* Header */}
       <div className="flex items-center justify-between mb-0.5">
         <h1 className="text-xl font-black tracking-tight">Nutrición</h1>
         <button
@@ -299,9 +247,6 @@ export default function NutritionPage() {
           <Settings size={18} />
         </button>
       </div>
-      <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
-        {targets.calories} kcal · {targets.protein}g P · {targets.carbs}g C · {targets.fat}g F
-      </p>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-4 overflow-x-auto">
@@ -320,11 +265,11 @@ export default function NutritionPage() {
       </div>
 
       <SwipeTabs tabs={["tracker", "plan", "shopping", "supps", "cooking"] as const} current={tab} onChange={(t) => setTab(t as Tab)}>
-      {/* TRACKER */}
+      {/* ========== TRACKER (MFP-style Food Diary) ========== */}
       {tab === "tracker" && (
         <div>
           {/* Date Navigation */}
-          <div className="flex items-center justify-center gap-3 mb-3">
+          <div className="flex items-center justify-center gap-3 mb-4">
             <button
               onClick={() => changeDate(-1)}
               className="p-2 rounded-xl border-none cursor-pointer"
@@ -355,87 +300,59 @@ export default function NutritionPage() {
             </button>
           </div>
 
-          {/* Macro Overview */}
+          {/* Calorie Ring + Macros */}
           <div className="card mb-3">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-2.5" style={{ color: "var(--text-muted)" }}>
-              Macros — {selectedDate}
-            </div>
-            {[
-              { label: "Calorías", value: totalCal, target: targets.calories, unit: "kcal", color: "#2C6BED" },
-              { label: "Proteína", value: totalPro, target: targets.protein, unit: "g", color: "#34C759" },
-              { label: "Carbos", value: totalCarbs, target: targets.carbs, unit: "g", color: "#FFCC00" },
-              { label: "Grasa", value: totalFat, target: targets.fat, unit: "g", color: "#AF52DE" },
-            ].map((m) => (
-              <div key={m.label} className="mb-2.5">
-                <div className="flex justify-between mb-1">
-                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>{m.label}</span>
-                  <span className="text-[0.7rem] font-bold" style={{ color: "var(--text)" }}>
-                    {m.value} <span style={{ color: "var(--text-muted)" }}>/ {m.target}{m.unit}</span>
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${Math.min((m.value / m.target) * 100, 100)}%`, background: m.color }} />
-                </div>
-              </div>
-            ))}
+            <CalorieRing
+              consumed={totalCal}
+              goal={targets.calories}
+              protein={totalPro}
+              carbs={totalCarbs}
+              fat={totalFat}
+              proteinTarget={targets.protein}
+              carbsTarget={targets.carbs}
+              fatTarget={targets.fat}
+            />
           </div>
 
-          {/* Caloric Balance */}
-          <div className="card mb-3">
-            <div className="flex justify-between items-center mb-2">
-              <div className="text-[0.75rem] font-bold" style={{ color: "var(--text)" }}>Balance Calórico</div>
-              <div className="flex items-center gap-1">
-                {remainingCal > 0 ? (
-                  <TrendingDown size={14} style={{ color: "#34C759" }} />
-                ) : (
-                  <TrendingUp size={14} style={{ color: "#FF3B30" }} />
-                )}
-                <span className="text-sm font-black" style={{ color: remainingCal >= 0 ? "#34C759" : "#FF3B30" }}>
-                  {remainingCal >= 0 ? remainingCal : `+${Math.abs(remainingCal)}`} kcal
-                </span>
-              </div>
+          {/* Caloric Balance Mini */}
+          <div className="card mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {remainingCal > 0 ? (
+                <TrendingDown size={14} style={{ color: "#34C759" }} />
+              ) : (
+                <TrendingUp size={14} style={{ color: "#FF3B30" }} />
+              )}
+              <span className="text-[0.75rem] font-bold" style={{ color: remainingCal >= 0 ? "#34C759" : "#FF3B30" }}>
+                {remainingCal >= 0 ? `${remainingCal} kcal restantes` : `+${Math.abs(remainingCal)} kcal excedido`}
+              </span>
             </div>
-            <p className="text-[0.6rem] mb-2.5" style={{ color: "var(--text-muted)" }}>
-              {remainingCal > 0 ? `Te quedan ${remainingCal} kcal por consumir hoy` : `Superaste tu objetivo por ${Math.abs(remainingCal)} kcal`}
-            </p>
-            <div className="text-[0.6rem] uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Semana</div>
-            <div className="flex items-end gap-1" style={{ height: "48px" }}>
+            <div className="flex items-end gap-0.5" style={{ height: "28px" }}>
               {weeklyData.map((d, i) => {
                 const pct = targets.calories > 0 ? Math.min(d.cal / targets.calories, 1.3) : 0;
                 const over = d.cal > targets.calories;
                 return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                  <div key={i} className="flex flex-col items-center gap-0.5" style={{ width: "12px" }}>
                     <div
-                      className="w-full rounded-sm transition-all"
+                      className="w-full rounded-sm"
                       style={{
-                        height: `${Math.max(pct * 36, 2)}px`,
+                        height: `${Math.max(pct * 20, 2)}px`,
                         background: d.isToday ? "var(--accent)" : over ? "#FF3B3066" : "#34C75966",
                       }}
                     />
-                    <span className="text-[0.5rem]" style={{ color: d.isToday ? "var(--accent)" : "var(--text-muted)" }}>
+                    <span className="text-[0.4rem]" style={{ color: d.isToday ? "var(--accent)" : "var(--text-muted)" }}>
                       {d.label}
                     </span>
                   </div>
                 );
               })}
             </div>
-            {(() => {
-              const weekTotal = weeklyData.reduce((s, d) => s + d.cal, 0);
-              const daysWithData = weeklyData.filter(d => d.cal > 0).length;
-              const weekAvg = daysWithData > 0 ? Math.round(weekTotal / daysWithData) : 0;
-              return weekAvg > 0 ? (
-                <div className="text-[0.6rem] mt-1.5" style={{ color: "var(--text-muted)" }}>
-                  Promedio: <strong>{weekAvg} kcal/día</strong> · Total: {weekTotal} kcal
-                </div>
-              ) : null;
-            })()}
           </div>
 
-          {/* Water Tracker */}
+          {/* Water Tracker - Compact */}
           <div className="card mb-3">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <Droplets size={16} style={{ color: "#007AFF" }} />
+                <Droplets size={14} style={{ color: "#007AFF" }} />
                 <span className="text-[0.75rem] font-bold" style={{ color: "var(--text)" }}>Agua</span>
               </div>
               <span className="text-[0.7rem] font-bold" style={{ color: "#007AFF" }}>
@@ -446,97 +363,75 @@ export default function NutritionPage() {
               <div className="progress-fill" style={{ width: `${Math.min((waterMl / WATER_TARGET_ML) * 100, 100)}%`, background: "#007AFF" }} />
             </div>
             <div className="flex gap-1.5">
-              <button onClick={() => addWater(GLASS_ML)} className="flex-1 py-2 rounded-xl border-none cursor-pointer text-sm font-bold text-white" style={{ background: "#007AFF" }}>
-                <Droplets size={12} className="inline mr-1" style={{ verticalAlign: "-1px" }} /> +1 Vaso
+              <button onClick={() => addWater(GLASS_ML)} className="flex-1 py-1.5 rounded-lg border-none cursor-pointer text-[0.7rem] font-bold text-white" style={{ background: "#007AFF" }}>
+                +1 Vaso
               </button>
-              <button onClick={() => addWater(500)} className="py-2 px-3 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold" style={{ background: "var(--bg-elevated)", color: "#007AFF" }}>
+              <button onClick={() => addWater(500)} className="py-1.5 px-3 rounded-lg border-none cursor-pointer text-[0.65rem] font-bold" style={{ background: "var(--bg-elevated)", color: "#007AFF" }}>
                 +500ml
               </button>
-              <button onClick={() => addWater(-GLASS_ML)} className="py-2 px-3 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold" style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>
-                <Minus size={12} className="inline" style={{ verticalAlign: "-1px" }} />
+              <button onClick={() => addWater(-GLASS_ML)} className="py-1.5 px-3 rounded-lg border-none cursor-pointer text-[0.65rem] font-bold" style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>
+                <Minus size={12} />
               </button>
-            </div>
-            <div className="flex gap-1 mt-2 flex-wrap">
-              {Array.from({ length: Math.ceil(WATER_TARGET_ML / GLASS_ML) }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-5 h-5 rounded-full transition-colors"
-                  style={{
-                    background: (i + 1) * GLASS_ML <= waterMl ? "#007AFF" : "var(--bg-elevated)",
-                    border: "1px solid",
-                    borderColor: (i + 1) * GLASS_ML <= waterMl ? "#007AFF" : "var(--border)",
-                  }}
-                />
-              ))}
             </div>
           </div>
 
-          {/* Global search/barcode/recents/favs buttons */}
-          <div className="flex gap-1.5 mb-3 flex-wrap">
-            <button
-              onClick={() => { setActiveSlot("Snacks"); setShowFoodSearch(true); }}
-              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold text-white"
-              style={{ background: "var(--accent)" }}
-            >
-              <Search size={13} /> Buscar
-            </button>
-            <button
-              onClick={() => { setActiveSlot("Snacks"); setShowBarcode(true); }}
-              className="py-2 px-3 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold"
-              style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
-            >
-              <Camera size={13} className="inline mr-1" style={{ verticalAlign: "-2px" }} /> Código
-            </button>
-            {recents.length > 0 && (
+          {/* Copy Yesterday / Templates (when day is empty) */}
+          {dayIsEmpty && (
+            <div className="flex gap-2 mb-3">
               <button
-                onClick={() => setShowRecents(true)}
-                className="py-2 px-3 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold"
-                style={{ background: "var(--bg-elevated)", color: "#FF9500" }}
+                onClick={copyYesterday}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl cursor-pointer border-none text-[0.75rem] font-bold"
+                style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
               >
-                <Clock size={13} className="inline mr-1" style={{ verticalAlign: "-2px" }} /> Recientes
+                <Copy size={14} /> Copiar de Ayer
               </button>
-            )}
-            {favorites.length > 0 && (
-              <button
-                onClick={() => setShowFavorites(true)}
-                className="py-2 px-3 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold"
-                style={{ background: "var(--bg-elevated)", color: "#FF3B30" }}
-              >
-                <Heart size={13} className="inline mr-1" style={{ verticalAlign: "-2px" }} /> Favoritos
-              </button>
-            )}
-          </div>
+              {templates.length > 0 && (
+                <button
+                  onClick={() => setShowTemplates(true)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl cursor-pointer border-none text-[0.75rem] font-bold"
+                  style={{ background: "var(--bg-elevated)", color: "#34C759" }}
+                >
+                  <FolderOpen size={14} /> Usar Template
+                </button>
+              )}
+            </div>
+          )}
 
-          {/* ===== MEAL SLOTS ===== */}
+          {/* ===== FOOD DIARY - MEAL SLOTS ===== */}
           {MEAL_SLOTS.map((slotName) => {
             const foods = getFoodsForSlot(slotName);
             const slotCal = foods.reduce((s, f) => s + f.calories, 0);
-            const slotPro = foods.reduce((s, f) => s + f.protein, 0);
             const planSlot = mealPlan.find((s) => s.slot === slotName);
 
             return (
-              <div key={slotName} className="card mb-2.5">
-                <div className="flex justify-between items-center mb-2">
-                  <div>
-                    <div className="text-[0.85rem] font-bold" style={{ color: "var(--text)" }}>{slotName}</div>
-                    {planSlot && (
-                      <div className="text-[0.55rem]" style={{ color: "var(--text-muted)" }}>{planSlot.time}</div>
-                    )}
+              <div key={slotName} className="card mb-2">
+                {/* Slot header */}
+                <div className="flex justify-between items-center mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{SLOT_ICONS[slotName] || "🍽️"}</span>
+                    <span className="text-[0.85rem] font-bold" style={{ color: "var(--text)" }}>{slotName}</span>
                   </div>
-                  <div className="text-right">
+                  <div className="flex items-center gap-2">
                     {foods.length > 0 && (
-                      <div className="text-[0.6rem] font-bold" style={{ color: "#34C759" }}>
-                        {slotCal} kcal · {slotPro}g P
-                      </div>
+                      <span className="text-[0.65rem] font-bold" style={{ color: "var(--text-muted)" }}>
+                        {slotCal} kcal
+                      </span>
                     )}
+                    <button
+                      onClick={() => openAddFood(slotName)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer"
+                      style={{ background: "var(--accent)", color: "white" }}
+                    >
+                      <Plus size={18} strokeWidth={3} />
+                    </button>
                   </div>
                 </div>
 
-                {/* Foods in this slot */}
+                {/* Food list */}
                 {foods.length > 0 && (
-                  <div className="flex flex-col gap-1 mb-2">
+                  <div className="flex flex-col gap-1 mb-1.5">
                     {foods.map((food, fi) => (
-                      <div key={fi} className="flex items-center gap-2 py-1.5 px-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
+                      <div key={fi} className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
                         <div className="flex-1 min-w-0">
                           <div className="text-[0.73rem] font-medium truncate" style={{ color: "var(--text)" }}>{food.name}</div>
                           <div className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>
@@ -544,19 +439,9 @@ export default function NutritionPage() {
                           </div>
                         </div>
                         <button
-                          onClick={() => toggleFavorite(food.name, food.calories, food.protein, food.carbs, food.fat)}
-                          className="bg-transparent border-none cursor-pointer p-1"
-                          style={{ color: isFav(food.name) ? "#FF3B30" : "var(--text-muted)" }}
-                        >
-                          {isFav(food.name) ? <Heart size={13} fill="#FF3B30" /> : <Heart size={13} />}
-                        </button>
-                        <button
                           onClick={() => {
-                            if (food.type === "plan") {
-                              removePlanMeal(slotName, food.name);
-                            } else {
-                              removeCustom(food.index);
-                            }
+                            if (food.type === "plan") removePlanMeal(slotName, food.name);
+                            else removeCustom(food.index);
                           }}
                           className="bg-transparent border-none cursor-pointer p-1"
                           style={{ color: "var(--text-muted)" }}
@@ -568,64 +453,54 @@ export default function NutritionPage() {
                   </div>
                 )}
 
-                {/* Action buttons for this slot */}
-                <div className="flex gap-1.5">
+                {/* Empty state — tap the + */}
+                {foods.length === 0 && (
                   <button
-                    onClick={() => { setActiveSlot(slotName); setShowFoodSearch(true); }}
-                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg border border-dashed cursor-pointer text-[0.65rem] font-semibold"
-                    style={{ background: "transparent", borderColor: "var(--border)", color: "var(--accent)" }}
+                    onClick={() => openAddFood(slotName)}
+                    className="w-full py-3 rounded-lg border border-dashed cursor-pointer text-[0.7rem] font-medium"
+                    style={{ background: "transparent", borderColor: "var(--border)", color: "var(--text-muted)" }}
                   >
-                    <Search size={12} /> Buscar
+                    Agregar alimento...
                   </button>
-                  <button
-                    onClick={() => { setActiveSlot(slotName); setShowManualForm(true); }}
-                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg border border-dashed cursor-pointer text-[0.65rem] font-semibold"
-                    style={{ background: "transparent", borderColor: "var(--border)", color: "#34C759" }}
-                  >
-                    <Plus size={12} /> Manual
-                  </button>
-                  {planSlot && planSlot.options.length > 0 && (
-                    <button
-                      onClick={() => setShowSuggestions(showSuggestions === slotName ? null : slotName)}
-                      className="flex items-center justify-center gap-1 py-2 px-2.5 rounded-lg border border-dashed cursor-pointer text-[0.65rem] font-semibold"
-                      style={{ background: "transparent", borderColor: "var(--border)", color: "#FF9500" }}
-                    >
-                      <ChefHat size={12} /> Sugerencias
-                    </button>
-                  )}
-                </div>
+                )}
 
-                {/* Suggestions from meal plan (expandable) */}
+                {/* Suggestions toggle */}
+                {planSlot && planSlot.options.length > 0 && foods.length === 0 && (
+                  <button
+                    onClick={() => setShowSuggestions(showSuggestions === slotName ? null : slotName)}
+                    className="mt-1.5 text-[0.6rem] font-semibold bg-transparent border-none cursor-pointer"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    {showSuggestions === slotName ? "Ocultar sugerencias ▲" : "Ver sugerencias del plan ▼"}
+                  </button>
+                )}
+
                 {showSuggestions === slotName && planSlot && (
-                  <div className="mt-2 pt-2" style={{ borderTop: "1px solid var(--border)" }}>
-                    <div className="text-[0.6rem] font-bold mb-1.5" style={{ color: "var(--text-muted)" }}>OPCIONES DEL PLAN</div>
-                    <div className="flex flex-col gap-1">
-                      {planSlot.options.map((meal) => {
-                        const sel = entry?.meals.some((m) => m.slot === slotName && m.name === meal.name);
-                        return (
-                          <button
-                            key={meal.name}
-                            onClick={() => toggleMeal(slotName, meal)}
-                            className="flex justify-between items-center p-2 rounded-lg cursor-pointer text-left w-full border transition-colors"
-                            style={{
-                              background: sel ? "#34C75912" : "var(--bg-elevated)",
-                              borderColor: sel ? "#34C75940" : "transparent",
-                            }}
-                          >
-                            <div className="flex-1">
-                              <div className="text-[0.73rem] font-medium" style={{ color: "var(--text)" }}>
-                                {sel && <Check size={11} className="inline mr-1" style={{ color: "#34C759", verticalAlign: "-1px" }} />}
-                                {meal.name}
-                              </div>
-                              <div className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>
-                                {meal.calories}kcal · {meal.protein}P · {meal.carbs}C · {meal.fat}F
-                                {meal.tags.includes("rápido") && " ⚡"}
-                              </div>
+                  <div className="mt-1.5 pt-1.5" style={{ borderTop: "1px solid var(--border)" }}>
+                    {planSlot.options.map((meal) => {
+                      const sel = entry?.meals.some((m) => m.slot === slotName && m.name === meal.name);
+                      return (
+                        <button
+                          key={meal.name}
+                          onClick={() => toggleMeal(slotName, meal)}
+                          className="w-full flex justify-between items-center p-2 rounded-lg cursor-pointer text-left mb-1 border transition-colors"
+                          style={{
+                            background: sel ? "#34C75912" : "var(--bg-elevated)",
+                            borderColor: sel ? "#34C75940" : "transparent",
+                          }}
+                        >
+                          <div className="flex-1">
+                            <div className="text-[0.7rem] font-medium" style={{ color: "var(--text)" }}>
+                              {sel && <Check size={11} className="inline mr-1" style={{ color: "#34C759" }} />}
+                              {meal.name}
                             </div>
-                          </button>
-                        );
-                      })}
-                    </div>
+                            <div className="text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
+                              {meal.calories}kcal · {meal.protein}P · {meal.carbs}C · {meal.fat}F
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -634,13 +509,13 @@ export default function NutritionPage() {
 
           {/* Legacy unslotted custom meals */}
           {getUnslottedCustomMeals().length > 0 && (
-            <div className="card mb-2.5">
-              <div className="text-[0.75rem] font-bold mb-1.5" style={{ color: "var(--text)" }}>Comidas Extra (sin categoría)</div>
+            <div className="card mb-2">
+              <div className="text-[0.7rem] font-bold mb-1.5" style={{ color: "var(--text-muted)" }}>Comidas Extra (sin categoría)</div>
               {getUnslottedCustomMeals().map((cm) => (
                 <div key={cm.originalIndex} className="flex justify-between items-center py-1.5" style={{ borderBottom: "1px solid var(--border)" }}>
                   <div>
-                    <div className="text-[0.75rem]" style={{ color: "var(--text)" }}>{cm.name}</div>
-                    <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                    <div className="text-[0.73rem]" style={{ color: "var(--text)" }}>{cm.name}</div>
+                    <div className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>
                       {cm.calories}kcal · {cm.protein}P · {cm.carbs}C · {cm.fat}F
                     </div>
                   </div>
@@ -652,25 +527,27 @@ export default function NutritionPage() {
             </div>
           )}
 
-          {/* Templates */}
-          <div className="flex gap-2 mb-3">
-            <button
-              onClick={() => setShowSaveTemplate(true)}
-              disabled={!entry || (entry.meals.length === 0 && entry.customMeals.length === 0)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl cursor-pointer text-[0.7rem] font-bold border-none disabled:opacity-40"
-              style={{ background: "var(--bg-elevated)", color: "#34C759" }}
-            >
-              <Save size={13} /> Guardar Template
-            </button>
-            <button
-              onClick={() => setShowTemplates(true)}
-              disabled={templates.length === 0}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl cursor-pointer text-[0.7rem] font-bold border-none disabled:opacity-40"
-              style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
-            >
-              <FolderOpen size={13} /> Cargar Template
-            </button>
-          </div>
+          {/* Templates (when day has data) */}
+          {!dayIsEmpty && (
+            <div className="flex gap-2 mt-2 mb-3">
+              <button
+                onClick={() => setShowSaveTemplate(true)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl cursor-pointer text-[0.7rem] font-bold border-none"
+                style={{ background: "var(--bg-elevated)", color: "#34C759" }}
+              >
+                <Save size={13} /> Guardar Template
+              </button>
+              {templates.length > 0 && (
+                <button
+                  onClick={() => setShowTemplates(true)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl cursor-pointer text-[0.7rem] font-bold border-none"
+                  style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
+                >
+                  <FolderOpen size={13} /> Templates
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -764,195 +641,13 @@ export default function NutritionPage() {
 
       {/* ===== MODALS ===== */}
 
-      {/* Food Search Modal */}
-      <FoodSearchModal
-        open={showFoodSearch}
-        onClose={() => { setShowFoodSearch(false); setActiveSlot(null); }}
-        onAdd={handleFoodAdd}
+      {/* MFP-style Add Food Screen */}
+      <AddFoodScreen
+        open={showAddFood}
+        slot={addFoodSlot}
+        onClose={() => setShowAddFood(false)}
+        onAdd={handleAddFromScreen}
       />
-
-      {/* Barcode Scanner Modal */}
-      <BarcodeScanner
-        open={showBarcode}
-        onClose={() => { setShowBarcode(false); setActiveSlot(null); }}
-        onFound={handleBarcodeFound}
-      />
-
-      {/* Manual Food Form Modal */}
-      {showManualForm && activeSlot && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center" onClick={() => { setShowManualForm(false); setActiveSlot(null); }}>
-          <div className="absolute inset-0 bg-black/60" />
-          <div className="relative w-[90%] max-w-[400px] rounded-2xl p-5" style={{ background: "var(--bg-card)" }} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-bold" style={{ color: "var(--text)" }}>Agregar a {activeSlot}</div>
-              <button onClick={() => { setShowManualForm(false); setActiveSlot(null); }} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
-                <X size={18} />
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="Nombre del alimento"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              className="w-full mb-2 text-sm rounded-lg py-2.5 px-3 border"
-              style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
-              autoFocus
-            />
-            <div className="grid grid-cols-4 gap-1.5 mb-3">
-              {[
-                { label: "kcal *", val: customCal, set: setCustomCal },
-                { label: "Prot (g)", val: customPro, set: setCustomPro },
-                { label: "Carbs (g)", val: customCarbs, set: setCustomCarbs },
-                { label: "Fat (g)", val: customFat, set: setCustomFat },
-              ].map((f) => (
-                <div key={f.label}>
-                  <label className="block text-[0.55rem] mb-0.5" style={{ color: "var(--text-muted)" }}>{f.label}</label>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    value={f.val}
-                    onChange={(e) => f.set(e.target.value)}
-                    className="w-full text-center text-sm rounded-lg py-2 border"
-                    style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => { setShowManualForm(false); setActiveSlot(null); }}
-                className="flex-1 py-2.5 rounded-xl border cursor-pointer text-sm font-semibold"
-                style={{ background: "transparent", borderColor: "var(--border)", color: "var(--text-muted)" }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={addManualFood}
-                disabled={!customName || !customCal}
-                className="flex-[2] py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm disabled:opacity-40"
-                style={{ background: "#34C759" }}
-              >
-                <Plus size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} /> Agregar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Recents Modal */}
-      {showRecents && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={() => setShowRecents(false)}>
-          <div className="absolute inset-0 bg-black/60" />
-          <div
-            className="relative w-full max-w-[540px] max-h-[70vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col"
-            style={{ background: "var(--bg-card)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid var(--border)" }}>
-              <div className="flex items-center gap-2">
-                <Clock size={16} style={{ color: "#FF9500" }} />
-                <span className="text-sm font-bold" style={{ color: "var(--text)" }}>Comidas Recientes</span>
-              </div>
-              <button onClick={() => setShowRecents(false)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
-                <X size={18} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-3">
-              {recents.map((food, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-xl mb-2" style={{ background: "var(--bg-elevated)" }}>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[0.78rem] font-semibold truncate" style={{ color: "var(--text)" }}>{food.name}</div>
-                    <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
-                      {food.calories}kcal · {food.protein}P · {food.carbs}C · {food.fat}F
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    {MEAL_SLOTS.map((slot) => (
-                      <button
-                        key={slot}
-                        onClick={() => {
-                          addFoodToSlot(slot, food.name, food.calories, food.protein, food.carbs, food.fat);
-                          setShowRecents(false);
-                        }}
-                        className="py-1 px-2 rounded-lg border-none cursor-pointer text-[0.55rem] font-bold text-white"
-                        style={{ background: "var(--accent)" }}
-                        title={`Agregar a ${slot}`}
-                      >
-                        {slot.slice(0, 3)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Favorites Modal */}
-      {showFavorites && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={() => setShowFavorites(false)}>
-          <div className="absolute inset-0 bg-black/60" />
-          <div
-            className="relative w-full max-w-[540px] max-h-[70vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col"
-            style={{ background: "var(--bg-card)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid var(--border)" }}>
-              <div className="flex items-center gap-2">
-                <Heart size={16} fill="#FF3B30" style={{ color: "#FF3B30" }} />
-                <span className="text-sm font-bold" style={{ color: "var(--text)" }}>Favoritos</span>
-              </div>
-              <button onClick={() => setShowFavorites(false)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
-                <X size={18} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-3">
-              {favorites.length === 0 && (
-                <p className="text-center py-8 text-[0.75rem]" style={{ color: "var(--text-muted)" }}>
-                  No tenés favoritos. Tocá el ❤️ en cualquier comida para guardarla.
-                </p>
-              )}
-              {favorites.map((fav) => (
-                <div key={fav.id} className="flex items-center gap-3 p-3 rounded-xl mb-2" style={{ background: "var(--bg-elevated)" }}>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[0.78rem] font-semibold truncate" style={{ color: "var(--text)" }}>{fav.name}</div>
-                    <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
-                      {fav.calories}kcal · {fav.protein}P · {fav.carbs}C · {fav.fat}F
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    {MEAL_SLOTS.map((slot) => (
-                      <button
-                        key={slot}
-                        onClick={() => {
-                          addFoodToSlot(slot, fav.name, fav.calories, fav.protein, fav.carbs, fav.fat);
-                          setShowFavorites(false);
-                        }}
-                        className="py-1 px-2 rounded-lg border-none cursor-pointer text-[0.55rem] font-bold text-white"
-                        style={{ background: "var(--accent)" }}
-                        title={`Agregar a ${slot}`}
-                      >
-                        {slot.slice(0, 3)}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => {
-                      removeFoodFavorite(fav.id);
-                      setFavorites(getFoodFavorites());
-                    }}
-                    className="bg-transparent border-none cursor-pointer p-1"
-                    style={{ color: "#FF3B30" }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Targets Editor Modal */}
       {showTargetEditor && <TargetEditorModal targets={targets} onSave={handleSaveTargets} onClose={() => setShowTargetEditor(false)} />}
