@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { getWorkoutById, getWeeklyPlan, type Exercise } from "@/data/workouts";
+import { getWorkoutById, getWeeklyPlan, type Exercise, type WorkoutDay } from "@/data/workouts";
 import { getCurrentPhase } from "@/data/phases";
 import { getProgramWorkoutById } from "@/data/programs";
 import {
@@ -30,6 +30,7 @@ import {
 } from "@/lib/native";
 import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
+  ArrowUp, ArrowDown, RefreshCw, Link2,
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
@@ -54,12 +55,19 @@ interface SessionExercise {
   previousSets: { weight: number; reps: number }[];
 }
 
+const SUPERSET_COLORS: Record<string, string> = {
+  A: '#0A84FF', B: '#AF52DE', C: '#30D158', D: '#FF9500', E: '#FF375F', F: '#64D2FF',
+};
+const SUPERSET_TAGS = Object.keys(SUPERSET_COLORS);
+
 function SessionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const dayId = searchParams.get("day") || "";
 
+  const isQuickStart = dayId === 'quickstart';
   const workout = useMemo(() => {
+    if (dayId === 'quickstart') return { id: 'quickstart', name: 'Quick Workout', day: '', focus: 'Custom', duration: '', color: '#0A84FF', type: 'full' as const, exercises: [], note: '' } satisfies WorkoutDay;
     const plan = getWeeklyPlan();
     return getWorkoutById(dayId) || plan[0];
   }, [dayId]);
@@ -77,6 +85,7 @@ function SessionContent() {
   const [prAlert, setPrAlert] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
+  const [replaceExerciseIdx, setReplaceExerciseIdx] = useState<number | null>(null);
 
   // Rest timer
   const [restActive, setRestActive] = useState(false);
@@ -102,6 +111,15 @@ function SessionContent() {
       setExercises(restored);
       setSessionStart(active.sessionStart);
       setStarted(true);
+      return;
+    }
+
+    // Quick start: empty session, auto-start
+    if (isQuickStart) {
+      setExercises([]);
+      setStarted(true);
+      setSessionStart(Date.now());
+      requestNotificationPermission();
       return;
     }
 
@@ -346,6 +364,55 @@ function SessionContent() {
     setShowAddExercise(false);
   }
 
+  function replaceExerciseFromLibrary(libEx: LibraryExercise) {
+    if (replaceExerciseIdx === null) return;
+    const history = getExerciseHistory(libEx.name, 1);
+    const prev = history[0]?.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps })) || [];
+    setExercises((p) =>
+      p.map((e, i) =>
+        i === replaceExerciseIdx
+          ? {
+              ...e,
+              name: libEx.name,
+              exerciseRef: { name: libEx.name, sets: 3, reps: '10', rest: '60s', load: '', rpe: '', primaryMuscles: libEx.primaryMuscles },
+              previousSets: prev,
+              sets: e.sets.map((s, si) => ({ ...s, weight: prev[si]?.weight || s.weight, reps: prev[si]?.reps || s.reps })),
+            }
+          : e
+      )
+    );
+    setReplaceExerciseIdx(null);
+    setShowAddExercise(false);
+  }
+
+  function moveExercise(exIdx: number, direction: -1 | 1) {
+    const target = exIdx + direction;
+    if (target < 0 || target >= exercises.length) return;
+    setExercises((prev) => {
+      const arr = [...prev];
+      [arr[exIdx], arr[target]] = [arr[target], arr[exIdx]];
+      return arr;
+    });
+  }
+
+  function cycleSuperset(exIdx: number) {
+    setExercises((prev) => {
+      const tag = prev[exIdx].supersetTag;
+      const idx = tag ? SUPERSET_TAGS.indexOf(tag) : -1;
+      const next = idx + 1 < SUPERSET_TAGS.length ? SUPERSET_TAGS[idx + 1] : undefined;
+      return prev.map((e, i) => i === exIdx ? { ...e, supersetTag: next } : e);
+    });
+  }
+
+  function fillFromPrevious(exIdx: number, setIdx: number) {
+    const ex = exercises[exIdx];
+    const set = ex.sets[setIdx];
+    const wIdx = isWarmupType(set.setType) ? undefined : ex.sets.filter((s, si) => si < setIdx && !isWarmupType(s.setType)).length;
+    const prev = wIdx !== undefined ? ex.previousSets[wIdx] : undefined;
+    if (!prev) return;
+    setExercises((p) => p.map((e, i) => i === exIdx ? { ...e, sets: e.sets.map((s, j) => j === setIdx ? { ...s, weight: prev.weight || s.weight, reps: prev.reps || s.reps } : s) } : e));
+  }
+
   // ── Notification helpers ──
   // (Now using native.ts: sendWorkoutNotification / clearWorkoutNotification)
 
@@ -568,21 +635,35 @@ function SessionContent() {
           const completedWorking = workingSets.filter((s) => s.completed).length;
 
           return (
-            <div key={exIdx} className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
+            <div key={exIdx} className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderLeft: ex.supersetTag ? `3px solid ${SUPERSET_COLORS[ex.supersetTag] || '#FF9500'}` : undefined }}>
               {/* Exercise Header */}
               <div className="px-4 pt-3 pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className="text-[0.92rem] font-bold truncate" style={{ color: "var(--accent)" }}>{ex.name}</span>
                     {ex.supersetTag && (
-                      <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: "#FF9500", color: "#fff" }}>
+                      <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: SUPERSET_COLORS[ex.supersetTag] || '#FF9500', color: "#fff" }}>
                         SS-{ex.supersetTag}
                       </span>
                     )}
                   </div>
-                  <button onClick={() => removeExercise(exIdx)} className="bg-transparent border-none cursor-pointer p-1 shrink-0" style={{ color: "var(--text-muted)" }}>
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button onClick={() => moveExercise(exIdx, -1)} disabled={exIdx === 0} className="bg-transparent border-none cursor-pointer p-1 disabled:opacity-20" style={{ color: "var(--text-muted)" }}>
+                      <ArrowUp size={15} />
+                    </button>
+                    <button onClick={() => moveExercise(exIdx, 1)} disabled={exIdx === exercises.length - 1} className="bg-transparent border-none cursor-pointer p-1 disabled:opacity-20" style={{ color: "var(--text-muted)" }}>
+                      <ArrowDown size={15} />
+                    </button>
+                    <button onClick={() => cycleSuperset(exIdx)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: ex.supersetTag ? (SUPERSET_COLORS[ex.supersetTag] || '#FF9500') : "var(--text-muted)" }}>
+                      <Link2 size={15} />
+                    </button>
+                    <button onClick={() => { setReplaceExerciseIdx(exIdx); setShowAddExercise(true); }} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
+                      <RefreshCw size={14} />
+                    </button>
+                    <button onClick={() => removeExercise(exIdx)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Notes */}
@@ -643,10 +724,15 @@ function SessionContent() {
                         />
                       </div>
 
-                      {/* Previous */}
-                      <div className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>
+                      {/* Previous — tap to fill */}
+                      <button
+                        onClick={() => prevSet && prevSet.weight > 0 && fillFromPrevious(exIdx, setIdx)}
+                        disabled={!prevSet || prevSet.weight <= 0}
+                        className="text-[0.7rem] bg-transparent border-none p-0 text-left cursor-pointer disabled:cursor-default"
+                        style={{ color: prevSet && prevSet.weight > 0 ? "var(--accent)" : "var(--text-muted)" }}
+                      >
                         {prevSet && prevSet.weight > 0 ? `${prevSet.weight}×${prevSet.reps}` : "\u2014"}
-                      </div>
+                      </button>
 
                       {/* Weight Input */}
                       <input
@@ -745,8 +831,8 @@ function SessionContent() {
       {/* ── Add Exercise Modal ── */}
       <AddExerciseModal
         open={showAddExercise}
-        onClose={() => setShowAddExercise(false)}
-        onSelect={addExerciseFromLibrary}
+        onClose={() => { setShowAddExercise(false); setReplaceExerciseIdx(null); }}
+        onSelect={replaceExerciseIdx !== null ? replaceExerciseFromLibrary : addExerciseFromLibrary}
         recentExerciseNames={exercises.map((e) => e.name)}
       />
 

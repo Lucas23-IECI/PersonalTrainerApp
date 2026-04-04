@@ -197,6 +197,15 @@ export default function WorkoutPage() {
         })}
       </div>
 
+      {/* ── Quick Start ── */}
+      <button
+        onClick={() => handleStartWorkout('quickstart')}
+        className="w-full mt-4 py-3 rounded-xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2"
+        style={{ background: 'var(--bg-card)', border: '1px dashed var(--border)', color: 'var(--accent)' }}
+      >
+        ⚡ Quick Start
+      </button>
+
       {/* ── Confirm discard & start new ── */}
       {confirmNewDay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
