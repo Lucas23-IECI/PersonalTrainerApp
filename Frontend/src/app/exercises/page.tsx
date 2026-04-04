@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import MuscleRadar, { type MuscleRegion, REGION_LABELS, REGION_MUSCLES, getRegionHits } from "@/components/MuscleMap";
 import {
   exerciseLibrary,
@@ -10,8 +10,20 @@ import {
   type MuscleGroup,
   type LibraryExercise,
 } from "@/data/exercises";
+import { getAllExercises } from "@/lib/custom-exercises";
 import { getWeeklyMuscleHits } from "@/lib/storage";
-import { Search, ChevronDown, ChevronUp, Target, BookOpen, Trophy } from "lucide-react";
+import { getExerciseHistory } from "@/lib/progression";
+import { getFavorites, toggleFavorite } from "@/lib/exercise-favorites";
+import { getExerciseImage, hasWgerMapping } from "@/lib/wger-api";
+import { Search, ChevronDown, ChevronUp, Target, BookOpen, Trophy, Star } from "lucide-react";
+
+type SortOption = "name" | "difficulty" | "favorites";
+const SORT_LABELS: Record<SortOption, string> = {
+  name: "A-Z",
+  difficulty: "Dificultad",
+  favorites: "Favoritos",
+};
+const DIFFICULTY_ORDER: Record<string, number> = { beginner: 1, intermediate: 2, advanced: 3 };
 
 const TIER_THRESHOLDS: { tier: string; min: number }[] = [
   { tier: "S", min: 5 },
@@ -48,19 +60,50 @@ export default function ExercisesPage() {
   const [muscleHits, setMuscleHits] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [expandedEx, setExpandedEx] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("name");
+  const [favoritesSet, setFavoritesSet] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setMuscleHits(getWeeklyMuscleHits());
+    setFavoritesSet(new Set(getFavorites()));
   }, []);
 
-  const filteredExercises = selectedMuscle
-    ? getExercisesForMuscle(selectedMuscle)
-    : search
-      ? exerciseLibrary.filter((e) =>
-          e.name.toLowerCase().includes(search.toLowerCase()) ||
-          e.primaryMuscles.some((m) => MUSCLE_LABELS[m].toLowerCase().includes(search.toLowerCase()))
-        )
-      : exerciseLibrary;
+  const allExercises = useMemo(() => getAllExercises(), []);
+
+  const filteredExercises = useMemo(() => {
+    let list = selectedMuscle
+      ? getExercisesForMuscle(selectedMuscle)
+      : search
+        ? allExercises.filter((e) =>
+            e.name.toLowerCase().includes(search.toLowerCase()) ||
+            e.primaryMuscles.some((m) => MUSCLE_LABELS[m].toLowerCase().includes(search.toLowerCase()))
+          )
+        : allExercises;
+
+    // Sort (3.13)
+    switch (sortBy) {
+      case "name":
+        list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "difficulty":
+        list = [...list].sort((a, b) => (DIFFICULTY_ORDER[a.difficulty] || 2) - (DIFFICULTY_ORDER[b.difficulty] || 2));
+        break;
+      case "favorites":
+        list = [...list].sort((a, b) => {
+          const aFav = favoritesSet.has(a.name) ? 0 : 1;
+          const bFav = favoritesSet.has(b.name) ? 0 : 1;
+          return aFav - bFav || a.name.localeCompare(b.name);
+        });
+        break;
+    }
+
+    return list;
+  }, [selectedMuscle, search, allExercises, sortBy, favoritesSet]);
+
+  function handleToggleFavorite(name: string) {
+    toggleFavorite(name);
+    setFavoritesSet(new Set(getFavorites()));
+  }
 
   const allMuscles = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
   const rankedMuscles = allMuscles.map((m) => ({
@@ -211,6 +254,8 @@ export default function ExercisesPage() {
                   exercises={unique}
                   expandedEx={expandedEx}
                   onToggle={(id) => setExpandedEx(expandedEx === id ? null : id)}
+                  favoritesSet={favoritesSet}
+                  onToggleFav={handleToggleFavorite}
                 />
               </div>
             );
@@ -267,14 +312,31 @@ export default function ExercisesPage() {
             ))}
           </div>
 
-          <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
-            {filteredExercises.length} ejercicios
+          <p className="text-xs mb-3 flex items-center justify-between" style={{ color: "var(--text-muted)" }}>
+            <span>{filteredExercises.length} ejercicios</span>
+            {/* Sort (3.13) */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="text-xs rounded-lg px-2 py-1"
+              style={{
+                background: sortBy !== "name" ? "var(--accent)" : "var(--bg-card)",
+                border: "1px solid var(--border)",
+                color: sortBy !== "name" ? "#fff" : "var(--text-secondary)",
+              }}
+            >
+              {Object.entries(SORT_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
           </p>
 
           <ExerciseList
             exercises={filteredExercises}
             expandedEx={expandedEx}
             onToggle={(id) => setExpandedEx(expandedEx === id ? null : id)}
+            favoritesSet={favoritesSet}
+            onToggleFav={handleToggleFavorite}
           />
         </div>
       )}
@@ -338,15 +400,20 @@ function ExerciseList({
   exercises,
   expandedEx,
   onToggle,
+  favoritesSet,
+  onToggleFav,
 }: {
   exercises: LibraryExercise[];
   expandedEx: string | null;
   onToggle: (id: string) => void;
+  favoritesSet?: Set<string>;
+  onToggleFav?: (name: string) => void;
 }) {
   return (
     <div className="flex flex-col gap-2">
       {exercises.map((ex) => {
         const isOpen = expandedEx === ex.id;
+        const isFav = favoritesSet?.has(ex.name) ?? false;
         return (
           <div key={ex.id} className="card">
             <div
@@ -364,8 +431,9 @@ function ExerciseList({
                   {CATEGORY_LABELS[ex.category]?.[0] || "E"}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate" style={{ color: "var(--text)" }}>
+                  <div className="text-sm font-semibold truncate flex items-center gap-1.5" style={{ color: "var(--text)" }}>
                     {ex.name}
+                    {isFav && <Star size={12} fill="#FFD60A" stroke="#FFD60A" className="shrink-0" />}
                   </div>
                   <div className="flex gap-1 mt-0.5 flex-wrap">
                     {ex.primaryMuscles.map((m) => (
@@ -376,74 +444,132 @@ function ExerciseList({
                   </div>
                 </div>
               </div>
-              <div style={{ color: "var(--text-muted)" }} className="ml-2 shrink-0">
-                {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              <div className="flex items-center gap-1 ml-2 shrink-0">
+                {onToggleFav && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onToggleFav(ex.name); }}
+                    className="bg-transparent border-none cursor-pointer p-1"
+                    style={{ color: isFav ? "#FFD60A" : "var(--text-muted)" }}
+                  >
+                    <Star size={16} fill={isFav ? "#FFD60A" : "none"} />
+                  </button>
+                )}
+                <div style={{ color: "var(--text-muted)" }}>
+                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </div>
               </div>
             </div>
 
             {isOpen && (
-              <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  <div>
-                    <span className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                      Categoría
-                    </span>
-                    <div className="text-xs font-medium mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                      {CATEGORY_LABELS[ex.category] || ex.category}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                      Dificultad
-                    </span>
-                    <div className="text-xs font-medium mt-0.5 capitalize" style={{ color: "var(--text-secondary)" }}>
-                      {ex.difficulty}
-                    </div>
-                  </div>
-                </div>
-
-                {ex.secondaryMuscles.length > 0 && (
-                  <div className="mb-3">
-                    <span className="text-[0.6rem] uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
-                      Secundarios
-                    </span>
-                    <div className="flex gap-1 flex-wrap">
-                      {ex.secondaryMuscles.map((m) => (
-                        <span key={m} className="badge text-[0.55rem]">
-                          {MUSCLE_LABELS[m]}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {ex.instructions && (
-                  <div className="mb-2">
-                    <span className="text-[0.6rem] uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
-                      Instrucciones
-                    </span>
-                    <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                      {ex.instructions}
-                    </p>
-                  </div>
-                )}
-
-                {ex.tips && (
-                  <div
-                    className="text-xs py-2 px-3 rounded-lg mt-2"
-                    style={{
-                      background: "rgba(44,107,237,0.06)",
-                      color: "var(--accent)",
-                    }}
-                  >
-                    {ex.tips}
-                  </div>
-                )}
-              </div>
+              <ExerciseDetail exercise={ex} />
             )}
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function ExerciseDetail({ exercise: ex }: { exercise: LibraryExercise }) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const history = useMemo(() => {
+    const h = getExerciseHistory(ex.name, 1);
+    return h.length > 0 ? h[0] : null;
+  }, [ex.name]);
+
+  useEffect(() => {
+    if (!hasWgerMapping(ex.name)) return;
+    let cancelled = false;
+    getExerciseImage(ex.name).then((url) => {
+      if (!cancelled && url) setImageUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [ex.name]);
+
+  return (
+    <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+      {/* Inline history (3.11) */}
+      {history && (
+        <div
+          className="mb-3 px-3 py-2 rounded-lg text-[0.65rem]"
+          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
+        >
+          <span style={{ color: "var(--text-muted)" }}>Último: </span>
+          <span className="font-semibold" style={{ color: "var(--accent)" }}>
+            {history.topSet.weight}kg × {history.topSet.reps}
+          </span>
+          <span style={{ color: "var(--text-muted)" }}> · RPE {history.avgRpe.toFixed(1)} · {new Date(history.date).toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short" })}</span>
+        </div>
+      )}
+
+      {/* wger image (3.14) */}
+      {imageUrl && (
+        <div className="mb-3 rounded-lg overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
+          <img
+            src={imageUrl}
+            alt={ex.name}
+            className="w-full h-36 object-contain"
+            loading="lazy"
+          />
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div>
+          <span className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+            Categoría
+          </span>
+          <div className="text-xs font-medium mt-0.5" style={{ color: "var(--text-secondary)" }}>
+            {CATEGORY_LABELS[ex.category] || ex.category}
+          </div>
+        </div>
+        <div>
+          <span className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+            Dificultad
+          </span>
+          <div className="text-xs font-medium mt-0.5 capitalize" style={{ color: "var(--text-secondary)" }}>
+            {ex.difficulty}
+          </div>
+        </div>
+      </div>
+
+      {ex.secondaryMuscles.length > 0 && (
+        <div className="mb-3">
+          <span className="text-[0.6rem] uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
+            Secundarios
+          </span>
+          <div className="flex gap-1 flex-wrap">
+            {ex.secondaryMuscles.map((m) => (
+              <span key={m} className="badge text-[0.55rem]">
+                {MUSCLE_LABELS[m]}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {ex.instructions && (
+        <div className="mb-2">
+          <span className="text-[0.6rem] uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
+            Instrucciones
+          </span>
+          <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            {ex.instructions}
+          </p>
+        </div>
+      )}
+
+      {ex.tips && (
+        <div
+          className="text-xs py-2 px-3 rounded-lg mt-2"
+          style={{
+            background: "rgba(44,107,237,0.06)",
+            color: "var(--accent)",
+          }}
+        >
+          {ex.tips}
+        </div>
+      )}
     </div>
   );
 }
