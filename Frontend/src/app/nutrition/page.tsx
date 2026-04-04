@@ -12,17 +12,32 @@ import {
 import {
   today,
   getNutritionForDate,
+  getNutritionEntries,
   saveNutritionEntry,
   getShoppingChecked,
   setShoppingChecked,
+  getMealTemplates,
+  saveMealTemplate,
+  deleteMealTemplate,
+  generateId,
   type NutritionEntry,
   type SelectedMeal,
   type CustomMeal,
+  type MealTemplate,
 } from "@/lib/storage";
-import { Check, Plus, ShoppingCart, Pill, ChefHat, UtensilsCrossed, Trash2 } from "lucide-react";
+import {
+  Check, Plus, ShoppingCart, Pill, ChefHat, UtensilsCrossed, Trash2,
+  Search, Droplets, Save, FolderOpen, Camera, TrendingDown, TrendingUp, Minus, X,
+} from "lucide-react";
 import { SwipeTabs } from "@/components/motion";
+import FoodSearchModal from "@/components/FoodSearchModal";
+import BarcodeScanner from "@/components/BarcodeScanner";
+import { calcMacros, type FoodItem } from "@/lib/openfoodfacts";
 
 type Tab = "tracker" | "plan" | "shopping" | "supps" | "cooking";
+
+const GLASS_ML = 250;
+const WATER_TARGET_ML = macroTargets.water * 1000; // 3000ml
 
 export default function NutritionPage() {
   const todayStr = today();
@@ -36,10 +51,26 @@ export default function NutritionPage() {
   const [customFat, setCustomFat] = useState("");
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
 
+  // 7.7 / 7.8 states
+  const [showFoodSearch, setShowFoodSearch] = useState(false);
+  const [showBarcode, setShowBarcode] = useState(false);
+
+  // 7.9 states
+  const [templates, setTemplates] = useState<MealTemplate[]>([]);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [showTemplates, setShowTemplates] = useState(false);
+
   useEffect(() => {
     setEntry(getNutritionForDate(todayStr));
     setCheckedItems(getShoppingChecked());
+    setTemplates(getMealTemplates());
   }, [todayStr]);
+
+  function updateEntry(updated: NutritionEntry) {
+    saveNutritionEntry(updated);
+    setEntry(updated);
+  }
 
   function toggleShoppingItem(item: string) {
     const updated = checkedItems.includes(item)
@@ -50,37 +81,93 @@ export default function NutritionPage() {
   }
 
   function toggleMeal(slot: string, meal: Meal) {
-    const current = entry || { date: todayStr, meals: [], customMeals: [] };
+    const current = entry || { date: todayStr, meals: [], customMeals: [], waterMl: 0 };
     const exists = current.meals.find((m) => m.slot === slot && m.name === meal.name);
     const newMeals: SelectedMeal[] = exists
       ? current.meals.filter((m) => !(m.slot === slot && m.name === meal.name))
       : [...current.meals, { slot, name: meal.name, calories: meal.calories, protein: meal.protein, carbs: meal.carbs, fat: meal.fat }];
-    const updated: NutritionEntry = { ...current, meals: newMeals };
-    saveNutritionEntry(updated);
-    setEntry(updated);
+    updateEntry({ ...current, meals: newMeals });
   }
 
   function addCustomMeal() {
     if (!customName || !customCal) return;
-    const current = entry || { date: todayStr, meals: [], customMeals: [] };
+    const current = entry || { date: todayStr, meals: [], customMeals: [], waterMl: 0 };
     const custom: CustomMeal = { name: customName, calories: parseInt(customCal, 10), protein: parseInt(customPro, 10) || 0, carbs: parseInt(customCarbs, 10) || 0, fat: parseInt(customFat, 10) || 0 };
-    const updated: NutritionEntry = { ...current, customMeals: [...current.customMeals, custom] };
-    saveNutritionEntry(updated);
-    setEntry(updated);
+    updateEntry({ ...current, customMeals: [...current.customMeals, custom] });
     setCustomName(""); setCustomCal(""); setCustomPro(""); setCustomCarbs(""); setCustomFat(""); setShowCustom(false);
   }
 
   function removeCustom(idx: number) {
     if (!entry) return;
-    const updated: NutritionEntry = { ...entry, customMeals: entry.customMeals.filter((_, i) => i !== idx) };
-    saveNutritionEntry(updated);
-    setEntry(updated);
+    updateEntry({ ...entry, customMeals: entry.customMeals.filter((_, i) => i !== idx) });
+  }
+
+  // 7.7 — Add food from search
+  function handleFoodAdd(name: string, calories: number, protein: number, carbs: number, fat: number) {
+    const current = entry || { date: todayStr, meals: [], customMeals: [], waterMl: 0 };
+    const custom: CustomMeal = { name, calories, protein, carbs, fat };
+    updateEntry({ ...current, customMeals: [...current.customMeals, custom] });
+  }
+
+  // 7.8 — Barcode scan found
+  function handleBarcodeFound(food: FoodItem) {
+    setShowBarcode(false);
+    // Auto-add as 100g
+    const macros = calcMacros(food, 100);
+    const label = food.brand ? `${food.name} (${food.brand}) — 100g` : `${food.name} — 100g`;
+    handleFoodAdd(label, macros.calories, macros.protein, macros.carbs, macros.fat);
+  }
+
+  // 7.10 — Water tracker
+  function addWater(ml: number) {
+    const current = entry || { date: todayStr, meals: [], customMeals: [], waterMl: 0 };
+    const newWater = Math.max(0, (current.waterMl || 0) + ml);
+    updateEntry({ ...current, waterMl: newWater });
+  }
+
+  // 7.9 — Save template
+  function handleSaveTemplate() {
+    if (!templateName.trim() || !entry) return;
+    const tpl: MealTemplate = {
+      id: generateId(),
+      name: templateName.trim(),
+      meals: entry.meals,
+      customMeals: entry.customMeals,
+      totalCalories: totalCal,
+      totalProtein: totalPro,
+      createdAt: todayStr,
+    };
+    saveMealTemplate(tpl);
+    setTemplates(getMealTemplates());
+    setTemplateName("");
+    setShowSaveTemplate(false);
+  }
+
+  // 7.9 — Apply template
+  function applyTemplate(tpl: MealTemplate) {
+    const current = entry || { date: todayStr, meals: [], customMeals: [], waterMl: 0 };
+    updateEntry({
+      ...current,
+      meals: tpl.meals,
+      customMeals: tpl.customMeals,
+    });
+    setShowTemplates(false);
+  }
+
+  function handleDeleteTemplate(id: string) {
+    deleteMealTemplate(id);
+    setTemplates(getMealTemplates());
   }
 
   const totalCal = (entry?.meals.reduce((s, m) => s + m.calories, 0) || 0) + (entry?.customMeals.reduce((s, m) => s + m.calories, 0) || 0);
   const totalPro = (entry?.meals.reduce((s, m) => s + m.protein, 0) || 0) + (entry?.customMeals.reduce((s, m) => s + m.protein, 0) || 0);
   const totalCarbs = (entry?.meals.reduce((s, m) => s + m.carbs, 0) || 0) + (entry?.customMeals.reduce((s, m) => s + m.carbs, 0) || 0);
   const totalFat = (entry?.meals.reduce((s, m) => s + m.fat, 0) || 0) + (entry?.customMeals.reduce((s, m) => s + m.fat, 0) || 0);
+  const waterMl = entry?.waterMl || 0;
+  const remainingCal = macroTargets.calories - totalCal;
+
+  // 7.11 — Weekly caloric data
+  const weeklyData = getWeeklyCalories();
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "tracker", label: "Hoy", icon: <UtensilsCrossed size={14} /> },
@@ -116,6 +203,7 @@ export default function NutritionPage() {
       {/* TRACKER */}
       {tab === "tracker" && (
         <div>
+          {/* Macro Overview */}
           <div className="card mb-3">
             <div className="text-[0.65rem] text-zinc-600 uppercase tracking-wider mb-2.5">Macros — {todayStr}</div>
             {[
@@ -136,6 +224,137 @@ export default function NutritionPage() {
             ))}
           </div>
 
+          {/* 7.11 — Caloric Balance */}
+          <div className="card mb-3">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-[0.75rem] font-bold">Balance Calórico</div>
+              <div className="flex items-center gap-1">
+                {remainingCal > 0 ? (
+                  <TrendingDown size={14} style={{ color: "#34C759" }} />
+                ) : (
+                  <TrendingUp size={14} style={{ color: "#FF3B30" }} />
+                )}
+                <span className="text-sm font-black" style={{ color: remainingCal >= 0 ? "#34C759" : "#FF3B30" }}>
+                  {remainingCal >= 0 ? remainingCal : `+${Math.abs(remainingCal)}`} kcal
+                </span>
+              </div>
+            </div>
+            <p className="text-[0.6rem] mb-2.5" style={{ color: "var(--text-muted)" }}>
+              {remainingCal > 0 ? `Te quedan ${remainingCal} kcal por consumir hoy` : `Superaste tu objetivo por ${Math.abs(remainingCal)} kcal`}
+            </p>
+
+            {/* Weekly mini chart */}
+            <div className="text-[0.6rem] uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Semana</div>
+            <div className="flex items-end gap-1" style={{ height: "48px" }}>
+              {weeklyData.map((d, i) => {
+                const pct = macroTargets.calories > 0 ? Math.min(d.cal / macroTargets.calories, 1.3) : 0;
+                const over = d.cal > macroTargets.calories;
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                    <div
+                      className="w-full rounded-sm transition-all"
+                      style={{
+                        height: `${Math.max(pct * 36, 2)}px`,
+                        background: d.isToday ? "var(--accent)" : over ? "#FF3B3066" : "#34C75966",
+                      }}
+                    />
+                    <span className="text-[0.5rem]" style={{ color: d.isToday ? "var(--accent)" : "var(--text-muted)" }}>
+                      {d.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {(() => {
+              const weekTotal = weeklyData.reduce((s, d) => s + d.cal, 0);
+              const weekAvg = weeklyData.filter(d => d.cal > 0).length > 0
+                ? Math.round(weekTotal / weeklyData.filter(d => d.cal > 0).length)
+                : 0;
+              return weekAvg > 0 ? (
+                <div className="text-[0.6rem] mt-1.5" style={{ color: "var(--text-muted)" }}>
+                  Promedio: <strong>{weekAvg} kcal/día</strong> · Total: {weekTotal} kcal
+                </div>
+              ) : null;
+            })()}
+          </div>
+
+          {/* 7.10 — Water Tracker */}
+          <div className="card mb-3">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-1.5">
+                <Droplets size={16} style={{ color: "#007AFF" }} />
+                <span className="text-[0.75rem] font-bold">Agua</span>
+              </div>
+              <span className="text-[0.7rem] font-bold" style={{ color: "#007AFF" }}>
+                {(waterMl / 1000).toFixed(1)}L <span className="text-zinc-500 font-normal">/ {macroTargets.water}L</span>
+              </span>
+            </div>
+            <div className="progress-bar mb-2">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${Math.min((waterMl / WATER_TARGET_ML) * 100, 100)}%`,
+                  background: "#007AFF",
+                }}
+              />
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => addWater(GLASS_ML)}
+                className="flex-1 py-2 rounded-xl border-none cursor-pointer text-sm font-bold text-white"
+                style={{ background: "#007AFF" }}
+              >
+                <Droplets size={12} className="inline mr-1" style={{ verticalAlign: "-1px" }} /> +1 Vaso
+              </button>
+              <button
+                onClick={() => addWater(500)}
+                className="py-2 px-3 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold"
+                style={{ background: "var(--bg-elevated)", color: "#007AFF" }}
+              >
+                +500ml
+              </button>
+              <button
+                onClick={() => addWater(-GLASS_ML)}
+                className="py-2 px-3 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold"
+                style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
+              >
+                <Minus size={12} className="inline" style={{ verticalAlign: "-1px" }} />
+              </button>
+            </div>
+            <div className="flex gap-1 mt-2 flex-wrap">
+              {Array.from({ length: Math.ceil(WATER_TARGET_ML / GLASS_ML) }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-5 h-5 rounded-full transition-colors"
+                  style={{
+                    background: (i + 1) * GLASS_ML <= waterMl ? "#007AFF" : "var(--bg-elevated)",
+                    border: "1px solid",
+                    borderColor: (i + 1) * GLASS_ML <= waterMl ? "#007AFF" : "var(--border)",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* 7.7/7.8 — Food Search + Barcode Buttons */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setShowFoodSearch(true)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-none cursor-pointer text-sm font-bold text-white"
+              style={{ background: "var(--accent)" }}
+            >
+              <Search size={14} /> Buscar Alimento
+            </button>
+            <button
+              onClick={() => setShowBarcode(true)}
+              className="py-2.5 px-4 rounded-xl border-none cursor-pointer text-sm font-bold"
+              style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
+            >
+              <Camera size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} /> Código
+            </button>
+          </div>
+
+          {/* Meal Slots */}
           {mealPlan.map((slot) => {
             const selected = entry?.meals.filter((m) => m.slot === slot.slot) || [];
             return (
@@ -173,6 +392,7 @@ export default function NutritionPage() {
             );
           })}
 
+          {/* Custom meals list */}
           {entry && entry.customMeals.length > 0 && (
             <div className="card mb-2.5">
               <div className="text-[0.75rem] font-bold mb-1.5">Comidas Extra</div>
@@ -188,13 +408,14 @@ export default function NutritionPage() {
             </div>
           )}
 
+          {/* Add custom meal manually */}
           {!showCustom ? (
-            <button onClick={() => setShowCustom(true)} className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-[#F2F2F7] border border-dashed border-[#E5E5EA] rounded-xl cursor-pointer text-zinc-500 text-sm">
-              <Plus size={16} /> Agregar comida extra
+            <button onClick={() => setShowCustom(true)} className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-[#F2F2F7] border border-dashed border-[#E5E5EA] rounded-xl cursor-pointer text-zinc-500 text-sm mb-3">
+              <Plus size={16} /> Agregar comida manual
             </button>
           ) : (
-            <div className="card">
-              <div className="text-[0.75rem] font-bold mb-2.5">Comida Extra</div>
+            <div className="card mb-3">
+              <div className="text-[0.75rem] font-bold mb-2.5">Comida Manual</div>
               <input type="text" placeholder="Nombre" value={customName} onChange={(e) => setCustomName(e.target.value)} className="w-full mb-2 text-sm" />
               <div className="grid grid-cols-4 gap-1.5 mb-2.5">
                 {[
@@ -215,6 +436,26 @@ export default function NutritionPage() {
               </div>
             </div>
           )}
+
+          {/* 7.9 — Meal Templates */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setShowSaveTemplate(true)}
+              disabled={!entry || (entry.meals.length === 0 && entry.customMeals.length === 0)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl cursor-pointer text-[0.7rem] font-bold border-none disabled:opacity-40"
+              style={{ background: "var(--bg-elevated)", color: "var(--accent-green, #34C759)" }}
+            >
+              <Save size={13} /> Guardar Template
+            </button>
+            <button
+              onClick={() => setShowTemplates(true)}
+              disabled={templates.length === 0}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl cursor-pointer text-[0.7rem] font-bold border-none disabled:opacity-40"
+              style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
+            >
+              <FolderOpen size={13} /> Cargar Template
+            </button>
+          </div>
         </div>
       )}
 
@@ -302,6 +543,131 @@ export default function NutritionPage() {
         </div>
       )}
       </SwipeTabs>
+
+      {/* MODALS */}
+
+      {/* 7.7 — Food Search Modal */}
+      <FoodSearchModal
+        open={showFoodSearch}
+        onClose={() => setShowFoodSearch(false)}
+        onAdd={handleFoodAdd}
+      />
+
+      {/* 7.8 — Barcode Scanner Modal */}
+      <BarcodeScanner
+        open={showBarcode}
+        onClose={() => setShowBarcode(false)}
+        onFound={handleBarcodeFound}
+      />
+
+      {/* 7.9 — Save Template Dialog */}
+      {showSaveTemplate && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center" onClick={() => setShowSaveTemplate(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative w-[90%] max-w-[400px] rounded-2xl p-5" style={{ background: "var(--bg-card)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="text-sm font-bold mb-3" style={{ color: "var(--text)" }}>Guardar como Template</div>
+            <input
+              type="text"
+              placeholder="Nombre del template..."
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              className="w-full mb-3 text-sm rounded-lg py-2.5 px-3 border"
+              style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
+              autoFocus
+            />
+            <div className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
+              {entry?.meals.length || 0} comidas + {entry?.customMeals.length || 0} extras · {totalCal} kcal · {totalPro}g P
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowSaveTemplate(false)} className="btn btn-ghost flex-1 text-sm">Cancelar</button>
+              <button
+                onClick={handleSaveTemplate}
+                disabled={!templateName.trim()}
+                className="flex-[2] py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm disabled:opacity-40"
+                style={{ background: "#34C759" }}
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7.9 — Load Template Dialog */}
+      {showTemplates && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={() => setShowTemplates(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            className="relative w-full max-w-[540px] max-h-[70vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col"
+            style={{ background: "var(--bg-card)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: "var(--border)" }}>
+              <span className="text-sm font-bold" style={{ color: "var(--text)" }}>Mis Templates</span>
+              <button onClick={() => setShowTemplates(false)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              {templates.length === 0 && (
+                <p className="text-center py-8 text-[0.75rem]" style={{ color: "var(--text-muted)" }}>
+                  No tenés templates guardados
+                </p>
+              )}
+              {templates.map((tpl) => (
+                <div key={tpl.id} className="flex items-center gap-3 p-3 rounded-xl mb-2" style={{ background: "var(--bg-elevated)" }}>
+                  <div className="flex-1">
+                    <div className="text-[0.8rem] font-bold" style={{ color: "var(--text)" }}>{tpl.name}</div>
+                    <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                      {tpl.totalCalories} kcal · {tpl.totalProtein}g P · {tpl.meals.length + tpl.customMeals.length} items · {tpl.createdAt}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => applyTemplate(tpl)}
+                    className="py-1.5 px-3 rounded-lg border-none cursor-pointer text-[0.7rem] font-bold text-white"
+                    style={{ background: "var(--accent)" }}
+                  >
+                    Aplicar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTemplate(tpl.id)}
+                    className="bg-transparent border-none cursor-pointer p-1"
+                    style={{ color: "#FF3B30" }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
+}
+
+// 7.11 — Helper: get this week's calorie data for the mini chart
+function getWeeklyCalories(): { label: string; cal: number; isToday: boolean }[] {
+  const dayLabels = ["L", "M", "X", "J", "V", "S", "D"];
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sun
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((dayOfWeek + 6) % 7));
+
+  const result: { label: string; cal: number; isToday: boolean }[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dateStr = d.toISOString().split("T")[0];
+    const entry = getNutritionEntries().find((n) => n.date === dateStr);
+    const cal = entry
+      ? entry.meals.reduce((s, m) => s + m.calories, 0) + entry.customMeals.reduce((s, m) => s + m.calories, 0)
+      : 0;
+    result.push({
+      label: dayLabels[i],
+      cal,
+      isToday: dateStr === now.toISOString().split("T")[0],
+    });
+  }
+  return result;
 }
