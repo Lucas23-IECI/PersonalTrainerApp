@@ -34,11 +34,11 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 2.1 | Gráfico 1RM por Ejercicio (recharts) | ✅ |
 | 2.2 | Volumen Semanal por Músculo | ✅ |
 | 2.3 | Volumen Total por Sesión | ✅ |
-| 2.4 | Heatmap Frecuencia (GitHub-style) | ⬜ |
-| 2.5 | Peso Corporal + PRs Superpuestos | ⬜ |
-| 2.6 | Distribución Muscular Mejorada | ⬜ |
-| 2.7 | Training Streak (🔥) | ⬜ |
-| 2.8 | PR System Completo (por rango reps) | ⬜ |
+| 2.4 | Heatmap Frecuencia (GitHub-style) | ✅ |
+| 2.5 | Peso Corporal + PRs Superpuestos | ✅ |
+| 2.6 | Distribución Muscular Mejorada | ✅ |
+| 2.7 | Training Streak (🔥) | ✅ |
+| 2.8 | PR System Completo (por rango reps) | ✅ |
 
 ---
 
