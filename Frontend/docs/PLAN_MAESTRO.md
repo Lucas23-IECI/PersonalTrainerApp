@@ -57,10 +57,10 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 3.8 | Ejercicios Custom | ✅ |
 | 3.9 | Ejercicios Alternativos | ✅ |
 | 3.10 | Clonar Ejercicios | ✅ |
-| 3.11 | Historial Inline por Ejercicio | ⬜ |
-| 3.12 | Favoritos y Etiquetas | ⬜ |
-| 3.13 | Ordenar Librería Multi-criterio | ⬜ |
-| 3.14 | GIFs/Videos Ejercicios (wger API) | ⬜ |
+| 3.11 | Historial Inline por Ejercicio | ✅ |
+| 3.12 | Favoritos y Etiquetas | ✅ |
+| 3.13 | Ordenar Librería Multi-criterio | ✅ |
+| 3.14 | GIFs/Videos Ejercicios (wger API) | ✅ |
 
 ---
 
@@ -69,10 +69,10 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 
 | # | Feature | Estado |
 |---|---------|--------|
-| 4.1 | Calendario Mejorado | ⬜ |
-| 4.2 | Detalle Sesión Pasada | ⬜ |
-| 4.3 | Búsqueda Avanzada Historial | ⬜ |
-| 4.4 | Re-hacer Workout (Repeat) | ⬜ |
+| 4.1 | Calendario Mejorado | ✅ |
+| 4.2 | Detalle Sesión Pasada | ✅ |
+| 4.3 | Búsqueda Avanzada Historial | ✅ |
+| 4.4 | Re-hacer Workout (Repeat) | ✅ |
 | 4.5 | Editar Workouts Pasados | ⬜ |
 | 4.6 | Notas/Rating Post-Workout en Historial | ⬜ |
 | 4.7 | Resumen Estadístico | ⬜ |

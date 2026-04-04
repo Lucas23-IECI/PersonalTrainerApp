@@ -58,6 +58,28 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ---
 
+## [Unreleased] — Fase 3.11-3.14: Ejercicios Enriquecidos
+
+### Completado
+- **3.11 Historial Inline por Ejercicio**: Historial expandible en AddExerciseModal, últimas 5 sesiones con peso/reps/RPE por set.
+- **3.12 Favoritos y Etiquetas**: Sistema de favoritos y tags por ejercicio. Tab "Favoritos" en modal, sort por favoritos. `exercise-favorites.ts`
+- **3.13 Ordenar Librería Multi-criterio**: Sort multi-criterio (A-Z, categoría, músculo, favoritos, recientes, frecuencia) con selector de criterio en modal.
+- **3.14 GIFs/Videos Ejercicios (wger API)**: Integración wger.de API para imágenes de ejercicios, cache de nombres, fallback a búsqueda por nombre. `wger-api.ts`
+
+### FASE 3 COMPLETADA ✅ (3.1-3.14)
+
+---
+
+## [Unreleased] — Fase 4: Historial, Records y Mediciones (4.1-4.4)
+
+### Completado
+- **4.1 Calendario Mejorado**: Dots de intensidad coloreados por volumen (percentil 33/66 del usuario → ligero/medio/intenso), mini-resumen al seleccionar fecha (sesiones, sets, volumen), leyenda de intensidad.
+- **4.2 Detalle Sesión Pasada**: Barra de métricas expandida con duración, sets, volumen (en k), RPE promedio. Pills de músculos trabajados con labels. Contador de ejercicios/saltados.
+- **4.3 Búsqueda Avanzada Historial**: Panel avanzado con rango de fechas (desde/hasta), chips de grupo muscular (Pecho/Espalda/Hombros/Brazos/Piernas/Core), badges activos removibles.
+- **4.4 Re-hacer Workout (Repeat)**: Botón RefreshCw en cada sesión del historial, crea ActiveSessionData con ejercicios pre-poblados del workout anterior, navega a quickstart con nombre "(Repetir)". Session page usa workoutName del active session.
+
+---
+
 ## [1.2.0] — 2025-06-XX
 
 ### Added
