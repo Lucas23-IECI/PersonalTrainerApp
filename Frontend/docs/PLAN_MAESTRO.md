@@ -51,12 +51,12 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 3.2 | Crear Rutinas Custom | ✅ |
 | 3.3 | Carpetas para Rutinas | ✅ |
 | 3.4 | Duplicar/Clonar Rutinas | ✅ |
-| 3.5 | Progresión Automática | ⬜ |
-| 3.6 | Importar Rutinas por Link/Código | ⬜ |
-| 3.7 | Recomendación según Nivel | ⬜ |
-| 3.8 | Ejercicios Custom | ⬜ |
-| 3.9 | Ejercicios Alternativos | ⬜ |
-| 3.10 | Clonar Ejercicios | ⬜ |
+| 3.5 | Progresión Automática | ✅ |
+| 3.6 | Importar Rutinas por Link/Código | ✅ |
+| 3.7 | Recomendación según Nivel | ✅ |
+| 3.8 | Ejercicios Custom | ✅ |
+| 3.9 | Ejercicios Alternativos | ✅ |
+| 3.10 | Clonar Ejercicios | ✅ |
 | 3.11 | Historial Inline por Ejercicio | ⬜ |
 | 3.12 | Favoritos y Etiquetas | ⬜ |
 | 3.13 | Ordenar Librería Multi-criterio | ⬜ |

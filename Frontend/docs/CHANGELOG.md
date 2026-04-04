@@ -47,8 +47,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - **3.2 Crear Rutinas Custom**: Editor completo de rutinas en `/routines/editor` — editar nombre, descripción, split, agregar/eliminar/reordenar días, agregar/eliminar/reordenar ejercicios con editor inline (nombre, sets, reps, descanso, RPE, notas). `routines-storage.ts` con CRUD completo.
 - **3.3 Carpetas para Rutinas**: Sistema de carpetas con colores auto-asignados, crear/renombrar/eliminar carpetas, mover rutinas entre carpetas, vista agrupada por carpeta en tab "Mis Rutinas".
 - **3.4 Duplicar/Clonar Rutinas**: Clonar desde biblioteca (convierte LibraryProgram → Routine), duplicar rutina existente con sufijo "(Copia)" y IDs regenerados, menú contextual de 3 puntos.
+- **3.5 Progresión Automática**: 3 reglas configurables (Linear Beginner, Double Progression, RPE Conservative) con selector en editor de rutina. Sugerencias batch por ejercicio basadas en historial de sesiones y RPE. `progression.ts` extendido con `PROGRESSION_RULES`, `getBatchSuggestions()`.
+- **3.6 Importar Rutinas por Link/Código**: Export a código base64 compacto (`exportRoutineCode`), import desde código pegado (`importRoutineCode`). Modal de compartir con botón copiar, modal de importar en tab Mis Rutinas.
+- **3.7 Recomendación según Nivel**: Motor de recomendaciones rule-based. Estima nivel (beginner/intermediate/advanced) por cantidad de sesiones, puntúa programas por nivel, días, categoría. Carrusel horizontal "Recomendados para vos" en tab Biblioteca. `recommendations.ts`
+- **3.8 Ejercicios Custom**: CRUD completo en `custom-exercises.ts`. Crear ejercicios personalizados con nombre, categoría y músculo. Formulario inline en AddExerciseModal. Badge "CUSTOM" en lista.
+- **3.9 Ejercicios Alternativos**: Mapa curado de ~20 grupos de alternativas + scoring basado en músculos. Botón "Alternativas" en cada ejercicio del modal. Panel expandible con sugerencias. `exercise-alternatives.ts`
+- **3.10 Clonar Ejercicios**: `cloneExerciseFromLibrary()` duplica ejercicio de la biblioteca como custom con sufijo "(Custom)". Botón "Clonar" en cada ejercicio del modal.
 
-### FASE 3 COMPLETADA ✅ (3.1-3.4)
+### FASE 3 COMPLETADA ✅ (3.1-3.10)
 
 ---
 
