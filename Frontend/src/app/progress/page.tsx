@@ -6,12 +6,15 @@ import {
   getCheckins,
   getSessions,
   getTrainingStreak,
+  getSettings,
+  kgToLbs,
   type DailyCheckin,
   type WorkoutSession,
 } from "@/lib/storage";
 import { getCurrentPhase, getPhaseWeek, isDeloadWeek } from "@/data/phases";
 import { Dumbbell, Flame, AlertTriangle, Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import dynamic from "next/dynamic";
+import { PageTransition, TabContent, SwipeTabs } from "@/components/motion";
 
 const E1RMChart = dynamic(() => import("@/components/charts/E1RMChart"), { ssr: false });
 const MuscleVolumeChart = dynamic(() => import("@/components/charts/MuscleVolumeChart"), { ssr: false });
@@ -29,6 +32,7 @@ export default function ProgressPage() {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [streak, setStreak] = useState(0);
   const [tab, setTab] = useState<Tab>("cuerpo");
+  const unit = getSettings().unit;
 
   const profileData = useMemo(() => getProfileData(), []);
 
@@ -122,6 +126,7 @@ export default function ProgressPage() {
   ];
 
   return (
+    <PageTransition>
     <main className="max-w-[600px] mx-auto px-4 py-5">
       <h1 className="text-[1.3rem] font-black tracking-tight mb-1">Progreso</h1>
       <p className="text-[0.7rem] text-zinc-600 mb-4">
@@ -179,17 +184,18 @@ export default function ProgressPage() {
         ))}
       </div>
 
+      <SwipeTabs tabs={["cuerpo", "fuerza", "volumen"] as const} current={tab} onChange={(t) => setTab(t as typeof tab)}>
       {/* ========== CUERPO TAB ========== */}
       {tab === "cuerpo" && (
-        <>
+        <TabContent tabKey="cuerpo">
           {/* Summary row */}
           <div className="grid grid-cols-4 gap-1.5 mb-4">
             <div className="card p-2.5 text-center">
-              <div className="text-lg font-black">{latestWeight}kg</div>
+              <div className="text-lg font-black">{unit === "lbs" ? kgToLbs(latestWeight) : latestWeight}{unit}</div>
               <div className="text-[0.5rem] text-zinc-500 uppercase">Peso</div>
               {weightChange !== 0 && (
                 <div className={`text-[0.6rem] font-bold ${weightChange < 0 ? "text-[#34C759]" : "text-[#FF3B30]"}`}>
-                  {weightChange > 0 ? "+" : ""}{weightChange.toFixed(1)}
+                  {weightChange > 0 ? "+" : ""}{(unit === "lbs" ? kgToLbs(weightChange) : weightChange).toFixed(1)}
                 </div>
               )}
             </div>
@@ -346,12 +352,12 @@ export default function ProgressPage() {
               </div>
             )}
           </div>
-        </>
+        </TabContent>
       )}
 
       {/* ========== FUERZA TAB ========== */}
       {tab === "fuerza" && (
-        <>
+        <TabContent tabKey="fuerza">
           {/* Deload Warning */}
           {(() => {
             const phase = getCurrentPhase();
@@ -387,12 +393,12 @@ export default function ProgressPage() {
 
           {/* PR System Complete (Feature 2.8) */}
           <PRSystemComplete />
-        </>
+        </TabContent>
       )}
 
       {/* ========== VOLUMEN TAB ========== */}
       {tab === "volumen" && (
-        <>
+        <TabContent tabKey="volumen">
           {/* Summary row */}
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="card p-3 text-center">
@@ -522,8 +528,10 @@ export default function ProgressPage() {
               </div>
             )}
           </div>
-        </>
+        </TabContent>
       )}
+      </SwipeTabs>
     </main>
+    </PageTransition>
   );
 }

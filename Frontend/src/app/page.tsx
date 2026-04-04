@@ -32,6 +32,7 @@ import {
   Dumbbell,
   Trophy,
 } from "lucide-react";
+import { PageTransition, StaggerList, StaggerItem } from "@/components/motion";
 
 export default function Dashboard() {
   const todayStr = today();
@@ -168,6 +169,7 @@ export default function Dashboard() {
   const currentWeight = checkin?.weight || prof.weight;
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       {/* ───── HEADER ───── */}
       <div className="flex items-center justify-between mb-5">
@@ -242,22 +244,24 @@ export default function Dashboard() {
       )}
 
       {/* ───── QUICK STATS ROW ───── */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="card py-3 text-center">
+      <StaggerList className="grid grid-cols-3 gap-2 mb-4">
+        <StaggerItem className="card py-3 text-center">
           <div className="text-2xl font-black">{streak}</div>
           <div className="text-[0.55rem] text-zinc-500 uppercase">racha</div>
-        </div>
+        </StaggerItem>
+        <StaggerItem>
         <Link href="/profile" className="no-underline text-inherit">
           <div className="card py-3 text-center">
             <div className="text-2xl font-black">{currentWeight || "—"}</div>
             <div className="text-[0.55rem] text-zinc-500 uppercase">kg</div>
           </div>
         </Link>
-        <div className="card py-3 text-center">
+        </StaggerItem>
+        <StaggerItem className="card py-3 text-center">
           <div className="text-2xl font-black text-[#2C6BED]">F{phase.id}</div>
           <div className="text-[0.55rem] text-zinc-500 uppercase">fase</div>
-        </div>
-      </div>
+        </StaggerItem>
+      </StaggerList>
 
       {/* ───── ACHIEVEMENTS QUICK CARD ───── */}
       <Link href="/achievements" className="no-underline text-inherit">
@@ -466,5 +470,6 @@ export default function Dashboard() {
         </div>
       )}
     </main>
+    </PageTransition>
   );
 }

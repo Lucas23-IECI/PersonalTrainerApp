@@ -13,6 +13,7 @@ import {
 } from "@/lib/achievements";
 import { ArrowLeft, Trophy, Lock } from "lucide-react";
 import Link from "next/link";
+import { PageTransition, StaggerList, StaggerItem, CelebrationPop } from "@/components/motion";
 
 export default function AchievementsPage() {
   const [unlocked, setUnlocked] = useState<UnlockedBadge[]>([]);
@@ -54,6 +55,7 @@ export default function AchievementsPage() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen pb-24" style={{ background: "var(--bg)" }}>
       {/* Header */}
       <div
@@ -146,12 +148,12 @@ export default function AchievementsPage() {
       </div>
 
       {/* Badges Grid */}
-      <div className="px-4 py-2 grid grid-cols-3 gap-3">
+      <StaggerList className="px-4 py-2 grid grid-cols-3 gap-3">
         {filtered.map((badge) => {
           const isUnlocked = unlockedIds.has(badge.id);
           const unlockDate = getUnlockDate(badge.id);
           return (
-            <div
+            <StaggerItem
               key={badge.id}
               className="rounded-xl p-3 flex flex-col items-center text-center gap-1 relative"
               style={{
@@ -188,10 +190,18 @@ export default function AchievementsPage() {
                 className="absolute top-1 right-1 w-2 h-2 rounded-full"
                 style={{ background: TIER_COLORS[badge.tier] }}
               />
-            </div>
+            </StaggerItem>
           );
         })}
-      </div>
+      </StaggerList>
+
+      {/* New Badge Celebration Overlay */}
+      {newBadges.length > 0 && (
+        <CelebrationPop className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="text-7xl animate-bounce">{newBadges[0].icon}</div>
+        </CelebrationPop>
+      )}
     </div>
+    </PageTransition>
   );
 }

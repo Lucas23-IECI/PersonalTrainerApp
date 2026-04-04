@@ -5,6 +5,8 @@ import OnboardingGate from "@/components/OnboardingGate";
 import PWAManager from "@/components/PWAManager";
 import ActiveWorkoutBar from "@/components/ActiveWorkoutBar";
 import UpdateChecker from "@/components/UpdateChecker";
+import SplashScreen from "@/components/SplashScreen";
+import AutoBackup from "@/components/AutoBackup";
 
 export const metadata: Metadata = {
   title: "MARK PT - Personal Trainer",
@@ -33,6 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body>
+        <SplashScreen />
+        <AutoBackup />
         <OnboardingGate />
         <PWAManager />
         <UpdateChecker />

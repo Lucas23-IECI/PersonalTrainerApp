@@ -3,10 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
-import { exportAllData, importAllData, exportCSV } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet } from "lucide-react";
+import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit } from "@/lib/storage";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
+import { t } from "@/lib/i18n";
+
+const WEIGHT_INCREMENTS = [0.5, 1, 1.25, 2.5, 5];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -16,11 +19,27 @@ export default function SettingsPage() {
   const [overrideActive, setOverrideActive] = useState(false);
   const [importStatus, setImportStatus] = useState<"idle" | "success" | "error">("idle");
   const [isDark, setIsDark] = useState(false);
+  const [unit, setUnit] = useState<WeightUnit>("kg");
+  const [hapticsOn, setHapticsOn] = useState(true);
+  const [soundOn, setSoundOn] = useState(true);
+  const [weightInc, setWeightInc] = useState(2.5);
+  const [lang, setLang] = useState<"es" | "en">("es");
+  const [autoBackup, setAutoBackup] = useState(true);
+  const [lastBackup, setLastBackup] = useState<string | null>(null);
+  const [backupRestored, setBackupRestored] = useState(false);
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
     setOverrideActive(override !== null);
     setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
+    const s = getSettings();
+    setUnit(s.unit);
+    setHapticsOn(s.hapticsEnabled);
+    setSoundOn(s.soundEnabled);
+    setWeightInc(s.weightIncrement);
+    setLang(s.language);
+    setAutoBackup(s.autoBackup);
+    setLastBackup(getAutoBackupDate());
   }, []);
 
   function toggleTheme() {
@@ -82,34 +101,209 @@ export default function SettingsPage() {
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
       <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-zinc-500 mb-4 bg-transparent border-none cursor-pointer p-0">
-        <ChevronLeft size={16} /> Volver
+        <ChevronLeft size={16} /> {t("common.back")}
       </button>
 
-      <h1 className="text-xl font-black tracking-tight mb-1">Ajustes</h1>
-      <p className="text-[0.7rem] text-zinc-500 mb-5">Configuración y datos</p>
+      <h1 className="text-xl font-black tracking-tight mb-1">{t("settings.title")}</h1>
+      <p className="text-[0.7rem] text-zinc-500 mb-5">{t("settings.subtitle")}</p>
 
       {/* THEME TOGGLE */}
       <div className="card mb-3">
-        <div className="text-[0.75rem] font-bold mb-2">Apariencia</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.appearance")}</div>
         <button
           onClick={toggleTheme}
           className="btn btn-ghost w-full text-sm justify-between"
         >
           <span className="flex items-center gap-2">
             {isDark ? <Moon size={16} /> : <Sun size={16} />}
-            {isDark ? "Modo Oscuro" : "Modo Claro"}
+            {isDark ? t("settings.darkMode") : t("settings.lightMode")}
           </span>
           <span className="text-[0.65rem] text-zinc-500">
-            Toca para cambiar
+            {t("settings.tapToChange")}
           </span>
         </button>
       </div>
 
+      {/* UNIT TOGGLE — 6.6 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.weightUnits")}</div>
+        <div className="flex gap-2">
+          {(["kg", "lbs"] as const).map((u) => (
+            <button
+              key={u}
+              onClick={() => {
+                setUnit(u);
+                saveSettings({ ...getSettings(), unit: u });
+              }}
+              className="flex-1 py-2 rounded-lg text-sm font-bold border-none cursor-pointer transition-colors"
+              style={{
+                background: unit === u ? "var(--accent)" : "var(--bg-elevated)",
+                color: unit === u ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <Weight size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} />
+              {u.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* HAPTIC & SOUND SETTINGS — 6.8 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.sound")}</div>
+        <button
+          onClick={() => {
+            const next = !hapticsOn;
+            setHapticsOn(next);
+            saveSettings({ ...getSettings(), hapticsEnabled: next });
+          }}
+          className="btn btn-ghost w-full text-sm justify-between mb-1.5"
+        >
+          <span className="flex items-center gap-2">
+            {hapticsOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            {t("settings.vibration")}
+          </span>
+          <span
+            className="w-10 h-5 rounded-full relative transition-colors inline-block"
+            style={{ background: hapticsOn ? "var(--accent-green)" : "var(--bg-elevated)" }}
+          >
+            <span
+              className="w-4 h-4 rounded-full absolute top-0.5 transition-all inline-block"
+              style={{
+                background: "#fff",
+                left: hapticsOn ? "calc(100% - 18px)" : "2px",
+              }}
+            />
+          </span>
+        </button>
+        <button
+          onClick={() => {
+            const next = !soundOn;
+            setSoundOn(next);
+            saveSettings({ ...getSettings(), soundEnabled: next });
+          }}
+          className="btn btn-ghost w-full text-sm justify-between"
+        >
+          <span className="flex items-center gap-2">
+            {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            {t("settings.sounds")}
+          </span>
+          <span
+            className="w-10 h-5 rounded-full relative transition-colors inline-block"
+            style={{ background: soundOn ? "var(--accent-green)" : "var(--bg-elevated)" }}
+          >
+            <span
+              className="w-4 h-4 rounded-full absolute top-0.5 transition-all inline-block"
+              style={{
+                background: "#fff",
+                left: soundOn ? "calc(100% - 18px)" : "2px",
+              }}
+            />
+          </span>
+        </button>
+      </div>
+
+      {/* WEIGHT INCREMENT — 6.10 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.weightIncrement")}</div>
+        <div className="flex gap-2 flex-wrap">
+          {WEIGHT_INCREMENTS.map((inc) => (
+            <button
+              key={inc}
+              onClick={() => {
+                setWeightInc(inc);
+                saveSettings({ ...getSettings(), weightIncrement: inc });
+              }}
+              className="py-2 px-3 rounded-lg text-sm font-bold border-none cursor-pointer transition-colors"
+              style={{
+                background: weightInc === inc ? "var(--accent)" : "var(--bg-elevated)",
+                color: weightInc === inc ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              {inc} {unit}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* LANGUAGE — 6.12 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.language")}</div>
+        <div className="flex gap-2">
+          {(["es", "en"] as const).map((l) => (
+            <button
+              key={l}
+              onClick={() => {
+                setLang(l);
+                saveSettings({ ...getSettings(), language: l });
+              }}
+              className="flex-1 py-2 rounded-lg text-sm font-bold border-none cursor-pointer transition-colors"
+              style={{
+                background: lang === l ? "var(--accent)" : "var(--bg-elevated)",
+                color: lang === l ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <Globe size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} />
+              {l === "es" ? "Español" : "English"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* AUTO BACKUP — 6.11 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.backup")}</div>
+        <p className="text-[0.65rem] text-zinc-500 mb-3">{t("settings.backupDesc")}</p>
+        <button
+          onClick={() => {
+            const next = !autoBackup;
+            setAutoBackup(next);
+            saveSettings({ ...getSettings(), autoBackup: next });
+          }}
+          className="btn btn-ghost w-full text-sm justify-between mb-2"
+        >
+          <span className="flex items-center gap-2">
+            <Database size={16} />
+            {t("settings.backup")}
+          </span>
+          <span
+            className="w-10 h-5 rounded-full relative transition-colors inline-block"
+            style={{ background: autoBackup ? "var(--accent-green)" : "var(--bg-elevated)" }}
+          >
+            <span
+              className="w-4 h-4 rounded-full absolute top-0.5 transition-all inline-block"
+              style={{
+                background: "#fff",
+                left: autoBackup ? "calc(100% - 18px)" : "2px",
+              }}
+            />
+          </span>
+        </button>
+        <p className="text-[0.65rem] text-zinc-500 mb-2">
+          {t("settings.lastBackup")}: {lastBackup || t("settings.noBackup")}
+        </p>
+        <button
+          onClick={() => {
+            const ok = restoreAutoBackup();
+            if (ok) setBackupRestored(true);
+          }}
+          className="btn btn-ghost w-full text-sm"
+          disabled={!lastBackup}
+        >
+          <RotateCcw size={14} /> {t("settings.restoreBackup")}
+        </button>
+        {backupRestored && (
+          <div className="flex items-center gap-1.5 text-[0.72rem] text-[#34C759] mt-2">
+            <Check size={14} /> {t("settings.backupRestored")}
+          </div>
+        )}
+      </div>
+
       {/* PHASE OVERRIDE */}
       <div className="card mb-3">
-        <div className="text-[0.75rem] font-bold mb-2">Fase de Entrenamiento</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.phase")}</div>
         <p className="text-[0.65rem] text-zinc-500 mb-3">
-          Fase actual: <strong style={{ color: "var(--accent)" }}>{currentPhase.name}</strong>
+          {t("settings.currentPhase")}: <strong style={{ color: "var(--accent)" }}>{currentPhase.name}</strong>
           {overrideActive && <span className="text-[#FF9500] ml-1">(override manual)</span>}
         </p>
 
@@ -127,45 +321,45 @@ export default function SettingsPage() {
 
         {overrideActive && (
           <button onClick={clearOverride} className="btn btn-ghost w-full text-sm">
-            <RotateCcw size={14} /> Volver a detección automática
+            <RotateCcw size={14} /> {t("settings.autoDetect")}
           </button>
         )}
       </div>
 
       {/* DATA EXPORT / IMPORT */}
       <div className="card mb-3">
-        <div className="text-[0.75rem] font-bold mb-2">Datos</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.data")}</div>
         <p className="text-[0.65rem] text-zinc-500 mb-3">
-          Exportá e importá todos tus datos (check-ins, sesiones, nutrición, notas, programas custom).
+          {t("settings.dataDesc")}
         </p>
 
         <div className="flex gap-2 mb-2">
           <button onClick={handleExport} className="btn btn-primary flex-1 text-sm">
-            <Download size={14} /> Exportar
+            <Download size={14} /> {t("settings.export")}
           </button>
           <button onClick={handleImportClick} className="btn btn-ghost flex-1 text-sm">
-            <Upload size={14} /> Importar
+            <Upload size={14} /> {t("settings.import")}
           </button>
           <input ref={fileRef} type="file" accept=".json" onChange={handleImportFile} className="hidden" />
         </div>
 
         {importStatus === "success" && (
           <div className="flex items-center gap-1.5 text-[0.72rem] text-[#34C759]">
-            <Check size={14} /> Datos importados correctamente. Recargá la página.
+            <Check size={14} /> {t("settings.importSuccess")}
           </div>
         )}
         {importStatus === "error" && (
           <div className="flex items-center gap-1.5 text-[0.72rem] text-[#FF3B30]">
-            <AlertTriangle size={14} /> Error al importar. Verificá el archivo.
+            <AlertTriangle size={14} /> {t("settings.importError")}
           </div>
         )}
       </div>
 
       {/* DOWNLOAD APP */}
       <div className="card mb-3">
-        <div className="text-[0.75rem] font-bold mb-2">Exportar CSV</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.exportCSV")}</div>
         <p className="text-[0.65rem] text-zinc-500 mb-3">
-          Exportá tus sesiones en formato CSV compatible con Strong y Hevy.
+          {t("settings.csvDesc")}
         </p>
         <button onClick={() => {
           const csv = exportCSV();
@@ -177,13 +371,13 @@ export default function SettingsPage() {
           a.click();
           URL.revokeObjectURL(url);
         }} className="btn btn-ghost w-full text-sm">
-          <FileSpreadsheet size={14} /> Exportar CSV
+          <FileSpreadsheet size={14} /> {t("settings.exportCSV")}
         </button>
       </div>
 
       {/* DOWNLOAD APP */}
       <div className="card mb-3">
-        <div className="text-[0.75rem] font-bold mb-2">App Android</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.androidApp")}</div>
         <p className="text-[0.65rem] text-zinc-500 mb-3">
           Descargá la app nativa para tu celular Android.
         </p>
@@ -191,17 +385,17 @@ export default function SettingsPage() {
           href="/descargar"
           className="btn btn-primary w-full text-sm no-underline flex items-center justify-center gap-2"
         >
-          <Smartphone size={14} /> Descargar APK
+          <Smartphone size={14} /> {t("settings.downloadAPK")}
         </Link>
       </div>
 
       {/* APP INFO */}
       <div className="card">
-        <div className="text-[0.75rem] font-bold mb-2">Acerca de</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.about")}</div>
         <div className="text-[0.65rem] text-zinc-500 space-y-1">
           <div>MARK PT — Personal Trainer</div>
-          <div>Versión: {APP_VERSION}</div>
-          <div>Datos guardados localmente en tu dispositivo</div>
+          <div>{t("common.version")}: {APP_VERSION}</div>
+          <div>{t("common.localData")}</div>
         </div>
       </div>
     </main>
