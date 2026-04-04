@@ -36,7 +36,7 @@ import {
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
 import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
-import { vibrateTimerComplete } from "@/lib/haptics";
+import { vibrateTimerComplete, vibrateMedium, vibrateHeavy, vibrateSuccess, vibrateLight } from "@/lib/haptics";
 import type { LibraryExercise } from "@/data/exercises";
 
 // ── Types ──
