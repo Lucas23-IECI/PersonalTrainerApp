@@ -92,6 +92,7 @@ function SessionContent() {
   const [replaceExerciseIdx, setReplaceExerciseIdx] = useState<number | null>(null);
   const [expandedSetNote, setExpandedSetNote] = useState<string | null>(null); // "exIdx-setIdx"
   const [sessionRating, setSessionRating] = useState(0);
+  const [sessionNotes, setSessionNotes] = useState("");
   const [swipeState, setSwipeState] = useState<{ key: string; startX: number; dx: number } | null>(null);
 
   // Rest timer
@@ -472,13 +473,15 @@ function SessionContent() {
       completed: true,
       startTime: sessionStart,
       endTime: Date.now(),
+      rating: sessionRating || undefined,
+      sessionNotes: sessionNotes.trim() || undefined,
     };
     saveSession(session);
     clearActiveSession();
     clearWorkoutNotification();
     setSavedSession(session);
     setFinished(true);
-  }, [exercises, sessionStart, workout]);
+  }, [exercises, sessionStart, workout, sessionRating, sessionNotes]);
 
   // ═════════════════════════════════════
   // FINISHED SUMMARY
@@ -496,13 +499,37 @@ function SessionContent() {
         <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>{workout.name}</p>
 
         {/* Session Rating */}
-        <div className="flex justify-center gap-1 mb-5">
+        <div className="flex justify-center gap-1 mb-2">
           {[1, 2, 3, 4, 5].map((v) => (
-            <button key={v} onClick={() => setSessionRating(v)} className="bg-transparent border-none cursor-pointer p-0.5">
+            <button key={v} onClick={() => {
+              setSessionRating(v);
+              if (savedSession) {
+                const updated = { ...savedSession, rating: v, sessionNotes: sessionNotes.trim() || undefined };
+                saveSession(updated);
+                setSavedSession(updated);
+              }
+            }} className="bg-transparent border-none cursor-pointer p-0.5">
               <Star size={28} fill={v <= sessionRating ? '#FFD700' : 'transparent'} strokeWidth={1.5} style={{ color: v <= sessionRating ? '#FFD700' : 'var(--text-muted)' }} />
             </button>
           ))}
         </div>
+
+        {/* Session Notes */}
+        <textarea
+          value={sessionNotes}
+          onChange={(e) => setSessionNotes(e.target.value)}
+          onBlur={() => {
+            if (savedSession) {
+              const updated = { ...savedSession, rating: sessionRating || undefined, sessionNotes: sessionNotes.trim() || undefined };
+              saveSession(updated);
+              setSavedSession(updated);
+            }
+          }}
+          placeholder="Notas de la sesión (opcional)..."
+          className="w-full text-[0.78rem] py-2 px-3 rounded-lg mb-5 resize-none border-none outline-none"
+          style={{ background: "var(--bg-elevated)", color: "var(--text)", minHeight: "56px" }}
+          rows={2}
+        />
 
         <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="card py-4 text-center">

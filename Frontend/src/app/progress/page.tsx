@@ -10,7 +10,7 @@ import {
   type WorkoutSession,
 } from "@/lib/storage";
 import { getCurrentPhase, getPhaseWeek, isDeloadWeek } from "@/data/phases";
-import { Dumbbell, Flame, AlertTriangle, Activity } from "lucide-react";
+import { Dumbbell, Flame, AlertTriangle, Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const E1RMChart = dynamic(() => import("@/components/charts/E1RMChart"), { ssr: false });
@@ -51,6 +51,35 @@ export default function ProgressPage() {
     : "—";
 
   const trainingDays = new Set(sessions.filter((s) => s.completed).map((s) => s.date)).size;
+
+  // 4.7 — Weekly executive summary (this week vs last week)
+  const weeklySummary = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay() || 7;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - day + 1);
+    monday.setHours(0, 0, 0, 0);
+    const lastMonday = new Date(monday);
+    lastMonday.setDate(monday.getDate() - 7);
+
+    const thisWeekStr = monday.toISOString().slice(0, 10);
+    const lastWeekStr = lastMonday.toISOString().slice(0, 10);
+
+    const thisWeek = sessions.filter((s) => s.completed && s.date >= thisWeekStr);
+    const lastWeek = sessions.filter((s) => s.completed && s.date >= lastWeekStr && s.date < thisWeekStr);
+
+    const calc = (list: WorkoutSession[]) => ({
+      sessions: list.length,
+      sets: list.reduce((a, s) => a + s.exercises.reduce((b, e) => b + (e.skipped ? 0 : e.sets.length), 0), 0),
+      volume: list.reduce((a, s) => a + s.exercises.reduce((b, e) => b + e.sets.reduce((c, set) => c + (set.weight || 0) * set.reps, 0), 0), 0),
+      avgRating: (() => {
+        const rated = list.filter((s) => s.rating);
+        return rated.length > 0 ? rated.reduce((a, s) => a + s.rating!, 0) / rated.length : 0;
+      })(),
+    });
+
+    return { thisWeek: calc(thisWeek), lastWeek: calc(lastWeek) };
+  }, [sessions]);
 
   // Weight chart data
   const weightData = weighIns.slice(-14);
@@ -98,6 +127,39 @@ export default function ProgressPage() {
       <p className="text-[0.7rem] text-zinc-600 mb-4">
         {checkins.length} check-ins · {trainingDays} días de entreno
       </p>
+
+      {/* 4.7 — Executive Summary: This week vs Last week */}
+      {(weeklySummary.thisWeek.sessions > 0 || weeklySummary.lastWeek.sessions > 0) && (
+        <div className="card mb-4">
+          <div className="text-[0.6rem] text-zinc-500 uppercase tracking-widest mb-2.5">Resumen Semanal</div>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            {([
+              { label: "Sesiones", curr: weeklySummary.thisWeek.sessions, prev: weeklySummary.lastWeek.sessions, fmt: (v: number) => String(v) },
+              { label: "Sets", curr: weeklySummary.thisWeek.sets, prev: weeklySummary.lastWeek.sets, fmt: (v: number) => String(v) },
+              { label: "Volumen", curr: weeklySummary.thisWeek.volume, prev: weeklySummary.lastWeek.volume, fmt: (v: number) => v > 1000 ? `${(v / 1000).toFixed(1)}k` : String(v) },
+              { label: "Rating", curr: weeklySummary.thisWeek.avgRating, prev: weeklySummary.lastWeek.avgRating, fmt: (v: number) => v > 0 ? v.toFixed(1) : "—" },
+            ] as const).map((item) => {
+              const diff = item.prev > 0 ? ((item.curr - item.prev) / item.prev) * 100 : (item.curr > 0 ? 100 : 0);
+              const TrendIcon = diff > 5 ? TrendingUp : diff < -5 ? TrendingDown : Minus;
+              const trendColor = diff > 5 ? "#34C759" : diff < -5 ? "#FF3B30" : "var(--text-muted)";
+              return (
+                <div key={item.label}>
+                  <div className="text-[0.5rem] text-zinc-500 uppercase">{item.label}</div>
+                  <div className="text-[1rem] font-black">{item.fmt(item.curr)}</div>
+                  {item.prev > 0 && (
+                    <div className="flex items-center justify-center gap-0.5 mt-0.5">
+                      <TrendIcon size={9} style={{ color: trendColor }} />
+                      <span className="text-[0.5rem] font-bold" style={{ color: trendColor }}>
+                        {diff > 0 ? "+" : ""}{diff.toFixed(0)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "var(--bg-elevated)" }}>

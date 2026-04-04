@@ -43,6 +43,9 @@ export interface WorkoutSession {
   completed: boolean;
   startTime: number;
   endTime: number;
+  rating?: number; // 1-5 stars post-workout
+  sessionNotes?: string; // free-text post-workout notes
+  editedAt?: number; // timestamp if edited later
 }
 
 export interface NutritionEntry {

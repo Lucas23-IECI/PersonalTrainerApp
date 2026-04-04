@@ -5,14 +5,17 @@ import { useRouter } from "next/navigation";
 import {
   getSessions,
   deleteSession,
+  saveSession,
   saveActiveSession,
   getActiveSession,
   type WorkoutSession,
+  type LoggedSet,
 } from "@/lib/storage";
 import { MUSCLE_LABELS } from "@/data/exercises";
 import {
   Dumbbell, Clock, ChevronDown, ChevronUp, Trash2, ChevronLeft,
   ChevronRight, Search, X, RefreshCw, SlidersHorizontal, Flame,
+  Pencil, Check, Star,
 } from "lucide-react";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
@@ -50,6 +53,9 @@ export default function LogPage() {
   const [filterDateTo, setFilterDateTo] = useState("");
   const [filterMuscleGroup, setFilterMuscleGroup] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // 4.5 — Editing state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<WorkoutSession | null>(null);
 
   useEffect(() => {
     const all = getSessions();
@@ -185,6 +191,48 @@ export default function LogPage() {
     });
 
     router.push("/workout/session?day=quickstart");
+  }
+
+  // 4.5 — Start editing a past session
+  function startEdit(session: WorkoutSession) {
+    setEditingId(session.id);
+    setEditData(JSON.parse(JSON.stringify(session)));
+    setExpanded(session.id);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditData(null);
+  }
+
+  function saveEdit() {
+    if (!editData) return;
+    const updated = { ...editData, editedAt: Date.now() };
+    saveSession(updated);
+    setSessions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+    setEditingId(null);
+    setEditData(null);
+  }
+
+  function updateEditSet(exIdx: number, setIdx: number, field: keyof LoggedSet, value: number | undefined) {
+    if (!editData) return;
+    const copy = JSON.parse(JSON.stringify(editData)) as WorkoutSession;
+    const set = copy.exercises[exIdx].sets[setIdx];
+    if (field === 'reps') set.reps = value ?? 0;
+    else if (field === 'weight') set.weight = value;
+    else if (field === 'rpe') set.rpe = value;
+    else if (field === 'rir') set.rir = value;
+    setEditData(copy);
+  }
+
+  function updateEditRating(rating: number) {
+    if (!editData) return;
+    setEditData({ ...editData, rating });
+  }
+
+  function updateEditNotes(notes: string) {
+    if (!editData) return;
+    setEditData({ ...editData, sessionNotes: notes });
   }
 
   function formatDate(d: string) {
@@ -449,10 +497,21 @@ export default function LogPage() {
 
             return (
               <div key={s.id} className="card mb-1.5">
-                <div onClick={() => setExpanded(isOpen ? null : s.id)} className="cursor-pointer">
+                <div onClick={() => { if (editingId !== s.id) setExpanded(isOpen ? null : s.id); }} className="cursor-pointer">
                   <div className="flex justify-between items-start">
                     <div>
-                      <div className="text-[0.9rem] font-extrabold mb-0.5">{s.workoutName}</div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[0.9rem] font-extrabold">{s.workoutName}</span>
+                        {/* 4.6 — Rating stars display */}
+                        {s.rating && (
+                          <span className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((v) => (
+                              <Star key={v} size={10} fill={v <= s.rating! ? '#FFD700' : 'transparent'} strokeWidth={1.5}
+                                style={{ color: v <= s.rating! ? '#FFD700' : 'var(--border)' }} />
+                            ))}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex gap-1.5 text-[0.65rem] text-zinc-600">
                         {s.startTime && s.endTime && (
                           <span className="flex items-center gap-0.5">
@@ -462,23 +521,56 @@ export default function LogPage() {
                         <span>{totalSets} sets</span>
                         {totalVolume > 0 && <span>{totalVolume.toLocaleString()}kg vol</span>}
                       </div>
+                      {/* 4.6 — Session notes preview */}
+                      {s.sessionNotes && !isOpen && (
+                        <div className="text-[0.62rem] text-zinc-500 mt-1 italic truncate max-w-[200px]">{s.sessionNotes}</div>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      {/* 4.4 — Repeat button */}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleRepeat(s); }}
-                        className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-blue-500 p-1 transition-colors"
-                        title="Repetir sesión"
-                      >
-                        <RefreshCw size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
-                        className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-[#FF3B30] p-1 transition-colors"
-                        title="Eliminar sesión"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      {/* 4.5 — Edit button */}
+                      {editingId === s.id ? (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); saveEdit(); }}
+                            className="bg-transparent border-none cursor-pointer text-green-500 p-1 transition-colors"
+                            title="Guardar cambios"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); cancelEdit(); }}
+                            className="bg-transparent border-none cursor-pointer text-zinc-400 p-1 transition-colors"
+                            title="Cancelar"
+                          >
+                            <X size={14} />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); startEdit(s); }}
+                            className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-yellow-500 p-1 transition-colors"
+                            title="Editar sesión"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          {/* 4.4 — Repeat button */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRepeat(s); }}
+                            className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-blue-500 p-1 transition-colors"
+                            title="Repetir sesión"
+                          >
+                            <RefreshCw size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
+                            className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-[#FF3B30] p-1 transition-colors"
+                            title="Eliminar sesión"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
                       <div className="text-zinc-600">
                         {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </div>
@@ -508,6 +600,53 @@ export default function LogPage() {
                       </div>
                     </div>
 
+                    {/* 4.5/4.6 — Editable rating + notes */}
+                    {editingId === s.id && editData ? (
+                      <div className="mb-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[0.65rem] text-zinc-500">Rating:</span>
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((v) => (
+                              <button key={v} onClick={() => updateEditRating(v)} className="bg-transparent border-none cursor-pointer p-0">
+                                <Star size={16} fill={v <= (editData.rating || 0) ? '#FFD700' : 'transparent'} strokeWidth={1.5}
+                                  style={{ color: v <= (editData.rating || 0) ? '#FFD700' : 'var(--text-muted)' }} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <textarea
+                          value={editData.sessionNotes || ""}
+                          onChange={(e) => updateEditNotes(e.target.value)}
+                          placeholder="Notas de la sesión..."
+                          className="w-full text-[0.72rem] py-1.5 px-2.5 rounded-lg resize-none border-none outline-none"
+                          style={{ background: "var(--bg-elevated)", color: "var(--text)", minHeight: "40px" }}
+                          rows={2}
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        {/* 4.6 — Read-only rating + notes in expanded */}
+                        {(s.rating || s.sessionNotes) && (
+                          <div className="mb-3 py-2 px-3 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
+                            {s.rating && (
+                              <div className="flex items-center gap-1 mb-1">
+                                {[1, 2, 3, 4, 5].map((v) => (
+                                  <Star key={v} size={12} fill={v <= s.rating! ? '#FFD700' : 'transparent'} strokeWidth={1.5}
+                                    style={{ color: v <= s.rating! ? '#FFD700' : 'var(--border)' }} />
+                                ))}
+                              </div>
+                            )}
+                            {s.sessionNotes && (
+                              <div className="text-[0.68rem] text-zinc-400 italic">{s.sessionNotes}</div>
+                            )}
+                          </div>
+                        )}
+                        {s.editedAt && (
+                          <div className="text-[0.55rem] text-zinc-600 mb-2">Editado {new Date(s.editedAt).toLocaleDateString()}</div>
+                        )}
+                      </>
+                    )}
+
                     {/* 4.2 — Muscles worked pills */}
                     {musclesWorked.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
@@ -528,7 +667,7 @@ export default function LogPage() {
                       {done} ejercicio{done !== 1 ? "s" : ""}{skipped > 0 && ` · ${skipped} saltado${skipped !== 1 ? "s" : ""}`}
                     </div>
 
-                    {s.exercises.map((ex, i) => (
+                    {(editingId === s.id && editData ? editData.exercises : s.exercises).map((ex, i) => (
                       <div key={i} className="py-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
                         <div className={`text-[0.82rem] font-bold mb-2 ${ex.skipped ? "text-zinc-400 line-through" : ""}`}>
                           {ex.name}
@@ -539,21 +678,70 @@ export default function LogPage() {
                             <thead>
                               <tr className="text-zinc-400 text-[0.6rem] uppercase tracking-wider">
                                 <th className="text-left py-1 w-12">Set</th>
-                                <th className="text-left py-1">Peso &amp; Reps</th>
+                                <th className="text-left py-1">Peso</th>
+                                <th className="text-left py-1">Reps</th>
+                                <th className="text-right py-1 w-14">RPE</th>
                               </tr>
                             </thead>
                             <tbody>
                               {ex.sets.map((set, j) => {
                                 const isEven = j % 2 === 1;
+                                const isEditing = editingId === s.id && editData;
                                 return (
                                   <tr key={j} style={{ background: isEven ? "var(--bg-elevated)" : "transparent" }}>
                                     <td className="py-1.5 px-1 rounded-l-lg font-bold" style={{ color: "#FF9500" }}>
                                       {j + 1}
                                     </td>
-                                    <td className="py-1.5 rounded-r-lg">
-                                      {set.weight ? <span className="font-semibold">{set.weight}kg</span> : "—"} × <span className="font-semibold">{set.reps} reps</span>
-                                      {set.rpe ? <span className="text-zinc-400 ml-2">RPE {set.rpe}</span> : null}
-                                    </td>
+                                    {isEditing ? (
+                                      <>
+                                        <td className="py-1">
+                                          <input
+                                            type="number"
+                                            value={set.weight ?? ""}
+                                            onChange={(e) => updateEditSet(i, j, "weight", e.target.value ? Number(e.target.value) : undefined)}
+                                            className="w-16 text-[0.72rem] py-0.5 px-1.5 rounded border-none outline-none font-semibold"
+                                            style={{ background: "var(--bg-card)", color: "var(--text)" }}
+                                            placeholder="kg"
+                                            step="0.5"
+                                          />
+                                        </td>
+                                        <td className="py-1">
+                                          <input
+                                            type="number"
+                                            value={set.reps}
+                                            onChange={(e) => updateEditSet(i, j, "reps", Number(e.target.value) || 0)}
+                                            className="w-14 text-[0.72rem] py-0.5 px-1.5 rounded border-none outline-none font-semibold"
+                                            style={{ background: "var(--bg-card)", color: "var(--text)" }}
+                                            placeholder="reps"
+                                          />
+                                        </td>
+                                        <td className="py-1 text-right pr-1">
+                                          <input
+                                            type="number"
+                                            value={set.rpe ?? ""}
+                                            onChange={(e) => updateEditSet(i, j, "rpe", e.target.value ? Number(e.target.value) : undefined)}
+                                            className="w-12 text-[0.72rem] py-0.5 px-1.5 rounded border-none outline-none text-right"
+                                            style={{ background: "var(--bg-card)", color: "var(--accent)" }}
+                                            placeholder="RPE"
+                                            min="1"
+                                            max="10"
+                                            step="0.5"
+                                          />
+                                        </td>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <td className="py-1.5">
+                                          {set.weight ? <span className="font-semibold">{set.weight}kg</span> : "—"}
+                                        </td>
+                                        <td className="py-1.5">
+                                          <span className="font-semibold">{set.reps}</span>
+                                        </td>
+                                        <td className="py-1.5 text-right text-[0.68rem]" style={{ color: set.rpe ? "var(--accent)" : "var(--text-muted)" }}>
+                                          {set.rpe ? `${set.rpe}` : "—"}
+                                        </td>
+                                      </>
+                                    )}
                                   </tr>
                                 );
                               })}
