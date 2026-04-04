@@ -52,6 +52,7 @@ export interface NutritionEntry {
   date: string; // YYYY-MM-DD
   meals: SelectedMeal[];
   customMeals: CustomMeal[];
+  waterMl: number; // 7.10 — daily water intake in ml
 }
 
 export interface SelectedMeal {
@@ -69,6 +70,18 @@ export interface CustomMeal {
   protein: number;
   carbs: number;
   fat: number;
+}
+
+// === Meal Templates (7.9) ===
+
+export interface MealTemplate {
+  id: string;
+  name: string;
+  meals: SelectedMeal[];
+  customMeals: CustomMeal[];
+  totalCalories: number;
+  totalProtein: number;
+  createdAt: string;
 }
 
 // === Keys ===
@@ -197,6 +210,7 @@ const KEYS = {
   bodyMeasurements: "mark-pt-body-measurements",
   progressPhotos: "mark-pt-progress-photos",
   activeSession: "mark-pt-active-session",
+  mealTemplates: "mark-pt-meal-templates",
 } as const;
 
 // === Helpers ===
@@ -295,7 +309,7 @@ export function getNutritionEntries(): NutritionEntry[] {
 
 export function getNutritionForDate(date: string): NutritionEntry {
   const existing = getNutritionEntries().find((n) => n.date === date);
-  return existing || { date, meals: [], customMeals: [] };
+  return existing || { date, meals: [], customMeals: [], waterMl: 0 };
 }
 
 export function saveNutritionEntry(entry: NutritionEntry) {
@@ -303,6 +317,22 @@ export function saveNutritionEntry(entry: NutritionEntry) {
   all.push(entry);
   all.sort((a, b) => a.date.localeCompare(b.date));
   save(KEYS.nutrition, all);
+}
+
+// === Meal Templates (7.9) ===
+
+export function getMealTemplates(): MealTemplate[] {
+  return load<MealTemplate>(KEYS.mealTemplates);
+}
+
+export function saveMealTemplate(tpl: MealTemplate) {
+  const all = getMealTemplates().filter((t) => t.id !== tpl.id);
+  all.push(tpl);
+  save(KEYS.mealTemplates, all);
+}
+
+export function deleteMealTemplate(id: string) {
+  save(KEYS.mealTemplates, getMealTemplates().filter((t) => t.id !== id));
 }
 
 // === Aggregation ===
