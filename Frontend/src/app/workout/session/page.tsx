@@ -185,7 +185,7 @@ function SessionContent() {
         exIndex: e.exIndex,
         notes: e.notes,
         restSeconds: e.restSeconds,
-        sets: e.sets.map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, completed: s.completed, isWarmup: s.isWarmup, setType: s.setType })),
+        sets: e.sets.map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, rir: s.rir, completed: s.completed, isWarmup: s.isWarmup, setType: s.setType })),
         supersetTag: e.supersetTag,
         previousSets: e.previousSets,
       })),
@@ -360,7 +360,7 @@ function SessionContent() {
       name: ex.name,
       plannedSets: ex.exerciseRef.sets,
       plannedReps: ex.exerciseRef.reps,
-      sets: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, setType: s.setType === 'normal' ? undefined : s.setType })),
+      sets: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, rir: s.rir, setType: s.setType === 'normal' ? undefined : s.setType })),
       skipped: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length === 0,
       notes: ex.notes,
       primaryMuscles: ex.exerciseRef.primaryMuscles,
@@ -422,6 +422,7 @@ function SessionContent() {
                     <tr className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                       <th className="text-left py-1 w-12">Set</th>
                       <th className="text-left py-1">Peso &amp; Reps</th>
+                      <th className="text-right py-1 w-16">RPE</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -438,6 +439,9 @@ function SessionContent() {
                         <td className="py-1.5">
                           {set.weight ? <span className="font-semibold">{set.weight}kg</span> : "\u2014"} &times; <span className="font-semibold">{set.reps}</span>
                           {typeLabel && <span className="text-[0.55rem] ml-1.5 opacity-60">({set.setType})</span>}
+                        </td>
+                        <td className="py-1.5 text-right text-[0.68rem] font-semibold" style={{ color: set.rpe ? "var(--accent)" : "var(--text-muted)" }}>
+                          {set.rpe ? <>{set.rpe} <span className="text-[0.5rem] opacity-60">({set.rir ?? (10 - set.rpe)} RIR)</span></> : "\u2014"}
                         </td>
                       </tr>
                       );
@@ -605,11 +609,12 @@ function SessionContent() {
               {/* Sets Table */}
               <div className="px-2">
                 {/* Table Header */}
-                <div className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 px-2 py-1.5 text-[0.6rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
+                <div className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 px-2 py-1.5 text-[0.6rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
                   <span>SET</span>
-                  <span>PREVIOUS</span>
+                  <span>PREV</span>
                   <span className="text-center">KG</span>
                   <span className="text-center">REPS</span>
+                  <span className="text-center">RPE</span>
                   <span className="text-center">{"\u2713"}</span>
                 </div>
 
@@ -622,7 +627,7 @@ function SessionContent() {
                   return (
                     <div
                       key={setIdx}
-                      className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 items-center px-2 py-1.5 rounded-lg mb-0.5"
+                      className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 items-center px-2 py-1.5 rounded-lg mb-0.5"
                       style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "transparent" }}
                     >
                       {/* Set type badge (tappable to cycle) */}
@@ -663,6 +668,23 @@ function SessionContent() {
                         className="session-input text-center"
                         style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                       />
+
+                      {/* RPE Input */}
+                      <select
+                        value={set.rpe ?? ""}
+                        onChange={(e) => {
+                          const rpe = e.target.value ? parseFloat(e.target.value) : undefined;
+                          updateSet(exIdx, setIdx, "rpe", rpe);
+                          updateSet(exIdx, setIdx, "rir", rpe !== undefined ? 10 - rpe : undefined);
+                        }}
+                        className="session-input text-center text-[0.7rem] appearance-none px-0"
+                        style={{ color: set.rpe ? "var(--accent)" : "var(--text-muted)", fontWeight: 600 }}
+                      >
+                        <option value="">—</option>
+                        {[6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10].map((v) => (
+                          <option key={v} value={v}>{v}</option>
+                        ))}
+                      </select>
 
                       {/* Complete Check */}
                       <div className="flex justify-center">

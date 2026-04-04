@@ -20,6 +20,7 @@ export interface LoggedSet {
   reps: number;
   weight?: number;
   rpe?: number;
+  rir?: number;
   setType?: SetType;
 }
 
