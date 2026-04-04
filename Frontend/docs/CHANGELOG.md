@@ -16,9 +16,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - **1.6 Quick Start (Empty Workout)**: Botón "⚡ Quick Start" en la página de Plan Semanal, inicia sesión vacía inmediatamente, permite agregar ejercicios ad-hoc desde la librería
 - **1.7 Reordenar Ejercicios en Vivo**: Flechas arriba/abajo en header de cada ejercicio durante sesión activa, swap instantáneo con feedback visual
 - **1.8 Reemplazar Ejercicio Mid-Workout**: Botón RefreshCw en header de ejercicio abre modal en modo reemplazo, sustituye ejercicio manteniendo estructura de sets
+- **1.9 Notas por Ejercicio/Set**: Icono MessageSquare por cada set para expandir input de nota inline, notas de sets se mergen al finalizar sesión, ejercicio-level notes ya existían
+- **1.10 Post-Workout Summary Mejorado**: Rating de sesión 1-5 estrellas, sección de músculos trabajados con chips visuales, sección de notas del entrenamiento
+- **1.11 Swipe Gestures en Sets**: Swipe izquierda en filas de sets revela zona roja de eliminación, threshold 80px para confirmar, feedback visual con icono Trash y fondo rojo
 
-### En Progreso
-- (próximo feature)
+### FASE 1 COMPLETADA ✅
 
 ---
 

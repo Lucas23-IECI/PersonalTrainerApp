@@ -20,9 +20,9 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 1.6 | Quick Start (Empty Workout) | ✅ COMPLETADO |
 | 1.7 | Reordenar Ejercicios en Vivo | ✅ COMPLETADO |
 | 1.8 | Reemplazar Ejercicio Mid-Workout | ✅ COMPLETADO |
-| 1.9 | Notas por Ejercicio/Set | ⬜ |
-| 1.10 | Post-Workout Summary | ⬜ |
-| 1.11 | Swipe Gestures en Sets | ⬜ |
+| 1.9 | Notas por Ejercicio/Set | ✅ COMPLETADO |
+| 1.10 | Post-Workout Summary | ✅ COMPLETADO |
+| 1.11 | Swipe Gestures en Sets | ✅ COMPLETADO |
 
 ---
 
@@ -146,7 +146,7 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 
 | Fase | Features | Estado |
 |------|----------|--------|
-| 1 Core Workout | 11 | 🔄 |
+| 1 Core Workout | 11 | ✅ COMPLETADO |
 | 2 Charts/Progreso | 8 | ⬜ |
 | 3 Programas/Ejercicios | 14 | ⬜ |
 | 4 Historial/Mediciones | 8 | ⬜ |
