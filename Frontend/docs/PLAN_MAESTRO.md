@@ -69,10 +69,10 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 
 | # | Feature | Estado |
 |---|---------|--------|
-| 4.1 | Calendario Mejorado | ⬜ |
-| 4.2 | Detalle Sesión Pasada | ⬜ |
-| 4.3 | Búsqueda Avanzada Historial | ⬜ |
-| 4.4 | Re-hacer Workout (Repeat) | ⬜ |
+| 4.1 | Calendario Mejorado | ✅ |
+| 4.2 | Detalle Sesión Pasada | ✅ |
+| 4.3 | Búsqueda Avanzada Historial | ✅ |
+| 4.4 | Re-hacer Workout (Repeat) | ✅ |
 | 4.5 | Editar Workouts Pasados | ⬜ |
 | 4.6 | Notas/Rating Post-Workout en Historial | ⬜ |
 | 4.7 | Resumen Estadístico | ⬜ |
