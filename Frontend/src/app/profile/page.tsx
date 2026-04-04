@@ -436,6 +436,65 @@ export default function ProfilePage() {
               );
             })()}
           </div>
+
+          {/* 4.8 — Chest chart */}
+          <div className="card">
+            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Pecho</div>
+            {(() => {
+              const chestData = measurements.filter((m) => m.chest).map((m) => ({ val: m.chest!, label: m.date.slice(5) }));
+              return chestData.length >= 2 ? (
+                <MiniChart data={chestData.map((d) => d.val)} labels={chestData.map((d) => d.label)} color="#AF52DE" />
+              ) : (
+                <EmptyChart text="Necesitás al menos 2 mediciones de pecho" />
+              );
+            })()}
+          </div>
+
+          {/* 4.8 — Thigh chart */}
+          <div className="card">
+            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Muslos</div>
+            {(() => {
+              const thighData = measurements.filter((m) => m.thighR).map((m) => ({ val: m.thighR!, label: m.date.slice(5) }));
+              return thighData.length >= 2 ? (
+                <MiniChart data={thighData.map((d) => d.val)} labels={thighData.map((d) => d.label)} color="#FF9500" />
+              ) : (
+                <EmptyChart text="Necesitás al menos 2 mediciones de muslos" />
+              );
+            })()}
+          </div>
+
+          {/* 4.8 — First vs Latest comparison */}
+          {initial && latest && measurements.length >= 2 && (
+            <div className="card">
+              <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Progreso Total</div>
+              <div className="flex justify-between text-[0.55rem] text-zinc-500 mb-2">
+                <span>{initial.date}</span>
+                <span>{latest.date}</span>
+              </div>
+              <div className="space-y-2">
+                {CIRCUM_FIELDS.map(({ key, label }) => {
+                  const first = initial[key] as number | undefined;
+                  const last = latest[key] as number | undefined;
+                  if (!first || !last) return null;
+                  const diff = last - first;
+                  return (
+                    <div key={key} className="flex items-center gap-2">
+                      <span className="text-[0.65rem] text-zinc-500 w-16 shrink-0">{label}</span>
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
+                        <div className="h-full rounded-full" style={{
+                          width: `${Math.min(100, Math.max(10, (last / Math.max(first, last)) * 100))}%`,
+                          background: diff <= 0 ? "#34C759" : "#FF9500",
+                        }} />
+                      </div>
+                      <span className="text-[0.6rem] font-bold shrink-0" style={{ color: diff <= 0 ? "#34C759" : "#FF9500" }}>
+                        {diff > 0 ? "+" : ""}{diff.toFixed(1)}cm
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </main>
