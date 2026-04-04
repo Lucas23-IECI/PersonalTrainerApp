@@ -82,6 +82,28 @@ export interface FoodFavorite {
   fat: number;
 }
 
+export interface MyFood {
+  id: string;
+  name: string;
+  brand?: string;
+  servingSize: string; // e.g. "100g", "1 unidad", "1 taza"
+  servingGrams: number;
+  calories: number; // per serving
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface FoodFrequency {
+  name: string;
+  count: number;
+  lastUsed: string; // ISO date
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
 export interface NutritionTargets {
   calories: number;
   protein: number;
@@ -238,6 +260,8 @@ const KEYS = {
   foodFavorites: "mark-pt-food-favorites",
   foodRecents: "mark-pt-food-recents",
   nutritionTargets: "mark-pt-nutrition-targets",
+  myFoods: "mark-pt-my-foods",
+  foodFrequency: "mark-pt-food-frequency",
 } as const;
 
 // === Helpers ===
@@ -412,6 +436,47 @@ export function getNutritionTargets(): NutritionTargets {
 
 export function saveNutritionTargets(targets: NutritionTargets) {
   localStorage.setItem(KEYS.nutritionTargets, JSON.stringify(targets));
+}
+
+// === My Foods (custom food database) ===
+
+export function getMyFoods(): MyFood[] {
+  return load<MyFood>(KEYS.myFoods);
+}
+
+export function saveMyFood(food: MyFood) {
+  const all = getMyFoods().filter((f) => f.id !== food.id);
+  all.push(food);
+  all.sort((a, b) => a.name.localeCompare(b.name));
+  save(KEYS.myFoods, all);
+}
+
+export function deleteMyFood(id: string) {
+  save(KEYS.myFoods, getMyFoods().filter((f) => f.id !== id));
+}
+
+// === Food Frequency Tracking ===
+
+export function getFoodFrequencies(): FoodFrequency[] {
+  return load<FoodFrequency>(KEYS.foodFrequency);
+}
+
+export function trackFoodFrequency(name: string, calories: number, protein: number, carbs: number, fat: number) {
+  const all = getFoodFrequencies();
+  const existing = all.find((f) => f.name === name);
+  if (existing) {
+    existing.count += 1;
+    existing.lastUsed = today();
+  } else {
+    all.push({ name, count: 1, lastUsed: today(), calories, protein, carbs, fat });
+  }
+  save(KEYS.foodFrequency, all);
+}
+
+export function getFrequentFoods(limit = 20): FoodFrequency[] {
+  return getFoodFrequencies()
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
 
 // === Aggregation ===
