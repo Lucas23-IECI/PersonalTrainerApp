@@ -6,7 +6,7 @@ import { getCurrentPhaseInfo } from "@/data/profile";
 import { getActiveSession, clearActiveSession } from "@/lib/storage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Play, Clock, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Play, Clock, ChevronDown, ChevronUp, Pencil, BookOpen } from "lucide-react";
 
 export default function WorkoutPage() {
   const router = useRouter();
@@ -46,9 +46,14 @@ export default function WorkoutPage() {
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       <div className="flex items-center justify-between mb-0.5">
         <h1 className="text-xl font-extrabold tracking-tight">Plan Semanal</h1>
-        <Link href="/workout/editor" className="flex items-center gap-1 text-[0.7rem] text-[#2C6BED] no-underline font-semibold">
-          <Pencil size={13} /> Editar
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/routines" className="flex items-center gap-1 text-[0.7rem] text-[var(--accent)] no-underline font-semibold">
+            <BookOpen size={13} /> Rutinas
+          </Link>
+          <Link href="/workout/editor" className="flex items-center gap-1 text-[0.7rem] text-[#2C6BED] no-underline font-semibold">
+            <Pencil size={13} /> Editar
+          </Link>
+        </div>
       </div>
       <div className="flex items-center justify-between mb-1">
         <p className="text-[0.68rem] text-zinc-500 uppercase tracking-wider">
