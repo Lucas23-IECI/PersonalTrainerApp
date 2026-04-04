@@ -30,7 +30,7 @@ import {
 } from "@/lib/native";
 import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
-  ArrowUp, ArrowDown, RefreshCw, Link2,
+  ArrowUp, ArrowDown, RefreshCw, Link2, MessageSquare, Star,
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
@@ -43,6 +43,7 @@ interface SessionSet extends LoggedSet {
   completed: boolean;
   isWarmup: boolean; // kept for backward compat with active sessions
   setType: SetType;
+  note?: string;
 }
 interface SessionExercise {
   name: string;
@@ -86,6 +87,9 @@ function SessionContent() {
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [replaceExerciseIdx, setReplaceExerciseIdx] = useState<number | null>(null);
+  const [expandedSetNote, setExpandedSetNote] = useState<string | null>(null); // "exIdx-setIdx"
+  const [sessionRating, setSessionRating] = useState(0);
+  const [swipeState, setSwipeState] = useState<{ key: string; startX: number; dx: number } | null>(null);
 
   // Rest timer
   const [restActive, setRestActive] = useState(false);
@@ -404,6 +408,29 @@ function SessionContent() {
     });
   }
 
+  function updateSetNote(exIdx: number, setIdx: number, note: string) {
+    setExercises((prev) =>
+      prev.map((e, i) =>
+        i === exIdx ? { ...e, sets: e.sets.map((s, j) => (j === setIdx ? { ...s, note } : s)) } : e
+      )
+    );
+  }
+
+  function handleSwipeStart(key: string, x: number) {
+    setSwipeState({ key, startX: x, dx: 0 });
+  }
+  function handleSwipeMove(x: number) {
+    if (!swipeState) return;
+    const dx = Math.min(0, x - swipeState.startX);
+    setSwipeState((s) => s ? { ...s, dx } : null);
+  }
+  function handleSwipeEnd(exIdx: number, setIdx: number) {
+    if (swipeState && swipeState.dx < -80) {
+      removeSet(exIdx, setIdx);
+    }
+    setSwipeState(null);
+  }
+
   function fillFromPrevious(exIdx: number, setIdx: number) {
     const ex = exercises[exIdx];
     const set = ex.sets[setIdx];
@@ -429,7 +456,7 @@ function SessionContent() {
       plannedReps: ex.exerciseRef.reps,
       sets: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, rir: s.rir, setType: s.setType === 'normal' ? undefined : s.setType })),
       skipped: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length === 0,
-      notes: ex.notes,
+      notes: ex.notes || ex.sets.filter(s => s.note).map((s, i) => `Set ${i + 1}: ${s.note}`).join('; ') || undefined,
       primaryMuscles: ex.exerciseRef.primaryMuscles,
     }));
 
@@ -457,12 +484,24 @@ function SessionContent() {
     const duration = formatDuration(savedSession.endTime - savedSession.startTime);
     const fSets = savedSession.exercises.reduce((s, e) => s + e.sets.length, 0);
     const fVolume = savedSession.exercises.reduce((s, e) => s + e.sets.reduce((a, set) => a + (set.weight || 0) * set.reps, 0), 0);
+    const musclesWorked = [...new Set(savedSession.exercises.flatMap((e) => e.primaryMuscles || []))];
+    const exercisesWithNotes = savedSession.exercises.filter((e) => e.notes);
     return (
       <main className="max-w-[540px] mx-auto px-4 pt-10 pb-6 text-center">
         <div className="text-5xl mb-3">{"\u{1F4AA}"}</div>
         <h1 className="text-2xl font-black mb-1" style={{ color: "var(--text)" }}>Sesi&oacute;n Completada!</h1>
-        <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>{workout.name}</p>
-        <div className="grid grid-cols-3 gap-2 mb-6">
+        <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>{workout.name}</p>
+
+        {/* Session Rating */}
+        <div className="flex justify-center gap-1 mb-5">
+          {[1, 2, 3, 4, 5].map((v) => (
+            <button key={v} onClick={() => setSessionRating(v)} className="bg-transparent border-none cursor-pointer p-0.5">
+              <Star size={28} fill={v <= sessionRating ? '#FFD700' : 'transparent'} strokeWidth={1.5} style={{ color: v <= sessionRating ? '#FFD700' : 'var(--text-muted)' }} />
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="card py-4 text-center">
             <div className="text-2xl font-black" style={{ color: "var(--text)" }}>{duration}</div>
             <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>Duraci&oacute;n</div>
@@ -476,6 +515,31 @@ function SessionContent() {
             <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>kg Vol</div>
           </div>
         </div>
+
+        {/* Muscles Worked */}
+        {musclesWorked.length > 0 && (
+          <div className="card py-3 px-4 mb-4 text-left">
+            <div className="text-[0.6rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>M&uacute;sculos Trabajados</div>
+            <div className="flex flex-wrap gap-1.5">
+              {musclesWorked.map((m) => (
+                <span key={m} className="text-[0.68rem] font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(10,132,255,0.15)', color: 'var(--accent)' }}>{m}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Exercise Notes */}
+        {exercisesWithNotes.length > 0 && (
+          <div className="card py-3 px-4 mb-4 text-left">
+            <div className="text-[0.6rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>Notas</div>
+            {exercisesWithNotes.map((e, i) => (
+              <div key={i} className="text-[0.72rem] mb-1" style={{ color: "var(--text-secondary)" }}>
+                <span className="font-semibold" style={{ color: "var(--text)" }}>{e.name}:</span> {e.notes}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="card text-left mb-6">
           {savedSession.exercises.map((e, i) => (
             <div key={i} className="py-3" style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none" }}>
@@ -704,12 +768,24 @@ function SessionContent() {
                   const isWarmup = isWarmupType(set.setType);
                   const workingIdx = isWarmup ? undefined : ex.sets.filter((s, si) => si < setIdx && !isWarmupType(s.setType)).length;
                   const prevSet = workingIdx !== undefined ? ex.previousSets[workingIdx] : undefined;
+                  const swipeKey = `${exIdx}-${setIdx}`;
+                  const isNoteOpen = expandedSetNote === swipeKey;
+                  const swipeDx = swipeState?.key === swipeKey ? swipeState.dx : 0;
 
                   return (
+                    <div key={setIdx} className="relative overflow-hidden rounded-lg mb-0.5">
+                      {/* Swipe-to-delete background */}
+                      {swipeDx < -20 && (
+                        <div className="absolute inset-y-0 right-0 flex items-center px-4 rounded-r-lg" style={{ background: '#FF3B30' }}>
+                          <Trash2 size={16} style={{ color: '#fff' }} />
+                        </div>
+                      )}
                     <div
-                      key={setIdx}
-                      className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 items-center px-2 py-1.5 rounded-lg mb-0.5"
-                      style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "transparent" }}
+                      className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 items-center px-2 py-1.5 relative"
+                      style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "var(--bg-card)", transform: `translateX(${swipeDx}px)`, transition: swipeState?.key === swipeKey ? 'none' : 'transform 0.2s' }}
+                      onTouchStart={(e) => handleSwipeStart(swipeKey, e.touches[0].clientX)}
+                      onTouchMove={(e) => handleSwipeMove(e.touches[0].clientX)}
+                      onTouchEnd={() => handleSwipeEnd(exIdx, setIdx)}
                     >
                       {/* Set type badge (tappable to cycle) */}
                       <div className="flex justify-center">
@@ -773,7 +849,14 @@ function SessionContent() {
                       </select>
 
                       {/* Complete Check */}
-                      <div className="flex justify-center">
+                      <div className="flex justify-center gap-0.5">
+                        <button
+                          onClick={() => setExpandedSetNote(isNoteOpen ? null : swipeKey)}
+                          className="bg-transparent border-none cursor-pointer p-0"
+                          style={{ color: set.note ? 'var(--accent)' : 'var(--text-muted)', opacity: set.note ? 1 : 0.4 }}
+                        >
+                          <MessageSquare size={12} />
+                        </button>
                         <button
                           onClick={() => toggleSetComplete(exIdx, setIdx)}
                           className="w-[28px] h-[28px] rounded-lg flex items-center justify-center border-none cursor-pointer transition-colors"
@@ -782,6 +865,19 @@ function SessionContent() {
                           <Check size={14} strokeWidth={3} style={{ color: set.completed ? "#fff" : "var(--text-muted)" }} />
                         </button>
                       </div>
+                    </div>
+                    {/* Per-set note input */}
+                    {isNoteOpen && (
+                      <input
+                        type="text"
+                        placeholder="Nota del set..."
+                        value={set.note || ''}
+                        onChange={(e) => updateSetNote(exIdx, setIdx, e.target.value)}
+                        className="w-full text-[0.7rem] py-1.5 px-3 bg-transparent border-none outline-none"
+                        style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)' }}
+                        autoFocus
+                      />
+                    )}
                     </div>
                   );
                 })}
