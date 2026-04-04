@@ -12,6 +12,7 @@ import {
   saveActiveSession,
   getActiveSession,
   clearActiveSession,
+  getSettings,
   type WorkoutSession,
   type LoggedExercise,
   type LoggedSet,
@@ -956,21 +957,48 @@ function SessionContent() {
                         {prevSet && prevSet.weight > 0 ? `${prevSet.weight}×${prevSet.reps}` : "\u2014"}
                       </button>
 
-                      {/* Weight Input */}
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        step={0.5}
-                        min={0}
-                        pattern="[0-9]*\.?[0-9]*"
-                        enterKeyHint="next"
-                        placeholder="kg"
-                        value={set.weight ?? ""}
-                        onChange={(e) => updateSet(exIdx, setIdx, "weight", e.target.value ? parseFloat(e.target.value) : undefined)}
-                        onFocus={(e) => e.target.select()}
-                        className="session-input text-center"
-                        style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
-                      />
+                      {/* Weight Input with Stepper — 6.4/6.10 */}
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const inc = getSettings().weightIncrement;
+                            const cur = set.weight ?? 0;
+                            const next = Math.max(0, cur - inc);
+                            updateSet(exIdx, setIdx, "weight", next || undefined);
+                          }}
+                          className="w-7 h-7 flex items-center justify-center rounded-md border-none cursor-pointer text-xs font-bold flex-shrink-0"
+                          style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
+                        >
+                          −
+                        </button>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step={0.5}
+                          min={0}
+                          pattern="[0-9]*\.?[0-9]*"
+                          enterKeyHint="next"
+                          placeholder="kg"
+                          value={set.weight ?? ""}
+                          onChange={(e) => updateSet(exIdx, setIdx, "weight", e.target.value ? parseFloat(e.target.value) : undefined)}
+                          onFocus={(e) => e.target.select()}
+                          className="session-input text-center flex-1 min-w-0"
+                          style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const inc = getSettings().weightIncrement;
+                            const cur = set.weight ?? 0;
+                            updateSet(exIdx, setIdx, "weight", cur + inc);
+                          }}
+                          className="w-7 h-7 flex items-center justify-center rounded-md border-none cursor-pointer text-xs font-bold flex-shrink-0"
+                          style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
+                        >
+                          +
+                        </button>
+                      </div>
 
                       {/* Reps Input */}
                       <input

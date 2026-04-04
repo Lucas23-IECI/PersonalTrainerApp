@@ -138,6 +138,9 @@ export interface UserSettings {
   unit: WeightUnit;
   hapticsEnabled: boolean;
   soundEnabled: boolean;
+  weightIncrement: number; // kg step for +/- buttons (default 2.5)
+  language: "es" | "en";
+  autoBackup: boolean;
 }
 
 const SETTINGS_KEY = "mark-pt-settings";
@@ -146,6 +149,9 @@ const DEFAULT_SETTINGS: UserSettings = {
   unit: "kg",
   hapticsEnabled: true,
   soundEnabled: true,
+  weightIncrement: 2.5,
+  language: "es",
+  autoBackup: true,
 };
 
 export function getSettings(): UserSettings {
@@ -566,4 +572,33 @@ export function exportCSV(): string {
   }
 
   return rows.join("\n");
+}
+
+// === Auto Backup (6.11) ===
+
+const BACKUP_KEY = "mark-pt-auto-backup";
+const BACKUP_DATE_KEY = "mark-pt-auto-backup-date";
+
+/** Run auto-backup if enabled — keeps one rolling backup in localStorage */
+export function runAutoBackup() {
+  if (typeof window === "undefined") return;
+  if (!getSettings().autoBackup) return;
+  const lastBackup = localStorage.getItem(BACKUP_DATE_KEY);
+  const now = today();
+  if (lastBackup === now) return; // max once per day
+  const data = exportAllData();
+  localStorage.setItem(BACKUP_KEY, data);
+  localStorage.setItem(BACKUP_DATE_KEY, now);
+}
+
+/** Restore from the auto-backup stored in localStorage */
+export function restoreAutoBackup(): boolean {
+  const data = localStorage.getItem(BACKUP_KEY);
+  if (!data) return false;
+  return importAllData(data);
+}
+
+/** Get the date of the last auto-backup */
+export function getAutoBackupDate(): string | null {
+  return localStorage.getItem(BACKUP_DATE_KEY);
 }
