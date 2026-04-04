@@ -11,6 +11,7 @@ import {
   ChevronUp,
   GripVertical,
   X,
+  TrendingUp,
 } from "lucide-react";
 import {
   getRoutine,
@@ -19,6 +20,14 @@ import {
   type RoutineDay,
   type RoutineExercise,
 } from "@/lib/routines-storage";
+import {
+  getBatchSuggestions,
+  getActiveRuleConfig,
+  PROGRESSION_RULES,
+  setActiveRuleId,
+  getActiveRuleId,
+  type BatchSuggestion,
+} from "@/lib/progression";
 
 function RoutineEditorContent() {
   const router = useRouter();
@@ -30,6 +39,8 @@ function RoutineEditorContent() {
   const [editingEx, setEditingEx] = useState<{ dayId: string; exIdx: number } | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [activeRuleId, setActiveRule] = useState(() => getActiveRuleId());
+  const [suggestions, setSuggestions] = useState<Record<string, BatchSuggestion>>({});
 
   useEffect(() => {
     if (routineId) {
@@ -37,6 +48,13 @@ function RoutineEditorContent() {
       if (r) {
         setRoutine(structuredClone(r));
         if (r.days.length > 0) setExpandedDay(r.days[0].id);
+        // Get progression suggestions for all exercises
+        const allNames = r.days.flatMap((d) => d.exercises.map((e) => e.name));
+        const unique = [...new Set(allNames)];
+        const batch = getBatchSuggestions(unique);
+        const map: Record<string, BatchSuggestion> = {};
+        batch.forEach((s) => { map[s.exerciseName] = s; });
+        setSuggestions(map);
       }
     }
   }, [routineId]);
@@ -204,6 +222,27 @@ function RoutineEditorContent() {
         </div>
       )}
 
+      {/* Progression rule selector (3.5) */}
+      <div className="mb-4 p-3 rounded-xl" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <TrendingUp size={13} style={{ color: "var(--accent)" }} />
+          <span className="text-[0.68rem] font-bold text-[var(--text)]">Regla de Progresión</span>
+        </div>
+        <select
+          value={activeRuleId}
+          onChange={(e) => { setActiveRuleId(e.target.value); setActiveRule(e.target.value); }}
+          className="w-full text-[0.72rem] py-1.5 px-2 rounded-lg text-[var(--text)]"
+          style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+        >
+          {PROGRESSION_RULES.map((rule) => (
+            <option key={rule.id} value={rule.id}>{rule.label}</option>
+          ))}
+        </select>
+        <p className="text-[0.58rem] text-zinc-500 mt-1">
+          {PROGRESSION_RULES.find((r) => r.id === activeRuleId)?.description}
+        </p>
+      </div>
+
       {/* Routine name & description */}
       <div className="mb-4">
         <input
@@ -334,6 +373,12 @@ function RoutineEditorContent() {
                           <div className="text-[0.62rem] text-zinc-500">
                             {ex.sets}×{ex.reps} · {ex.rest} · RPE {ex.rpe}
                           </div>
+                          {suggestions[ex.name] && (
+                            <div className="text-[0.55rem] mt-0.5 flex items-center gap-1" style={{ color: "#34C759" }}>
+                              <TrendingUp size={10} />
+                              {suggestions[ex.name].reason}
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={() => removeExercise(day.id, i)}

@@ -240,3 +240,81 @@ export function getRoutinesByFolder(folderId: string | undefined): Routine[] {
 export function getRoutinesWithoutFolder(): Routine[] {
   return getRoutines().filter((r) => !r.folderId);
 }
+
+// =============================================
+// 3.6 — Import / Export by shareable code
+// =============================================
+
+/**
+ * Serialize a routine to a shareable code (base64-encoded JSON).
+ * Strips metadata like folderId to keep the code portable.
+ */
+export function exportRoutineCode(routineId: string): string | null {
+  const routine = getRoutine(routineId);
+  if (!routine) return null;
+  const portable = {
+    v: 1,
+    n: routine.name,
+    d: routine.description,
+    s: routine.split,
+    dpw: routine.daysPerWeek,
+    days: routine.days.map((day) => ({
+      n: day.name,
+      f: day.focus,
+      t: day.type,
+      ex: day.exercises.map((e) => ({
+        n: e.name,
+        s: e.sets,
+        r: e.reps,
+        rs: e.rest,
+        rp: e.rpe,
+        nt: e.notes || undefined,
+        pm: e.primaryMuscles,
+        c: e.isCompound,
+      })),
+    })),
+  };
+  return btoa(unescape(encodeURIComponent(JSON.stringify(portable))));
+}
+
+/**
+ * Import a routine from a shareable code.
+ * Returns the new Routine or null if the code is invalid.
+ */
+export function importRoutineCode(code: string): Routine | null {
+  try {
+    const json = decodeURIComponent(escape(atob(code.trim())));
+    const data = JSON.parse(json);
+    if (!data || data.v !== 1 || !data.n || !Array.isArray(data.days)) return null;
+
+    const routine: Routine = {
+      id: generateId(),
+      name: data.n,
+      description: data.d || "",
+      daysPerWeek: data.dpw || data.days.length,
+      split: data.s || "",
+      days: data.days.map((day: any, i: number) => ({
+        id: `day-${i}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 4)}`,
+        name: day.n || `Día ${i + 1}`,
+        focus: day.f || "",
+        type: day.t || "full",
+        exercises: (day.ex || []).map((e: any) => ({
+          name: e.n || "Ejercicio",
+          sets: e.s || 3,
+          reps: e.r || "8-12",
+          rest: e.rs || "60s",
+          rpe: e.rp || "7-8",
+          notes: e.nt,
+          primaryMuscles: Array.isArray(e.pm) ? e.pm : [],
+          isCompound: !!e.c,
+        })),
+      })),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+
+    return saveRoutine(routine);
+  } catch {
+    return null;
+  }
+}
