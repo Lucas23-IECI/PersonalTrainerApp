@@ -16,6 +16,11 @@ import {
 } from "@/lib/progression";
 import { getCurrentPhase, getPhaseWeek, isDeloadWeek } from "@/data/phases";
 import { TrendingDown, Moon, Dumbbell, Flame, Trophy, BarChart3, AlertTriangle, Activity } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const E1RMChart = dynamic(() => import("@/components/charts/E1RMChart"), { ssr: false });
+const MuscleVolumeChart = dynamic(() => import("@/components/charts/MuscleVolumeChart"), { ssr: false });
+const SessionVolumeChart = dynamic(() => import("@/components/charts/SessionVolumeChart"), { ssr: false });
 
 type Tab = "cuerpo" | "fuerza" | "volumen";
 
@@ -312,6 +317,9 @@ export default function ProgressPage() {
             return null;
           })()}
 
+          {/* E1RM Chart (Feature 2.1) */}
+          <E1RMChart />
+
           {/* Personal Records */}
           <div className="card mb-3.5">
             <div className="flex items-center gap-2 mb-2.5">
@@ -456,6 +464,12 @@ export default function ProgressPage() {
               <div className="text-[0.5rem] text-zinc-500 uppercase">Racha</div>
             </div>
           </div>
+
+          {/* Session Volume Chart (Feature 2.3) */}
+          <SessionVolumeChart />
+
+          {/* Muscle Volume Chart (Feature 2.2) */}
+          <MuscleVolumeChart />
 
           {/* Sets per week chart */}
           <div className="card mb-3.5">
