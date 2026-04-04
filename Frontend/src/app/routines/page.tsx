@@ -22,6 +22,11 @@ import {
   MoreVertical,
   X,
   FolderInput,
+  Share2,
+  Download,
+  Sparkles,
+  ClipboardCopy,
+  Check,
 } from "lucide-react";
 import {
   PROGRAM_LIBRARY,
@@ -41,9 +46,12 @@ import {
   moveRoutineToFolder,
   getRoutinesByFolder,
   getRoutinesWithoutFolder,
+  exportRoutineCode,
+  importRoutineCode,
   type Routine,
   type RoutineFolder,
 } from "@/lib/routines-storage";
+import { getTopRecommendations, estimateUserLevel } from "@/lib/recommendations";
 
 // ── Tabs ──
 type Tab = "library" | "routines";
@@ -88,6 +96,13 @@ export default function RoutinesPage() {
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [renameFolderId, setRenameFolderId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+
+  // Import / Export (3.6)
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importCode, setImportCode] = useState("");
+  const [importError, setImportError] = useState("");
+  const [shareCode, setShareCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const reload = useCallback(() => {
     setRoutines(getRoutines());
@@ -161,6 +176,41 @@ export default function RoutinesPage() {
     setMenuOpen(null);
     reload();
   }
+
+  // ── Import / Export (3.6) ──
+  function handleExport(routineId: string) {
+    const code = exportRoutineCode(routineId);
+    if (code) {
+      setShareCode(code);
+      setCopied(false);
+    }
+    setMenuOpen(null);
+  }
+
+  function handleCopyCode() {
+    if (!shareCode) return;
+    navigator.clipboard.writeText(shareCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function handleImport() {
+    if (!importCode.trim()) return;
+    const routine = importRoutineCode(importCode.trim());
+    if (routine) {
+      setShowImportModal(false);
+      setImportCode("");
+      setImportError("");
+      reload();
+      setTab("routines");
+    } else {
+      setImportError("Código inválido. Verificá que esté completo.");
+    }
+  }
+
+  // ── Recommendations (3.7) ──
+  const recommendations = typeof window !== "undefined" ? getTopRecommendations(3) : [];
 
   // ── Renders ──
   function renderProgramCard(p: LibraryProgram) {
@@ -309,6 +359,12 @@ export default function RoutinesPage() {
               <Copy size={13} /> Duplicar
             </button>
             <button
+              onClick={() => handleExport(r.id)}
+              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-zinc-800"
+            >
+              <Share2 size={13} /> Compartir Código
+            </button>
+            <button
               onClick={() => { setMoveTarget(r.id); setMenuOpen(null); }}
               className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-zinc-800"
             >
@@ -399,6 +455,42 @@ export default function RoutinesPage() {
       {/* ── LIBRARY TAB ── */}
       {tab === "library" && (
         <>
+          {/* Recommendations (3.7) */}
+          {recommendations.length > 0 && !search && catFilter === "all" && (
+            <div className="mb-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Sparkles size={14} style={{ color: "var(--accent)" }} />
+                <span className="text-[0.72rem] font-bold text-[var(--text)]">Recomendados para vos</span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {recommendations.map(({ program, reasons }) => (
+                  <div
+                    key={program.id}
+                    className="shrink-0 w-[200px] rounded-xl p-3 cursor-pointer"
+                    style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
+                    onClick={() => { setExpandedProgram(program.id); }}
+                  >
+                    <span
+                      className="text-[0.5rem] font-bold px-1.5 py-0.5 rounded-full text-white"
+                      style={{ background: LEVEL_COLORS[program.level] }}
+                    >
+                      {LEVEL_LABELS[program.level]}
+                    </span>
+                    <p className="text-[0.75rem] font-bold text-[var(--text)] mt-1.5 line-clamp-1">{program.name}</p>
+                    <p className="text-[0.58rem] text-zinc-500 mt-0.5 line-clamp-1">
+                      {program.daysPerWeek} días · {program.split}
+                    </p>
+                    {reasons[0] && (
+                      <p className="text-[0.52rem] mt-1" style={{ color: "var(--accent)" }}>
+                        {reasons[0]}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Search */}
           <div className="relative mb-3">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -464,6 +556,13 @@ export default function RoutinesPage() {
               style={{ background: "var(--accent)" }}
             >
               <Plus size={14} /> Crear Rutina
+            </button>
+            <button
+              onClick={() => { setShowImportModal(true); setImportError(""); setImportCode(""); }}
+              className="py-2.5 px-4 rounded-xl font-bold text-[0.72rem] flex items-center justify-center gap-1.5"
+              style={{ background: "var(--bg-elevated)", color: "var(--text-muted)", border: "1px solid var(--border)" }}
+            >
+              <Download size={14} />
             </button>
             <button
               onClick={() => setShowNewFolder(true)}
@@ -598,6 +697,77 @@ export default function RoutinesPage() {
       )}
 
       {moveModal}
+
+      {/* ── Import modal (3.6) ── */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center" onClick={() => setShowImportModal(false)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-[540px] rounded-t-2xl p-4"
+            style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+          >
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-[0.85rem] font-bold text-[var(--text)]">Importar Rutina</p>
+              <button onClick={() => setShowImportModal(false)} className="text-zinc-500"><X size={18} /></button>
+            </div>
+            <p className="text-[0.68rem] text-zinc-500 mb-3">
+              Pegá el código que te compartieron para importar la rutina.
+            </p>
+            <textarea
+              autoFocus
+              value={importCode}
+              onChange={(e) => { setImportCode(e.target.value); setImportError(""); }}
+              placeholder="Pegar código aquí..."
+              rows={4}
+              className="w-full text-[0.72rem] py-2.5 px-3 rounded-lg text-[var(--text)] placeholder-zinc-600 resize-none mb-2"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
+            />
+            {importError && (
+              <p className="text-[0.65rem] text-[#FF453A] mb-2">{importError}</p>
+            )}
+            <button
+              onClick={handleImport}
+              disabled={!importCode.trim()}
+              className="w-full py-2.5 rounded-xl font-bold text-[0.78rem] text-white flex items-center justify-center gap-2"
+              style={{ background: importCode.trim() ? "var(--accent)" : "var(--bg-elevated)", opacity: importCode.trim() ? 1 : 0.5 }}
+            >
+              <Download size={16} /> Importar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Share code modal (3.6) ── */}
+      {shareCode && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center" onClick={() => setShareCode(null)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-[540px] rounded-t-2xl p-4"
+            style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+          >
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-[0.85rem] font-bold text-[var(--text)]">Código de Rutina</p>
+              <button onClick={() => setShareCode(null)} className="text-zinc-500"><X size={18} /></button>
+            </div>
+            <p className="text-[0.68rem] text-zinc-500 mb-3">
+              Compartí este código para que alguien pueda importar tu rutina.
+            </p>
+            <div
+              className="p-3 rounded-lg text-[0.6rem] font-mono break-all mb-3 max-h-32 overflow-y-auto"
+              style={{ background: "var(--bg-elevated)", color: "var(--text-muted)", border: "1px solid var(--border)" }}
+            >
+              {shareCode}
+            </div>
+            <button
+              onClick={handleCopyCode}
+              className="w-full py-2.5 rounded-xl font-bold text-[0.78rem] text-white flex items-center justify-center gap-2"
+              style={{ background: copied ? "#34C759" : "var(--accent)" }}
+            >
+              {copied ? <><Check size={16} /> Copiado!</> : <><ClipboardCopy size={16} /> Copiar Código</>}
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
