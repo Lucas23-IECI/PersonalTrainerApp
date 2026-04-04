@@ -128,11 +128,11 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 7.4 | IA: Recuperación Muscular | ⬜ |
 | 7.5 | IA: Análisis Debilidades | ⬜ |
 | 7.6 | IA: Chat Fitness (FAQ local + GPT opcional) | ⬜ |
-| 7.7 | Nutrición: Food DB (Open Food Facts) | ⬜ |
-| 7.8 | Nutrición: Barcode Scanner | ⬜ |
-| 7.9 | Nutrición: Meal Templates | ⬜ |
-| 7.10 | Nutrición: Water Tracker | ⬜ |
-| 7.11 | Nutrición: Balance Calórico | ⬜ |
+| 7.7 | Nutrición: Food DB (Open Food Facts) | ✅ |
+| 7.8 | Nutrición: Barcode Scanner | ✅ |
+| 7.9 | Nutrición: Meal Templates | ✅ |
+| 7.10 | Nutrición: Water Tracker | ✅ |
+| 7.11 | Nutrición: Balance Calórico | ✅ |
 | 7.12 | Calculadoras (1RM/TDEE/Macros/Wilks) | ⬜ |
 | 7.13 | Cloud Sync (Google Drive) | ⬜ |
 | 7.14 | Widgets Android | ⬜ |
