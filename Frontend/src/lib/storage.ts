@@ -70,6 +70,24 @@ export interface CustomMeal {
   protein: number;
   carbs: number;
   fat: number;
+  slot?: string; // meal slot (Desayuno, Almuerzo, etc.)
+}
+
+export interface FoodFavorite {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface NutritionTargets {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  water: number; // liters
 }
 
 // === Meal Templates (7.9) ===
@@ -217,6 +235,9 @@ const KEYS = {
   progressPhotos: "mark-pt-progress-photos",
   activeSession: "mark-pt-active-session",
   mealTemplates: "mark-pt-meal-templates",
+  foodFavorites: "mark-pt-food-favorites",
+  foodRecents: "mark-pt-food-recents",
+  nutritionTargets: "mark-pt-nutrition-targets",
 } as const;
 
 // === Helpers ===
@@ -339,6 +360,58 @@ export function saveMealTemplate(tpl: MealTemplate) {
 
 export function deleteMealTemplate(id: string) {
   save(KEYS.mealTemplates, getMealTemplates().filter((t) => t.id !== id));
+}
+
+// === Food Favorites ===
+
+export function getFoodFavorites(): FoodFavorite[] {
+  return load<FoodFavorite>(KEYS.foodFavorites);
+}
+
+export function addFoodFavorite(fav: FoodFavorite) {
+  const all = getFoodFavorites().filter((f) => f.id !== fav.id);
+  all.push(fav);
+  save(KEYS.foodFavorites, all);
+}
+
+export function removeFoodFavorite(id: string) {
+  save(KEYS.foodFavorites, getFoodFavorites().filter((f) => f.id !== id));
+}
+
+// === Recent Foods (max 30) ===
+
+export function getRecentFoods(): CustomMeal[] {
+  return load<CustomMeal>(KEYS.foodRecents);
+}
+
+export function addRecentFood(food: CustomMeal) {
+  const all = getRecentFoods().filter((f) => f.name !== food.name);
+  all.unshift(food);
+  save(KEYS.foodRecents, all.slice(0, 30));
+}
+
+// === Nutrition Targets ===
+
+export function getNutritionTargets(): NutritionTargets {
+  if (typeof window === "undefined") return { calories: 2300, protein: 170, carbs: 230, fat: 77, water: 3.0 };
+  try {
+    const raw = localStorage.getItem(KEYS.nutritionTargets);
+    if (raw) return JSON.parse(raw);
+  } catch { /* fall through */ }
+  // Try to compute from profile
+  const profile = getProfile();
+  if (profile && profile.targetCalories > 0) {
+    const cal = profile.targetCalories;
+    const pro = Math.round(profile.weight * 2.1); // 2.1g/kg
+    const fat = Math.round(cal * 0.25 / 9); // 25% from fat
+    const carbs = Math.round((cal - pro * 4 - fat * 9) / 4);
+    return { calories: cal, protein: pro, carbs: Math.max(carbs, 100), fat, water: 3.0 };
+  }
+  return { calories: 2300, protein: 170, carbs: 230, fat: 77, water: 3.0 };
+}
+
+export function saveNutritionTargets(targets: NutritionTargets) {
+  localStorage.setItem(KEYS.nutritionTargets, JSON.stringify(targets));
 }
 
 // === Aggregation ===
