@@ -47,10 +47,10 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 
 | # | Feature | Estado |
 |---|---------|--------|
-| 3.1 | Biblioteca 15-20 Programas | ⬜ |
-| 3.2 | Crear Rutinas Custom | ⬜ |
-| 3.3 | Carpetas para Rutinas | ⬜ |
-| 3.4 | Duplicar/Clonar Rutinas | ⬜ |
+| 3.1 | Biblioteca 15-20 Programas | ✅ |
+| 3.2 | Crear Rutinas Custom | ✅ |
+| 3.3 | Carpetas para Rutinas | ✅ |
+| 3.4 | Duplicar/Clonar Rutinas | ✅ |
 | 3.5 | Progresión Automática | ⬜ |
 | 3.6 | Importar Rutinas por Link/Código | ⬜ |
 | 3.7 | Recomendación según Nivel | ⬜ |

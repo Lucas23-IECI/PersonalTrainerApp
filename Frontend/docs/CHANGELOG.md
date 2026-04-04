@@ -40,6 +40,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ---
 
+## [Unreleased] — Fase 3: Programas y Rutinas
+
+### Completado
+- **3.1 Biblioteca 15-20 Programas**: 20 programas pre-armados (PPL, Upper/Lower, Full Body, PHUL, Starting Strength, Arnold Split, 5/3/1, Bro Split, Calistenia, GZCLP, nSuns, StrongLifts, PHAT, etc.) con búsqueda, filtro por categoría/nivel, vista expandible con tablas de ejercicios. `program-library.ts`
+- **3.2 Crear Rutinas Custom**: Editor completo de rutinas en `/routines/editor` — editar nombre, descripción, split, agregar/eliminar/reordenar días, agregar/eliminar/reordenar ejercicios con editor inline (nombre, sets, reps, descanso, RPE, notas). `routines-storage.ts` con CRUD completo.
+- **3.3 Carpetas para Rutinas**: Sistema de carpetas con colores auto-asignados, crear/renombrar/eliminar carpetas, mover rutinas entre carpetas, vista agrupada por carpeta en tab "Mis Rutinas".
+- **3.4 Duplicar/Clonar Rutinas**: Clonar desde biblioteca (convierte LibraryProgram → Routine), duplicar rutina existente con sufijo "(Copia)" y IDs regenerados, menú contextual de 3 puntos.
+
+### FASE 3 COMPLETADA ✅ (3.1-3.4)
+
+---
+
 ## [1.2.0] — 2025-06-XX
 
 ### Added
