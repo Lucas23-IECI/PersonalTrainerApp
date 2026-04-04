@@ -31,6 +31,7 @@ import {
 import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
   ArrowUp, ArrowDown, RefreshCw, Link2, MessageSquare, Star,
+  Share2, Download, Copy,
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
@@ -93,6 +94,9 @@ function SessionContent() {
   const [expandedSetNote, setExpandedSetNote] = useState<string | null>(null); // "exIdx-setIdx"
   const [sessionRating, setSessionRating] = useState(0);
   const [sessionNotes, setSessionNotes] = useState("");
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [swipeState, setSwipeState] = useState<{ key: string; startX: number; dx: number } | null>(null);
 
   // Rest timer
@@ -483,6 +487,66 @@ function SessionContent() {
     setFinished(true);
   }, [exercises, sessionStart, workout, sessionRating, sessionNotes]);
 
+  async function shareWorkoutSummary() {
+    if (!summaryRef.current) return;
+    setSharing(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(summaryRef.current, {
+        backgroundColor: "#000",
+        scale: 2,
+        useCORS: true,
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+
+      // Try Web Share API first (mobile)
+      if (navigator.share && navigator.canShare) {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "workout-summary.png", { type: "image/png" });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: "Mi Sesión - MARK PT" });
+          setSharing(false);
+          return;
+        }
+      }
+
+      // Fallback: download
+      const link = document.createElement("a");
+      link.download = `MARK-PT-${savedSession?.date || "workout"}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch {
+      // silent fail
+    }
+    setSharing(false);
+  }
+
+  function copySummaryAsText() {
+    if (!savedSession) return;
+    const dur = formatDuration(savedSession.endTime - savedSession.startTime);
+    const vol = savedSession.exercises.reduce((s, e) => s + e.sets.reduce((a, set) => a + (set.weight || 0) * set.reps, 0), 0);
+    const lines: string[] = [
+      `💪 ${savedSession.workoutName}`,
+      `📅 ${savedSession.date} · ⏱ ${dur} · 🏋️ ${vol.toLocaleString()}kg`,
+      "",
+    ];
+    for (const e of savedSession.exercises) {
+      if (e.skipped) { lines.push(`⏭ ${e.name} (saltado)`); continue; }
+      lines.push(`▸ ${e.name}`);
+      e.sets.forEach((set, i) => {
+        const w = set.weight ? `${set.weight}kg` : "—";
+        const rpe = set.rpe ? ` RPE ${set.rpe}` : "";
+        lines.push(`  Set ${i + 1}: ${w} × ${set.reps}${rpe}`);
+      });
+    }
+    lines.push("", "— MARK PT");
+    navigator.clipboard.writeText(lines.join("\n")).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   // ═════════════════════════════════════
   // FINISHED SUMMARY
   // ═════════════════════════════════════
@@ -494,6 +558,7 @@ function SessionContent() {
     const exercisesWithNotes = savedSession.exercises.filter((e) => e.notes);
     return (
       <main className="max-w-[540px] mx-auto px-4 pt-10 pb-6 text-center">
+        <div ref={summaryRef} className="pb-4" style={{ background: "var(--bg)" }}>
         <div className="text-5xl mb-3">{"\u{1F4AA}"}</div>
         <h1 className="text-2xl font-black mb-1" style={{ color: "var(--text)" }}>Sesi&oacute;n Completada!</h1>
         <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>{workout.name}</p>
@@ -612,6 +677,32 @@ function SessionContent() {
               )}
             </div>
           ))}
+        </div>
+        </div>{/* end summaryRef */}
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={shareWorkoutSummary}
+            disabled={sharing}
+            className="btn btn-ghost flex-1 flex items-center justify-center gap-2"
+          >
+            {sharing ? (
+              <span className="text-xs">Generando...</span>
+            ) : (
+              <>
+                <Share2 size={16} /> Compartir
+              </>
+            )}
+          </button>
+          <button
+            onClick={copySummaryAsText}
+            className="btn btn-ghost flex-1 flex items-center justify-center gap-2"
+          >
+            {copied ? (
+              <><Check size={16} /> Copiado!</>
+            ) : (
+              <><Copy size={16} /> Copiar Texto</>
+            )}
+          </button>
         </div>
         <div className="flex gap-2">
           <button onClick={() => router.push("/")} className="btn btn-ghost flex-1">Dashboard</button>

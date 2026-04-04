@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
-import { exportAllData, importAllData } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone } from "lucide-react";
+import { exportAllData, importAllData, exportCSV } from "@/lib/storage";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
 
@@ -159,6 +159,26 @@ export default function SettingsPage() {
             <AlertTriangle size={14} /> Error al importar. Verificá el archivo.
           </div>
         )}
+      </div>
+
+      {/* DOWNLOAD APP */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">Exportar CSV</div>
+        <p className="text-[0.65rem] text-zinc-500 mb-3">
+          Exportá tus sesiones en formato CSV compatible con Strong y Hevy.
+        </p>
+        <button onClick={() => {
+          const csv = exportCSV();
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `mark-pt-sessions-${new Date().toISOString().split("T")[0]}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }} className="btn btn-ghost w-full text-sm">
+          <FileSpreadsheet size={14} /> Exportar CSV
+        </button>
       </div>
 
       {/* DOWNLOAD APP */}

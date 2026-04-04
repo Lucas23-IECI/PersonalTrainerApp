@@ -24,6 +24,8 @@ import {
   Weight,
   X,
   Camera,
+  Trophy,
+  CalendarDays,
 } from "lucide-react";
 
 const CIRCUM_FIELDS: { key: keyof BodyMeasurement; label: string }[] = [
@@ -150,6 +152,30 @@ export default function ProfilePage() {
         <div className="flex-1">
           <span className="font-bold text-sm">Fotos de Progreso</span>
           <p className="text-[0.6rem] text-zinc-500">Comparar tu transformación visual</p>
+        </div>
+        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+      </Link>
+
+      {/* ACHIEVEMENTS LINK */}
+      <Link href="/achievements" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FFD700] to-[#FF9500] flex items-center justify-center">
+          <Trophy size={18} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <span className="font-bold text-sm">Logros y Badges</span>
+          <p className="text-[0.6rem] text-zinc-500">Tu colección de medallas</p>
+        </div>
+        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+      </Link>
+
+      {/* YEAR REVIEW LINK */}
+      <Link href="/year-review" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#30D158] to-[#0A84FF] flex items-center justify-center">
+          <CalendarDays size={18} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <span className="font-bold text-sm">Resumen del Año</span>
+          <p className="text-[0.6rem] text-zinc-500">Tu año en entrenamiento estilo Wrapped</p>
         </div>
         <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
       </Link>

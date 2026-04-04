@@ -73,10 +73,10 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 4.2 | Detalle Sesión Pasada | ✅ |
 | 4.3 | Búsqueda Avanzada Historial | ✅ |
 | 4.4 | Re-hacer Workout (Repeat) | ✅ |
-| 4.5 | Editar Workouts Pasados | ⬜ |
-| 4.6 | Notas/Rating Post-Workout en Historial | ⬜ |
-| 4.7 | Resumen Estadístico | ⬜ |
-| 4.8 | Mediciones Corporales Completas | ⬜ |
+| 4.5 | Editar Workouts Pasados | ✅ |
+| 4.6 | Notas/Rating Post-Workout en Historial | ✅ |
+| 4.7 | Resumen Estadístico | ✅ |
+| 4.8 | Mediciones Corporales Completas | ✅ |
 
 ---
 
@@ -85,14 +85,14 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 
 | # | Feature | Estado |
 |---|---------|--------|
-| 5.1 | Sistema Logros/Badges (~30-40) | ⬜ |
-| 5.2 | Weekly Report | ⬜ |
-| 5.3 | Year in Review (Spotify Wrapped) | ⬜ |
-| 5.4 | Workout Summary Shareable | ⬜ |
-| 5.5 | PR Card Shareable | ⬜ |
-| 5.6 | Export CSV (Strong/Hevy compatible) | ⬜ |
-| 5.7 | Copiar Summary como Texto | ⬜ |
-| 5.8 | Notificaciones Motivacionales | ⬜ |
+| 5.1 | Sistema Logros/Badges (~30-40) | ✅ |
+| 5.2 | Weekly Report | ✅ |
+| 5.3 | Year in Review (Spotify Wrapped) | ✅ |
+| 5.4 | Workout Summary Shareable | ✅ |
+| 5.5 | PR Card Shareable | ✅ |
+| 5.6 | Export CSV (Strong/Hevy compatible) | ✅ |
+| 5.7 | Copiar Summary como Texto | ✅ |
+| 5.8 | Notificaciones Motivacionales | ✅ |
 
 ---
 
@@ -147,10 +147,10 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | Fase | Features | Estado |
 |------|----------|--------|
 | 1 Core Workout | 11 | ✅ COMPLETADO |
-| 2 Charts/Progreso | 8 | ⬜ |
-| 3 Programas/Ejercicios | 14 | ⬜ |
-| 4 Historial/Mediciones | 8 | ⬜ |
-| 5 Gamificación/Social | 8 | ⬜ |
+| 2 Charts/Progreso | 8 | ✅ COMPLETADO |
+| 3 Programas/Ejercicios | 14 | ✅ COMPLETADO |
+| 4 Historial/Mediciones | 8 | ✅ COMPLETADO |
+| 5 Gamificación/Social | 8 | ✅ COMPLETADO |
 | 6 UX Polish/Config | 13 | ⬜ |
 | 7 Avanzados | 17 | ⬜ |
 | **TOTAL** | **~81** | |

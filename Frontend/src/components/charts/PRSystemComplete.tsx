@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { getSessions } from "@/lib/storage";
-import { Trophy, Medal, ChevronDown, ChevronUp } from "lucide-react";
+import { Trophy, Medal, ChevronDown, ChevronUp, Share2 } from "lucide-react";
 
 interface PRByRepRange {
   exerciseName: string;
@@ -37,6 +37,39 @@ function getRangeLabel(reps: number): string {
 export default function PRSystemComplete() {
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "recent">("all");
+  const [sharing, setSharing] = useState(false);
+  const prCardRef = useRef<HTMLDivElement>(null);
+
+  async function sharePRCard(exerciseName: string, prs: PRByRepRange[], bestE1rm: number) {
+    setSharing(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      if (!prCardRef.current) { setSharing(false); return; }
+      const canvas = await html2canvas(prCardRef.current, {
+        backgroundColor: "#000",
+        scale: 2,
+        useCORS: true,
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+
+      if (navigator.share && navigator.canShare) {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `PR-${exerciseName}.png`, { type: "image/png" });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: `PR - ${exerciseName}` });
+          setSharing(false);
+          return;
+        }
+      }
+
+      const link = document.createElement("a");
+      link.download = `MARK-PT-PR-${exerciseName}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch { /* silent */ }
+    setSharing(false);
+  }
 
   const groups: ExercisePRGroup[] = useMemo(() => {
     const sessions = getSessions().filter((s) => s.completed);
@@ -196,7 +229,14 @@ export default function PRSystemComplete() {
               </button>
 
               {isExpanded && (
-                <div className="mt-1 ml-2 space-y-1">
+                <div ref={prCardRef} className="mt-1 ml-2 space-y-1 p-2 rounded-xl" style={{ background: "#000" }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <Trophy size={12} className="text-[#FFD700]" />
+                      <span className="text-[0.65rem] font-bold text-white">{g.exerciseName}</span>
+                    </div>
+                    <span className="text-[0.5rem] text-zinc-500">MARK PT</span>
+                  </div>
                   {g.prs.map((p) => (
                     <div
                       key={p.repRange}
@@ -213,7 +253,7 @@ export default function PRSystemComplete() {
                       <div>
                         <span className="font-bold text-white">{p.repRange}</span>
                         <span className="text-zinc-500 mx-1.5">→</span>
-                        <span className="font-semibold" style={{ color: "var(--accent)" }}>
+                        <span className="font-semibold" style={{ color: "#0A84FF" }}>
                           {p.weight}kg × {p.reps}
                         </span>
                       </div>
@@ -224,7 +264,20 @@ export default function PRSystemComplete() {
                       </div>
                     </div>
                   ))}
+                  <div className="text-center text-[0.5rem] text-zinc-600 pt-1">
+                    Best e1RM: {Math.round(g.bestE1rm)}kg
+                  </div>
                 </div>
+              )}
+              {isExpanded && (
+                <button
+                  onClick={() => sharePRCard(g.exerciseName, g.prs, g.bestE1rm)}
+                  disabled={sharing}
+                  className="mt-1 ml-2 flex items-center gap-1.5 text-[0.6rem] px-3 py-1.5 rounded-lg bg-transparent border-none cursor-pointer"
+                  style={{ color: "var(--accent)" }}
+                >
+                  {sharing ? <span>Generando...</span> : <><Share2 size={12} /> Compartir PR</>}
+                </button>
               )}
             </div>
           );

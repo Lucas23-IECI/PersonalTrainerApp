@@ -17,6 +17,7 @@ import {
   type DailyCheckin,
   type DayStatus,
 } from "@/lib/storage";
+import { evaluateAchievements, getAchievementStats, type BadgeDefinition } from "@/lib/achievements";
 import Link from "next/link";
 import {
   Play,
@@ -29,6 +30,7 @@ import {
   User,
   X,
   Dumbbell,
+  Trophy,
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -45,6 +47,9 @@ export default function Dashboard() {
   const [weekStatus, setWeekStatus] = useState<DayStatus[]>([]);
   const [streak, setStreak] = useState(0);
   const [recentSessions, setRecentSessions] = useState<{ name: string; date: string; count: number }[]>([]);
+  const [badgeStats, setBadgeStats] = useState({ unlocked: 0, total: 0, percentage: 0 });
+  const [newBadges, setNewBadges] = useState<BadgeDefinition[]>([]);
+  const [motivationalMsg, setMotivationalMsg] = useState<{ emoji: string; text: string } | null>(null);
 
   const [ciSleep, setCiSleep] = useState(7);
   const [ciEnergy, setCiEnergy] = useState<1 | 2 | 3 | 4 | 5>(3);
@@ -110,6 +115,34 @@ export default function Dashboard() {
         count: s.exercises.filter((e) => !e.skipped).length,
       }))
     );
+
+    // Evaluate achievements
+    const badgeResult = evaluateAchievements();
+    setNewBadges(badgeResult.newlyUnlocked);
+    setBadgeStats(getAchievementStats());
+
+    // Motivational notification
+    const curStreak = getTrainingStreak();
+    const totalCompleted = allSessions.length;
+    const daysSinceLastSession = allSessions.length > 0
+      ? Math.round((Date.now() - new Date(allSessions[0].date + "T12:00:00").getTime()) / 86400000)
+      : 999;
+
+    if (badgeResult.newlyUnlocked.length > 0) {
+      setMotivationalMsg({ emoji: "🏆", text: `¡Desbloqueaste "${badgeResult.newlyUnlocked[0].name}"! Seguí así.` });
+    } else if (curStreak >= 7) {
+      setMotivationalMsg({ emoji: "🔥", text: `${curStreak} días seguidos entrenando. ¡Imparable!` });
+    } else if (curStreak >= 3) {
+      setMotivationalMsg({ emoji: "💪", text: `Racha de ${curStreak} días. ¡No pares ahora!` });
+    } else if (daysSinceLastSession >= 3 && daysSinceLastSession < 999) {
+      setMotivationalMsg({ emoji: "⏰", text: `Hace ${daysSinceLastSession} días que no entrenás. ¡Dale que podés!` });
+    } else if (totalCompleted >= 50) {
+      setMotivationalMsg({ emoji: "🎯", text: `${totalCompleted} sesiones completadas. ¡Sos una máquina!` });
+    } else if (totalCompleted >= 10) {
+      setMotivationalMsg({ emoji: "📈", text: `Ya van ${totalCompleted} sesiones. Cada una cuenta.` });
+    } else {
+      setMotivationalMsg(null);
+    }
   }
 
   function submitCheckin() {
@@ -166,6 +199,14 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ───── MOTIVATIONAL NOTIFICATION ───── */}
+      {motivationalMsg && (
+        <div className="card mb-4 flex items-center gap-3 py-3" style={{ borderLeft: "3px solid var(--accent)" }}>
+          <span className="text-xl">{motivationalMsg.emoji}</span>
+          <p className="text-[0.75rem] font-medium leading-snug" style={{ color: "var(--text)" }}>{motivationalMsg.text}</p>
+        </div>
+      )}
+
       {/* ───── TODAY'S WORKOUT (hero card) ───── */}
       {todayWorkout && todayWorkout.exercises.length > 0 ? (
         <div className="card mb-4" style={{ background: "linear-gradient(135deg, #2C6BED 0%, #1a4fd4 100%)", color: "#fff" }}>
@@ -217,6 +258,29 @@ export default function Dashboard() {
           <div className="text-[0.55rem] text-zinc-500 uppercase">fase</div>
         </div>
       </div>
+
+      {/* ───── ACHIEVEMENTS QUICK CARD ───── */}
+      <Link href="/achievements" className="no-underline text-inherit">
+        <div className="card mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.12)" }}>
+              <Trophy size={18} style={{ color: "#FFD700" }} />
+            </div>
+            <div>
+              <div className="text-[0.78rem] font-semibold">Logros</div>
+              <div className="text-[0.6rem] text-zinc-500">{badgeStats.unlocked}/{badgeStats.total} desbloqueados</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {newBadges.length > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-[0.55rem] font-bold" style={{ background: "rgba(255,215,0,0.2)", color: "#FFD700" }}>
+                +{newBadges.length} nuevo{newBadges.length > 1 ? "s" : ""}
+              </span>
+            )}
+            <ChevronRight size={14} className="text-zinc-400" />
+          </div>
+        </div>
+      </Link>
 
       {/* ───── MACROS (compact) ───── */}
       <Link href="/nutrition" className="no-underline text-inherit">
@@ -341,7 +405,10 @@ export default function Dashboard() {
 
       {/* ───── WEEK DOTS ───── */}
       <div className="card mb-4">
-        <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Esta Semana</div>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[0.65rem] text-zinc-500 uppercase tracking-wider">Esta Semana</span>
+          <Link href="/weekly-report" className="text-[0.65rem] text-[#2C6BED] no-underline">Reporte →</Link>
+        </div>
         <div className="flex justify-between">
           {weekStatus.map((d) => {
             const isToday = d.date === todayStr;
