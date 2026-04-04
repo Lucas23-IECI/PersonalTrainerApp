@@ -9,13 +9,18 @@ import {
   type DailyCheckin,
   type WorkoutSession,
 } from "@/lib/storage";
-import {
-  getPersonalRecords,
-  getExerciseHistory,
-  type PersonalRecord,
-} from "@/lib/progression";
 import { getCurrentPhase, getPhaseWeek, isDeloadWeek } from "@/data/phases";
-import { TrendingDown, Moon, Dumbbell, Flame, Trophy, BarChart3, AlertTriangle, Activity } from "lucide-react";
+import { Dumbbell, Flame, AlertTriangle, Activity } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const E1RMChart = dynamic(() => import("@/components/charts/E1RMChart"), { ssr: false });
+const MuscleVolumeChart = dynamic(() => import("@/components/charts/MuscleVolumeChart"), { ssr: false });
+const SessionVolumeChart = dynamic(() => import("@/components/charts/SessionVolumeChart"), { ssr: false });
+const TrainingHeatmap = dynamic(() => import("@/components/charts/TrainingHeatmap"), { ssr: false });
+const BodyWeightPRChart = dynamic(() => import("@/components/charts/BodyWeightPRChart"), { ssr: false });
+const MuscleDistributionRadar = dynamic(() => import("@/components/charts/MuscleDistributionRadar"), { ssr: false });
+const TrainingStreakCard = dynamic(() => import("@/components/charts/TrainingStreakCard"), { ssr: false });
+const PRSystemComplete = dynamic(() => import("@/components/charts/PRSystemComplete"), { ssr: false });
 
 type Tab = "cuerpo" | "fuerza" | "volumen";
 
@@ -23,8 +28,6 @@ export default function ProgressPage() {
   const [checkins, setCheckins] = useState<DailyCheckin[]>([]);
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [streak, setStreak] = useState(0);
-  const [prs, setPrs] = useState<PersonalRecord[]>([]);
-  const [selectedLift, setSelectedLift] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("cuerpo");
 
   const profileData = useMemo(() => getProfileData(), []);
@@ -35,7 +38,6 @@ export default function ProgressPage() {
     setCheckins(ci);
     setSessions(getSessions());
     setStreak(getTrainingStreak());
-    setPrs(getPersonalRecords());
   }, []);
 
   const weighIns = checkins.filter((c) => c.weight);
@@ -240,6 +242,12 @@ export default function ProgressPage() {
             )}
           </div>
 
+          {/* Training Streak (Feature 2.7) */}
+          <TrainingStreakCard />
+
+          {/* Body Weight + PRs (Feature 2.5) */}
+          <BodyWeightPRChart />
+
           {/* Check-in History */}
           <div className="card">
             <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">Check-ins</div>
@@ -312,126 +320,11 @@ export default function ProgressPage() {
             return null;
           })()}
 
-          {/* Personal Records */}
-          <div className="card mb-3.5">
-            <div className="flex items-center gap-2 mb-2.5">
-              <Trophy size={16} className="text-[#FFD700]" />
-              <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Records Personales</div>
-            </div>
-            {prs.length === 0 ? (
-              <div className="text-center py-5 text-zinc-400 text-[0.8rem]">Completá sesiones para desbloquear PRs</div>
-            ) : (() => {
-              const byExercise = new Map<string, PersonalRecord>();
-              prs.forEach((pr) => {
-                if (pr.type === "weight") {
-                  const current = byExercise.get(pr.exerciseName);
-                  if (!current || pr.value > current.value) byExercise.set(pr.exerciseName, pr);
-                }
-              });
-              const weightPrs = Array.from(byExercise.values()).sort((a, b) => b.value - a.value);
-              const e1rmByEx = new Map<string, PersonalRecord>();
-              prs.forEach((pr) => {
-                if (pr.type === "e1rm") {
-                  const current = e1rmByEx.get(pr.exerciseName);
-                  if (!current || pr.value > current.value) e1rmByEx.set(pr.exerciseName, pr);
-                }
-              });
-              return (
-                <div>
-                  {weightPrs.slice(0, 10).map((pr, i) => {
-                    const e1rm = e1rmByEx.get(pr.exerciseName);
-                    return (
-                      <div
-                        key={i}
-                        className="flex justify-between items-center py-2 cursor-pointer"
-                        style={{ borderBottom: i < Math.min(weightPrs.length, 10) - 1 ? "1px solid var(--border-subtle)" : "none" }}
-                        onClick={() => setSelectedLift(selectedLift === pr.exerciseName ? null : pr.exerciseName)}
-                      >
-                        <div>
-                          <div className="text-[0.8rem] font-semibold text-zinc-800">{pr.exerciseName}</div>
-                          <div className="text-[0.6rem] text-zinc-500">{pr.date.slice(5)} · {pr.detail}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-black text-[#2C6BED]">{pr.value}kg</div>
-                          {e1rm && <div className="text-[0.55rem] text-zinc-400">e1RM ~{Math.round(e1rm.value)}kg</div>}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
-          </div>
+          {/* E1RM Chart (Feature 2.1) */}
+          <E1RMChart />
 
-          {/* Exercise Progression Chart */}
-          {selectedLift && (() => {
-            const history = getExerciseHistory(selectedLift, 12);
-            if (history.length < 2) return (
-              <div className="card mb-3.5">
-                <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2">
-                  <BarChart3 size={14} className="inline mr-1" /> {selectedLift}
-                </div>
-                <div className="text-center py-4 text-zinc-400 text-[0.75rem]">Necesitás al menos 2 sesiones</div>
-              </div>
-            );
-
-            const reversed = [...history].reverse();
-            const weights = reversed.map((h) => h.topSet.weight);
-            const minVal = Math.min(...weights) - 2.5;
-            const maxVal = Math.max(...weights) + 2.5;
-            const range = maxVal - minVal || 1;
-            const chartW = (reversed.length - 1) * 50 + 20;
-
-            return (
-              <div className="card mb-3.5">
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest flex items-center gap-1">
-                    <BarChart3 size={14} className="text-[#2C6BED]" /> {selectedLift}
-                  </div>
-                  <button onClick={() => setSelectedLift(null)} className="text-[0.6rem] text-zinc-500 bg-transparent border-none cursor-pointer">Cerrar</button>
-                </div>
-                <div className="relative h-[120px]">
-                  <div className="absolute left-0 top-0 bottom-0 w-[35px] flex flex-col justify-between text-[0.55rem] text-zinc-400">
-                    <span>{maxVal.toFixed(1)}</span>
-                    <span>{((maxVal + minVal) / 2).toFixed(1)}</span>
-                    <span>{minVal.toFixed(1)}</span>
-                  </div>
-                  <div className="ml-10 h-full relative overflow-x-auto">
-                    <svg viewBox={`0 0 ${chartW} 120`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                      {[0, 0.5, 1].map((p) => (
-                        <line key={p} x1="0" y1={p * 120} x2={chartW} y2={p * 120} stroke="var(--border-subtle)" strokeWidth="0.5" />
-                      ))}
-                      {reversed.map((h, i) => {
-                        if (i === 0) return null;
-                        const x1 = (i - 1) * 50 + 10;
-                        const y1 = ((maxVal - reversed[i - 1].topSet.weight) / range) * 120;
-                        const x2 = i * 50 + 10;
-                        const y2 = ((maxVal - h.topSet.weight) / range) * 120;
-                        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#2C6BED" strokeWidth="2" />;
-                      })}
-                      {reversed.map((h, i) => {
-                        const x = i * 50 + 10;
-                        const y = ((maxVal - h.topSet.weight) / range) * 120;
-                        return <circle key={i} cx={x} cy={y} r="4" fill="#2C6BED" stroke="#fff" strokeWidth="2" />;
-                      })}
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex justify-between mt-2 text-[0.55rem] text-zinc-400 ml-10">
-                  <span>{reversed[0]?.date.slice(5)}</span>
-                  <span>{reversed[reversed.length - 1]?.date.slice(5)}</span>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  {reversed.slice(-3).map((h, i) => (
-                    <div key={i} className="flex-1 text-center py-1.5 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
-                      <div className="text-[0.7rem] font-bold">{h.topSet.weight}×{h.topSet.reps}</div>
-                      <div className="text-[0.5rem] text-zinc-500">{h.date.slice(5)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
+          {/* PR System Complete (Feature 2.8) */}
+          <PRSystemComplete />
         </>
       )}
 
@@ -456,6 +349,18 @@ export default function ProgressPage() {
               <div className="text-[0.5rem] text-zinc-500 uppercase">Racha</div>
             </div>
           </div>
+
+          {/* Session Volume Chart (Feature 2.3) */}
+          <SessionVolumeChart />
+
+          {/* Training Heatmap (Feature 2.4) */}
+          <TrainingHeatmap />
+
+          {/* Muscle Distribution Radar (Feature 2.6) */}
+          <MuscleDistributionRadar />
+
+          {/* Muscle Volume Chart (Feature 2.2) */}
+          <MuscleVolumeChart />
 
           {/* Sets per week chart */}
           <div className="card mb-3.5">

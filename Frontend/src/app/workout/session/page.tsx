@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { getWorkoutById, getWeeklyPlan, type Exercise } from "@/data/workouts";
+import { getWorkoutById, getWeeklyPlan, type Exercise, type WorkoutDay } from "@/data/workouts";
 import { getCurrentPhase } from "@/data/phases";
 import { getProgramWorkoutById } from "@/data/programs";
 import {
@@ -15,6 +15,7 @@ import {
   type WorkoutSession,
   type LoggedExercise,
   type LoggedSet,
+  type SetType,
 } from "@/lib/storage";
 import {
   getSuggestion,
@@ -29,14 +30,20 @@ import {
 } from "@/lib/native";
 import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
+  ArrowUp, ArrowDown, RefreshCw, Link2, MessageSquare, Star,
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
+import RestTimer from "@/components/RestTimer";
+import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
+import { vibrateTimerComplete } from "@/lib/haptics";
 import type { LibraryExercise } from "@/data/exercises";
 
 // ── Types ──
 interface SessionSet extends LoggedSet {
   completed: boolean;
-  isWarmup: boolean;
+  isWarmup: boolean; // kept for backward compat with active sessions
+  setType: SetType;
+  note?: string;
 }
 interface SessionExercise {
   name: string;
@@ -49,12 +56,19 @@ interface SessionExercise {
   previousSets: { weight: number; reps: number }[];
 }
 
+const SUPERSET_COLORS: Record<string, string> = {
+  A: '#0A84FF', B: '#AF52DE', C: '#30D158', D: '#FF9500', E: '#FF375F', F: '#64D2FF',
+};
+const SUPERSET_TAGS = Object.keys(SUPERSET_COLORS);
+
 function SessionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const dayId = searchParams.get("day") || "";
 
+  const isQuickStart = dayId === 'quickstart';
   const workout = useMemo(() => {
+    if (dayId === 'quickstart') return { id: 'quickstart', name: 'Quick Workout', day: '', focus: 'Custom', duration: '', color: '#0A84FF', type: 'full' as const, exercises: [], note: '' } satisfies WorkoutDay;
     const plan = getWeeklyPlan();
     return getWorkoutById(dayId) || plan[0];
   }, [dayId]);
@@ -72,6 +86,10 @@ function SessionContent() {
   const [prAlert, setPrAlert] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
+  const [replaceExerciseIdx, setReplaceExerciseIdx] = useState<number | null>(null);
+  const [expandedSetNote, setExpandedSetNote] = useState<string | null>(null); // "exIdx-setIdx"
+  const [sessionRating, setSessionRating] = useState(0);
+  const [swipeState, setSwipeState] = useState<{ key: string; startX: number; dx: number } | null>(null);
 
   // Rest timer
   const [restActive, setRestActive] = useState(false);
@@ -89,10 +107,23 @@ function SessionContent() {
 
     const active = getActiveSession();
     if (active && active.dayId === dayId) {
-      // Restore from persisted active session
-      setExercises(active.exercises as SessionExercise[]);
+      // Restore from persisted active session (migrate old isWarmup-only data)
+      const restored = (active.exercises as SessionExercise[]).map(e => ({
+        ...e,
+        sets: e.sets.map(s => ({ ...s, setType: s.setType || (s.isWarmup ? 'warmup' as SetType : 'normal' as SetType) })),
+      }));
+      setExercises(restored);
       setSessionStart(active.sessionStart);
       setStarted(true);
+      return;
+    }
+
+    // Quick start: empty session, auto-start
+    if (isQuickStart) {
+      setExercises([]);
+      setStarted(true);
+      setSessionStart(Date.now());
+      requestNotificationPermission();
       return;
     }
 
@@ -111,7 +142,7 @@ function SessionContent() {
         if (targetWeight > 20) {
           const warmups = getWarmupSets(targetWeight);
           warmups.forEach((ws) => {
-            plannedSets.push({ reps: ws.reps, weight: ws.weight, completed: false, isWarmup: true });
+            plannedSets.push({ reps: ws.reps, weight: ws.weight, completed: false, isWarmup: true, setType: 'warmup' });
           });
         }
       }
@@ -124,6 +155,7 @@ function SessionContent() {
           weight: suggestion?.weight ?? prevSet?.weight ?? (parseFloat(ex.load.match(/[\d.]+/)?.[0] || "0") || undefined),
           completed: false,
           isWarmup: false,
+          setType: 'normal',
         });
       }
 
@@ -154,7 +186,7 @@ function SessionContent() {
     if (!restActive || restSeconds <= 0) {
       if (restActive && restSeconds <= 0) {
         setRestActive(false);
-        if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        vibrateTimerComplete();
       }
       return;
     }
@@ -175,7 +207,7 @@ function SessionContent() {
         exIndex: e.exIndex,
         notes: e.notes,
         restSeconds: e.restSeconds,
-        sets: e.sets.map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, completed: s.completed, isWarmup: s.isWarmup })),
+        sets: e.sets.map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, rir: s.rir, completed: s.completed, isWarmup: s.isWarmup, setType: s.setType })),
         supersetTag: e.supersetTag,
         previousSets: e.previousSets,
       })),
@@ -184,11 +216,11 @@ function SessionContent() {
 
   // ── Notification data ref — updated when exercises change ──
   useEffect(() => {
-    const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !s.isWarmup));
+    const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !isWarmupType(s.setType)));
     notifDataRef.current = {
       exName: currentEx?.name || exercises[exercises.length - 1]?.name || '',
-      completed: exercises.reduce((a, e) => a + e.sets.filter((s) => s.completed && !s.isWarmup).length, 0),
-      total: exercises.reduce((a, e) => a + e.sets.filter((s) => !s.isWarmup).length, 0),
+      completed: exercises.reduce((a, e) => a + e.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length, 0),
+      total: exercises.reduce((a, e) => a + e.sets.filter((s) => !isWarmupType(s.setType)).length, 0),
     };
   }, [exercises]);
 
@@ -236,7 +268,7 @@ function SessionContent() {
   }, [started, finished, router]);
 
   // ── Computed stats ──
-  const totalSets = exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.completed && !s.isWarmup).length, 0);
+  const totalSets = exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length, 0);
   const totalVolume = exercises.reduce(
     (a, ex) => a + ex.sets.filter((s) => s.completed).reduce((v, s) => v + (s.weight || 0) * s.reps, 0), 0
   );
@@ -285,10 +317,10 @@ function SessionContent() {
     setExercises((prev) =>
       prev.map((e, i) => {
         if (i !== exIdx) return e;
-        const lastWorking = [...e.sets].reverse().find((s) => !s.isWarmup);
+        const lastWorking = [...e.sets].reverse().find((s) => !isWarmupType(s.setType));
         return {
           ...e,
-          sets: [...e.sets, { reps: lastWorking?.reps || 10, weight: lastWorking?.weight, completed: false, isWarmup: false }],
+          sets: [...e.sets, { reps: lastWorking?.reps || 10, weight: lastWorking?.weight, completed: false, isWarmup: false, setType: 'normal' as SetType }],
         };
       })
     );
@@ -326,14 +358,86 @@ function SessionContent() {
         notes: '',
         restSeconds: 60,
         sets: [
-          { reps: prev[0]?.reps || 10, weight: prev[0]?.weight || undefined, completed: false, isWarmup: false },
-          { reps: prev[1]?.reps || 10, weight: prev[1]?.weight || undefined, completed: false, isWarmup: false },
-          { reps: prev[2]?.reps || 10, weight: prev[2]?.weight || undefined, completed: false, isWarmup: false },
+          { reps: prev[0]?.reps || 10, weight: prev[0]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
+          { reps: prev[1]?.reps || 10, weight: prev[1]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
+          { reps: prev[2]?.reps || 10, weight: prev[2]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
         ],
         previousSets: prev,
       },
     ]);
     setShowAddExercise(false);
+  }
+
+  function replaceExerciseFromLibrary(libEx: LibraryExercise) {
+    if (replaceExerciseIdx === null) return;
+    const history = getExerciseHistory(libEx.name, 1);
+    const prev = history[0]?.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps })) || [];
+    setExercises((p) =>
+      p.map((e, i) =>
+        i === replaceExerciseIdx
+          ? {
+              ...e,
+              name: libEx.name,
+              exerciseRef: { name: libEx.name, sets: 3, reps: '10', rest: '60s', load: '', rpe: '', primaryMuscles: libEx.primaryMuscles },
+              previousSets: prev,
+              sets: e.sets.map((s, si) => ({ ...s, weight: prev[si]?.weight || s.weight, reps: prev[si]?.reps || s.reps })),
+            }
+          : e
+      )
+    );
+    setReplaceExerciseIdx(null);
+    setShowAddExercise(false);
+  }
+
+  function moveExercise(exIdx: number, direction: -1 | 1) {
+    const target = exIdx + direction;
+    if (target < 0 || target >= exercises.length) return;
+    setExercises((prev) => {
+      const arr = [...prev];
+      [arr[exIdx], arr[target]] = [arr[target], arr[exIdx]];
+      return arr;
+    });
+  }
+
+  function cycleSuperset(exIdx: number) {
+    setExercises((prev) => {
+      const tag = prev[exIdx].supersetTag;
+      const idx = tag ? SUPERSET_TAGS.indexOf(tag) : -1;
+      const next = idx + 1 < SUPERSET_TAGS.length ? SUPERSET_TAGS[idx + 1] : undefined;
+      return prev.map((e, i) => i === exIdx ? { ...e, supersetTag: next } : e);
+    });
+  }
+
+  function updateSetNote(exIdx: number, setIdx: number, note: string) {
+    setExercises((prev) =>
+      prev.map((e, i) =>
+        i === exIdx ? { ...e, sets: e.sets.map((s, j) => (j === setIdx ? { ...s, note } : s)) } : e
+      )
+    );
+  }
+
+  function handleSwipeStart(key: string, x: number) {
+    setSwipeState({ key, startX: x, dx: 0 });
+  }
+  function handleSwipeMove(x: number) {
+    if (!swipeState) return;
+    const dx = Math.min(0, x - swipeState.startX);
+    setSwipeState((s) => s ? { ...s, dx } : null);
+  }
+  function handleSwipeEnd(exIdx: number, setIdx: number) {
+    if (swipeState && swipeState.dx < -80) {
+      removeSet(exIdx, setIdx);
+    }
+    setSwipeState(null);
+  }
+
+  function fillFromPrevious(exIdx: number, setIdx: number) {
+    const ex = exercises[exIdx];
+    const set = ex.sets[setIdx];
+    const wIdx = isWarmupType(set.setType) ? undefined : ex.sets.filter((s, si) => si < setIdx && !isWarmupType(s.setType)).length;
+    const prev = wIdx !== undefined ? ex.previousSets[wIdx] : undefined;
+    if (!prev) return;
+    setExercises((p) => p.map((e, i) => i === exIdx ? { ...e, sets: e.sets.map((s, j) => j === setIdx ? { ...s, weight: prev.weight || s.weight, reps: prev.reps || s.reps } : s) } : e));
   }
 
   // ── Notification helpers ──
@@ -350,9 +454,9 @@ function SessionContent() {
       name: ex.name,
       plannedSets: ex.exerciseRef.sets,
       plannedReps: ex.exerciseRef.reps,
-      sets: ex.sets.filter((s) => s.completed && !s.isWarmup).map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe })),
-      skipped: ex.sets.filter((s) => s.completed && !s.isWarmup).length === 0,
-      notes: ex.notes,
+      sets: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, rir: s.rir, setType: s.setType === 'normal' ? undefined : s.setType })),
+      skipped: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length === 0,
+      notes: ex.notes || ex.sets.filter(s => s.note).map((s, i) => `Set ${i + 1}: ${s.note}`).join('; ') || undefined,
       primaryMuscles: ex.exerciseRef.primaryMuscles,
     }));
 
@@ -380,12 +484,24 @@ function SessionContent() {
     const duration = formatDuration(savedSession.endTime - savedSession.startTime);
     const fSets = savedSession.exercises.reduce((s, e) => s + e.sets.length, 0);
     const fVolume = savedSession.exercises.reduce((s, e) => s + e.sets.reduce((a, set) => a + (set.weight || 0) * set.reps, 0), 0);
+    const musclesWorked = [...new Set(savedSession.exercises.flatMap((e) => e.primaryMuscles || []))];
+    const exercisesWithNotes = savedSession.exercises.filter((e) => e.notes);
     return (
       <main className="max-w-[540px] mx-auto px-4 pt-10 pb-6 text-center">
         <div className="text-5xl mb-3">{"\u{1F4AA}"}</div>
         <h1 className="text-2xl font-black mb-1" style={{ color: "var(--text)" }}>Sesi&oacute;n Completada!</h1>
-        <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>{workout.name}</p>
-        <div className="grid grid-cols-3 gap-2 mb-6">
+        <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>{workout.name}</p>
+
+        {/* Session Rating */}
+        <div className="flex justify-center gap-1 mb-5">
+          {[1, 2, 3, 4, 5].map((v) => (
+            <button key={v} onClick={() => setSessionRating(v)} className="bg-transparent border-none cursor-pointer p-0.5">
+              <Star size={28} fill={v <= sessionRating ? '#FFD700' : 'transparent'} strokeWidth={1.5} style={{ color: v <= sessionRating ? '#FFD700' : 'var(--text-muted)' }} />
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="card py-4 text-center">
             <div className="text-2xl font-black" style={{ color: "var(--text)" }}>{duration}</div>
             <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>Duraci&oacute;n</div>
@@ -399,6 +515,31 @@ function SessionContent() {
             <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>kg Vol</div>
           </div>
         </div>
+
+        {/* Muscles Worked */}
+        {musclesWorked.length > 0 && (
+          <div className="card py-3 px-4 mb-4 text-left">
+            <div className="text-[0.6rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>M&uacute;sculos Trabajados</div>
+            <div className="flex flex-wrap gap-1.5">
+              {musclesWorked.map((m) => (
+                <span key={m} className="text-[0.68rem] font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(10,132,255,0.15)', color: 'var(--accent)' }}>{m}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Exercise Notes */}
+        {exercisesWithNotes.length > 0 && (
+          <div className="card py-3 px-4 mb-4 text-left">
+            <div className="text-[0.6rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>Notas</div>
+            {exercisesWithNotes.map((e, i) => (
+              <div key={i} className="text-[0.72rem] mb-1" style={{ color: "var(--text-secondary)" }}>
+                <span className="font-semibold" style={{ color: "var(--text)" }}>{e.name}:</span> {e.notes}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="card text-left mb-6">
           {savedSession.exercises.map((e, i) => (
             <div key={i} className="py-3" style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none" }}>
@@ -412,17 +553,30 @@ function SessionContent() {
                     <tr className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                       <th className="text-left py-1 w-12">Set</th>
                       <th className="text-left py-1">Peso &amp; Reps</th>
+                      <th className="text-right py-1 w-16">RPE</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {e.sets.map((set, j) => (
+                    {e.sets.map((set, j) => {
+                      const typeLabel = set.setType && set.setType !== 'normal'
+                        ? { warmup: 'W', dropset: 'D', failure: 'F', amrap: 'A' }[set.setType]
+                        : null;
+                      const typeColor = set.setType === 'dropset' ? '#AF52DE' : set.setType === 'failure' ? '#FF3B30' : set.setType === 'amrap' ? '#30D158' : '#FF9500';
+                      return (
                       <tr key={j}>
-                        <td className="py-1.5 px-1 font-bold" style={{ color: "#FF9500" }}>{j + 1}</td>
+                        <td className="py-1.5 px-1 font-bold" style={{ color: typeColor }}>
+                          {typeLabel || (j + 1)}
+                        </td>
                         <td className="py-1.5">
                           {set.weight ? <span className="font-semibold">{set.weight}kg</span> : "\u2014"} &times; <span className="font-semibold">{set.reps}</span>
+                          {typeLabel && <span className="text-[0.55rem] ml-1.5 opacity-60">({set.setType})</span>}
+                        </td>
+                        <td className="py-1.5 text-right text-[0.68rem] font-semibold" style={{ color: set.rpe ? "var(--accent)" : "var(--text-muted)" }}>
+                          {set.rpe ? <>{set.rpe} <span className="text-[0.5rem] opacity-60">({set.rir ?? (10 - set.rpe)} RIR)</span></> : "\u2014"}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -541,25 +695,39 @@ function SessionContent() {
       {/* ── Exercise Cards ── */}
       <div className="flex flex-col gap-3 mt-3 px-4">
         {exercises.map((ex, exIdx) => {
-          const workingSets = ex.sets.filter((s) => !s.isWarmup);
+          const workingSets = ex.sets.filter((s) => !isWarmupType(s.setType));
           const completedWorking = workingSets.filter((s) => s.completed).length;
 
           return (
-            <div key={exIdx} className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
+            <div key={exIdx} className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderLeft: ex.supersetTag ? `3px solid ${SUPERSET_COLORS[ex.supersetTag] || '#FF9500'}` : undefined }}>
               {/* Exercise Header */}
               <div className="px-4 pt-3 pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className="text-[0.92rem] font-bold truncate" style={{ color: "var(--accent)" }}>{ex.name}</span>
                     {ex.supersetTag && (
-                      <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: "#FF9500", color: "#fff" }}>
+                      <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: SUPERSET_COLORS[ex.supersetTag] || '#FF9500', color: "#fff" }}>
                         SS-{ex.supersetTag}
                       </span>
                     )}
                   </div>
-                  <button onClick={() => removeExercise(exIdx)} className="bg-transparent border-none cursor-pointer p-1 shrink-0" style={{ color: "var(--text-muted)" }}>
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button onClick={() => moveExercise(exIdx, -1)} disabled={exIdx === 0} className="bg-transparent border-none cursor-pointer p-1 disabled:opacity-20" style={{ color: "var(--text-muted)" }}>
+                      <ArrowUp size={15} />
+                    </button>
+                    <button onClick={() => moveExercise(exIdx, 1)} disabled={exIdx === exercises.length - 1} className="bg-transparent border-none cursor-pointer p-1 disabled:opacity-20" style={{ color: "var(--text-muted)" }}>
+                      <ArrowDown size={15} />
+                    </button>
+                    <button onClick={() => cycleSuperset(exIdx)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: ex.supersetTag ? (SUPERSET_COLORS[ex.supersetTag] || '#FF9500') : "var(--text-muted)" }}>
+                      <Link2 size={15} />
+                    </button>
+                    <button onClick={() => { setReplaceExerciseIdx(exIdx); setShowAddExercise(true); }} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
+                      <RefreshCw size={14} />
+                    </button>
+                    <button onClick={() => removeExercise(exIdx)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Notes */}
@@ -586,40 +754,61 @@ function SessionContent() {
               {/* Sets Table */}
               <div className="px-2">
                 {/* Table Header */}
-                <div className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 px-2 py-1.5 text-[0.6rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
+                <div className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 px-2 py-1.5 text-[0.6rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
                   <span>SET</span>
-                  <span>PREVIOUS</span>
+                  <span>PREV</span>
                   <span className="text-center">KG</span>
                   <span className="text-center">REPS</span>
+                  <span className="text-center">RPE</span>
                   <span className="text-center">{"\u2713"}</span>
                 </div>
 
                 {/* Set Rows */}
                 {ex.sets.map((set, setIdx) => {
-                  const workingIdx = set.isWarmup ? undefined : ex.sets.filter((s, si) => si < setIdx && !s.isWarmup).length;
+                  const isWarmup = isWarmupType(set.setType);
+                  const workingIdx = isWarmup ? undefined : ex.sets.filter((s, si) => si < setIdx && !isWarmupType(s.setType)).length;
                   const prevSet = workingIdx !== undefined ? ex.previousSets[workingIdx] : undefined;
+                  const swipeKey = `${exIdx}-${setIdx}`;
+                  const isNoteOpen = expandedSetNote === swipeKey;
+                  const swipeDx = swipeState?.key === swipeKey ? swipeState.dx : 0;
 
                   return (
+                    <div key={setIdx} className="relative overflow-hidden rounded-lg mb-0.5">
+                      {/* Swipe-to-delete background */}
+                      {swipeDx < -20 && (
+                        <div className="absolute inset-y-0 right-0 flex items-center px-4 rounded-r-lg" style={{ background: '#FF3B30' }}>
+                          <Trash2 size={16} style={{ color: '#fff' }} />
+                        </div>
+                      )}
                     <div
-                      key={setIdx}
-                      className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 items-center px-2 py-1.5 rounded-lg mb-0.5"
-                      style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "transparent" }}
+                      className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 items-center px-2 py-1.5 relative"
+                      style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "var(--bg-card)", transform: `translateX(${swipeDx}px)`, transition: swipeState?.key === swipeKey ? 'none' : 'transform 0.2s' }}
+                      onTouchStart={(e) => handleSwipeStart(swipeKey, e.touches[0].clientX)}
+                      onTouchMove={(e) => handleSwipeMove(e.touches[0].clientX)}
+                      onTouchEnd={() => handleSwipeEnd(exIdx, setIdx)}
                     >
-                      {/* Set label */}
-                      <div className="text-center">
-                        {set.isWarmup ? (
-                          <span className="text-[0.78rem] font-bold" style={{ color: "var(--accent-orange)" }}>W</span>
-                        ) : (
-                          <span className="text-[0.78rem] font-bold" style={{ color: set.completed ? "var(--accent-green)" : "var(--text-secondary)" }}>
-                            {(workingIdx ?? 0) + 1}
-                          </span>
-                        )}
+                      {/* Set type badge (tappable to cycle) */}
+                      <div className="flex justify-center">
+                        <SetTypeBadge
+                          type={set.setType}
+                          index={(workingIdx ?? 0) + 1}
+                          onCycle={() => {
+                            const next = nextSetType(set.setType);
+                            updateSet(exIdx, setIdx, "setType", next);
+                            updateSet(exIdx, setIdx, "isWarmup", isWarmupType(next));
+                          }}
+                        />
                       </div>
 
-                      {/* Previous */}
-                      <div className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>
+                      {/* Previous — tap to fill */}
+                      <button
+                        onClick={() => prevSet && prevSet.weight > 0 && fillFromPrevious(exIdx, setIdx)}
+                        disabled={!prevSet || prevSet.weight <= 0}
+                        className="text-[0.7rem] bg-transparent border-none p-0 text-left cursor-pointer disabled:cursor-default"
+                        style={{ color: prevSet && prevSet.weight > 0 ? "var(--accent)" : "var(--text-muted)" }}
+                      >
                         {prevSet && prevSet.weight > 0 ? `${prevSet.weight}×${prevSet.reps}` : "\u2014"}
-                      </div>
+                      </button>
 
                       {/* Weight Input */}
                       <input
@@ -642,8 +831,32 @@ function SessionContent() {
                         style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                       />
 
+                      {/* RPE Input */}
+                      <select
+                        value={set.rpe ?? ""}
+                        onChange={(e) => {
+                          const rpe = e.target.value ? parseFloat(e.target.value) : undefined;
+                          updateSet(exIdx, setIdx, "rpe", rpe);
+                          updateSet(exIdx, setIdx, "rir", rpe !== undefined ? 10 - rpe : undefined);
+                        }}
+                        className="session-input text-center text-[0.7rem] appearance-none px-0"
+                        style={{ color: set.rpe ? "var(--accent)" : "var(--text-muted)", fontWeight: 600 }}
+                      >
+                        <option value="">—</option>
+                        {[6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10].map((v) => (
+                          <option key={v} value={v}>{v}</option>
+                        ))}
+                      </select>
+
                       {/* Complete Check */}
-                      <div className="flex justify-center">
+                      <div className="flex justify-center gap-0.5">
+                        <button
+                          onClick={() => setExpandedSetNote(isNoteOpen ? null : swipeKey)}
+                          className="bg-transparent border-none cursor-pointer p-0"
+                          style={{ color: set.note ? 'var(--accent)' : 'var(--text-muted)', opacity: set.note ? 1 : 0.4 }}
+                        >
+                          <MessageSquare size={12} />
+                        </button>
                         <button
                           onClick={() => toggleSetComplete(exIdx, setIdx)}
                           className="w-[28px] h-[28px] rounded-lg flex items-center justify-center border-none cursor-pointer transition-colors"
@@ -652,6 +865,19 @@ function SessionContent() {
                           <Check size={14} strokeWidth={3} style={{ color: set.completed ? "#fff" : "var(--text-muted)" }} />
                         </button>
                       </div>
+                    </div>
+                    {/* Per-set note input */}
+                    {isNoteOpen && (
+                      <input
+                        type="text"
+                        placeholder="Nota del set..."
+                        value={set.note || ''}
+                        onChange={(e) => updateSetNote(exIdx, setIdx, e.target.value)}
+                        className="w-full text-[0.7rem] py-1.5 px-3 bg-transparent border-none outline-none"
+                        style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)' }}
+                        autoFocus
+                      />
+                    )}
                     </div>
                   );
                 })}
@@ -689,42 +915,20 @@ function SessionContent() {
         </button>
       </div>
 
-      {/* ── Rest Timer Bottom Bar ── */}
-      {restActive && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 animate-fade-in" style={{ background: "var(--accent)" }}>
-          <div className="h-[3px]" style={{ background: "rgba(255,255,255,0.2)" }}>
-            <div className="h-full transition-all duration-1000" style={{ width: `${(restSeconds / restTotal) * 100}%`, background: "#fff" }} />
-          </div>
-          <div className="max-w-[540px] mx-auto flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => setRestSeconds((s) => Math.max(0, s - 15))}
-              className="text-white text-[0.8rem] font-bold px-3 py-1.5 rounded-lg border-none cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.15)" }}
-            >-15</button>
-            <div className="text-white text-center">
-              <div className="text-2xl font-black tabular-nums">
-                {Math.floor(restSeconds / 60).toString().padStart(2, "0")}:{(restSeconds % 60).toString().padStart(2, "0")}
-              </div>
-            </div>
-            <button
-              onClick={() => setRestSeconds((s) => s + 15)}
-              className="text-white text-[0.8rem] font-bold px-3 py-1.5 rounded-lg border-none cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.15)" }}
-            >+15</button>
-            <button
-              onClick={() => setRestActive(false)}
-              className="text-[0.8rem] font-bold px-4 py-1.5 rounded-lg border-none cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.2)", color: "#fff" }}
-            >Skip</button>
-          </div>
-        </div>
-      )}
+      {/* ── Rest Timer ── */}
+      <RestTimer
+        seconds={restSeconds}
+        total={restTotal}
+        isActive={restActive}
+        onAdjust={(delta) => setRestSeconds((s) => Math.max(0, s + delta))}
+        onSkip={() => setRestActive(false)}
+      />
 
       {/* ── Add Exercise Modal ── */}
       <AddExerciseModal
         open={showAddExercise}
-        onClose={() => setShowAddExercise(false)}
-        onSelect={addExerciseFromLibrary}
+        onClose={() => { setShowAddExercise(false); setReplaceExerciseIdx(null); }}
+        onSelect={replaceExerciseIdx !== null ? replaceExerciseFromLibrary : addExerciseFromLibrary}
         recentExerciseNames={exercises.map((e) => e.name)}
       />
 

@@ -299,3 +299,112 @@ export function getWarmupSets(workingWeight: number): { weight: number; reps: nu
 
   return sets;
 }
+
+// =============================================
+// 3.5 — Configurable Progression Rules + Batch
+// =============================================
+
+export interface ProgressionRuleConfig {
+  id: string;
+  label: string;
+  description: string;
+  minSessionsToTrigger: number;
+  maxAvgRpe: number;
+  barbellIncrement: number;
+  otherIncrement: number;
+}
+
+export const PROGRESSION_RULES: ProgressionRuleConfig[] = [
+  {
+    id: "linear-beginner",
+    label: "Lineal Principiante",
+    description: "RPE ≤ 7 en 1 sesión → +2.5kg barra / +2kg accesorio",
+    minSessionsToTrigger: 1,
+    maxAvgRpe: 7,
+    barbellIncrement: 2.5,
+    otherIncrement: 2,
+  },
+  {
+    id: "double-progression",
+    label: "Doble Progresión",
+    description: "RPE ≤ 8 en 2 sesiones consecutivas → sube peso",
+    minSessionsToTrigger: 2,
+    maxAvgRpe: 8,
+    barbellIncrement: 2.5,
+    otherIncrement: 2,
+  },
+  {
+    id: "rpe-conservative",
+    label: "Conservador RPE",
+    description: "RPE ≤ 7 por 3 sesiones → +2.5kg",
+    minSessionsToTrigger: 3,
+    maxAvgRpe: 7,
+    barbellIncrement: 2.5,
+    otherIncrement: 1,
+  },
+];
+
+const ACTIVE_RULE_KEY = "mark-pt-progression-rule";
+
+export function getActiveRuleId(): string {
+  if (typeof window === "undefined") return PROGRESSION_RULES[0].id;
+  return localStorage.getItem(ACTIVE_RULE_KEY) || PROGRESSION_RULES[0].id;
+}
+
+export function setActiveRuleId(ruleId: string): void {
+  localStorage.setItem(ACTIVE_RULE_KEY, ruleId);
+}
+
+export function getActiveRuleConfig(): ProgressionRuleConfig {
+  const id = getActiveRuleId();
+  return PROGRESSION_RULES.find((r) => r.id === id) || PROGRESSION_RULES[0];
+}
+
+export interface BatchSuggestion {
+  exerciseName: string;
+  currentWeight: number;
+  suggestedWeight: number;
+  currentReps: string;
+  suggestedReps: string | null;
+  reason: string;
+  trend: "up" | "same" | "new";
+}
+
+/**
+ * Batch progression suggestions for a list of exercise names
+ * using the currently active progression rule.
+ */
+export function getBatchSuggestions(exerciseNames: string[]): BatchSuggestion[] {
+  const rule = getActiveRuleConfig();
+  const suggestions: BatchSuggestion[] = [];
+
+  for (const name of exerciseNames) {
+    const history = getExerciseHistory(name, rule.minSessionsToTrigger + 1);
+    if (history.length === 0) continue;
+    if (history.length < rule.minSessionsToTrigger) continue;
+
+    const recentSlice = history.slice(0, rule.minSessionsToTrigger);
+    const allBelowRpe = recentSlice.every((h) => h.avgRpe > 0 && h.avgRpe <= rule.maxAvgRpe);
+
+    if (!allBelowRpe) continue;
+
+    const last = history[0];
+    const w = last.topSet.weight;
+    if (w <= 0) continue;
+
+    const isBarbell = /barra|barbell|press banca|sentadilla|peso muerto|squat|bench|deadlift|ohp|militar/i.test(name);
+    const inc = isBarbell ? rule.barbellIncrement : rule.otherIncrement;
+
+    suggestions.push({
+      exerciseName: name,
+      currentWeight: w,
+      suggestedWeight: w + inc,
+      currentReps: last.sets.length > 0 ? `${last.topSet.reps}` : "",
+      suggestedReps: null,
+      reason: `RPE ≤ ${rule.maxAvgRpe} × ${rule.minSessionsToTrigger} sesión(es) → +${inc}kg`,
+      trend: "up",
+    });
+  }
+
+  return suggestions;
+}
