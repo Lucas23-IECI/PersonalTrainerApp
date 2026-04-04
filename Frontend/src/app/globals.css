@@ -25,29 +25,29 @@
 }
 
 [data-theme="dark"] {
-  --bg: #09090b;
-  --bg-card: #18181b;
-  --bg-card-hover: #27272a;
-  --bg-elevated: #1c1c1e;
-  --border: #2c2c2e;
-  --border-subtle: rgba(255,255,255,0.08);
-  --text: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
-  --accent-green: #4ade80;
-  --accent-blue: #3b82f6;
-  --accent-yellow: #facc15;
-  --accent-orange: #fb923c;
-  --accent-red: #f87171;
-  --accent-violet: #c084fc;
-  --ring: rgba(59, 130, 246, 0.3);
-  --radar-fill: rgba(59, 130, 246, 0.18);
-  --nav-bg: rgba(9, 9, 11, 0.94);
-  --nav-border: rgba(255, 255, 255, 0.08);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.12);
-  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.15);
+  --bg: #000000;
+  --bg-card: #1C1C1E;
+  --bg-card-hover: #2C2C2E;
+  --bg-elevated: #1C1C1E;
+  --border: #38383A;
+  --border-subtle: rgba(255,255,255,0.06);
+  --text: #FFFFFF;
+  --text-secondary: #98989F;
+  --text-muted: #636366;
+  --accent: #0A84FF;
+  --accent-hover: #409CFF;
+  --accent-green: #30D158;
+  --accent-blue: #0A84FF;
+  --accent-yellow: #FFD60A;
+  --accent-orange: #FF9F0A;
+  --accent-red: #FF453A;
+  --accent-violet: #BF5AF2;
+  --ring: rgba(10, 132, 255, 0.25);
+  --radar-fill: rgba(10, 132, 255, 0.18);
+  --nav-bg: rgba(0, 0, 0, 0.92);
+  --nav-border: rgba(255, 255, 255, 0.06);
+  --shadow-card: none;
+  --shadow-card-hover: none;
 }
 
 * {
@@ -81,16 +81,15 @@ body {
 /* ===== Card system ===== */
 .card {
   background: var(--bg-card);
-  border: none;
-  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
   padding: 0.875rem;
   box-shadow: var(--shadow-card);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: transform 0.12s ease, background 0.12s ease;
 }
 
 .card:hover {
   background: var(--bg-card-hover);
-  box-shadow: var(--shadow-card-hover);
 }
 
 .card:active {
@@ -164,11 +163,9 @@ body {
 .btn-primary {
   background: var(--accent);
   color: white;
-  box-shadow: 0 2px 8px rgba(44, 107, 237, 0.25);
 }
 .btn-primary:hover {
   background: var(--accent-hover);
-  box-shadow: 0 4px 12px rgba(44, 107, 237, 0.35);
 }
 
 .btn-ghost {
@@ -355,7 +352,7 @@ tr:last-child td {
 .session-input {
   width: 100%;
   padding: 8px 6px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid transparent;
   font-size: 0.85rem;
   font-weight: 600;
@@ -363,7 +360,7 @@ tr:last-child td {
   color: var(--text);
   outline: none;
   -moz-appearance: textfield;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.12s, background 0.12s;
 }
 .session-input::-webkit-outer-spin-button,
 .session-input::-webkit-inner-spin-button {
@@ -372,7 +369,7 @@ tr:last-child td {
 }
 .session-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--ring);
+  background: var(--bg);
 }
 .session-rest-btn {
   width: 26px;
@@ -386,7 +383,7 @@ tr:last-child td {
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.12s, color 0.12s;
 }
 .session-rest-btn:active {
   background: var(--accent);

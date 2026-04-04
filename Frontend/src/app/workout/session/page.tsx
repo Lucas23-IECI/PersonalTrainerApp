@@ -30,6 +30,8 @@ import {
 import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
 } from "lucide-react";
+import AddExerciseModal from "@/components/AddExerciseModal";
+import type { LibraryExercise } from "@/data/exercises";
 
 // ── Types ──
 interface SessionSet extends LoggedSet {
@@ -69,6 +71,7 @@ function SessionContent() {
   const [savedSession, setSavedSession] = useState<WorkoutSession | null>(null);
   const [prAlert, setPrAlert] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [showAddExercise, setShowAddExercise] = useState(false);
 
   // Rest timer
   const [restActive, setRestActive] = useState(false);
@@ -77,6 +80,7 @@ function SessionContent() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
+  const notifDataRef = useRef({ exName: '', completed: 0, total: 0 });
 
   // ── Initialize exercises (or restore active session) ──
   useEffect(() => {
@@ -178,30 +182,37 @@ function SessionContent() {
     });
   }, [started, finished, exercises, sessionStart, dayId, workout.name]);
 
-  // ── Persistent notification (update every 30s + on exercise changes) ──
+  // ── Notification data ref — updated when exercises change ──
+  useEffect(() => {
+    const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !s.isWarmup));
+    notifDataRef.current = {
+      exName: currentEx?.name || exercises[exercises.length - 1]?.name || '',
+      completed: exercises.reduce((a, e) => a + e.sets.filter((s) => s.completed && !s.isWarmup).length, 0),
+      total: exercises.reduce((a, e) => a + e.sets.filter((s) => !s.isWarmup).length, 0),
+    };
+  }, [exercises]);
+
+  // ── Persistent notification — updates every 10s independently ──
   useEffect(() => {
     if (!started || finished) return;
-
-    const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !s.isWarmup));
-    const exName = currentEx?.name || exercises[exercises.length - 1]?.name || '';
-    const completedWorking = exercises.reduce((a, e) => a + e.sets.filter((s) => s.completed && !s.isWarmup).length, 0);
-    const totalWorking = exercises.reduce((a, e) => a + e.sets.filter((s) => !s.isWarmup).length, 0);
+    const startMs = sessionStart;
 
     const update = () => {
-      const elMs = Date.now() - sessionStart;
+      const elMs = Date.now() - startMs;
       const sec = Math.floor(elMs / 1000);
       const m = Math.floor(sec / 60);
       const s = sec % 60;
       const time = `${m}:${s.toString().padStart(2, '0')}`;
+      const { exName, completed, total } = notifDataRef.current;
       sendWorkoutNotification(
         `${workout.name} — ${time}`,
-        `${exName} · ${completedWorking}/${totalWorking} sets`
+        `${exName} · ${completed}/${total} sets`
       );
     };
     update();
-    const id = setInterval(update, 30_000);
+    const id = setInterval(update, 10_000);
     return () => clearInterval(id);
-  }, [started, finished, exercises, sessionStart, workout.name]);
+  }, [started, finished, sessionStart, workout.name]);
 
   // ── Handle Android hardware back button ──
   useEffect(() => {
@@ -301,6 +312,28 @@ function SessionContent() {
     setExercises((prev) =>
       prev.map((e, i) => (i === exIdx ? { ...e, restSeconds: Math.max(0, e.restSeconds + delta) } : e))
     );
+  }
+
+  function addExerciseFromLibrary(libEx: LibraryExercise) {
+    const history = getExerciseHistory(libEx.name, 1);
+    const prev = history[0]?.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps })) || [];
+    setExercises((p) => [
+      ...p,
+      {
+        name: libEx.name,
+        exerciseRef: { name: libEx.name, sets: 3, reps: '10', rest: '60s', load: '', rpe: '', primaryMuscles: libEx.primaryMuscles },
+        exIndex: p.length,
+        notes: '',
+        restSeconds: 60,
+        sets: [
+          { reps: prev[0]?.reps || 10, weight: prev[0]?.weight || undefined, completed: false, isWarmup: false },
+          { reps: prev[1]?.reps || 10, weight: prev[1]?.weight || undefined, completed: false, isWarmup: false },
+          { reps: prev[2]?.reps || 10, weight: prev[2]?.weight || undefined, completed: false, isWarmup: false },
+        ],
+        previousSets: prev,
+      },
+    ]);
+    setShowAddExercise(false);
   }
 
   // ── Notification helpers ──
@@ -454,39 +487,35 @@ function SessionContent() {
   return (
     <main className="max-w-[540px] mx-auto px-0 pt-0" style={{ paddingBottom: restActive ? 100 : 96 }} ref={scrollRef}>
       {/* ── Sticky Header ── */}
-      <div className="sticky top-0 z-30" style={{ background: "var(--bg)" }}>
+      <div className="sticky top-0 z-30" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="flex items-center justify-between px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <button onClick={() => router.push("/workout")} className="bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.push("/workout")} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
               <ChevronDown size={20} />
             </button>
-            <span className="text-base font-bold" style={{ color: "var(--text)" }}>Log Workout</span>
+            <div>
+              <div className="text-[0.82rem] font-bold" style={{ color: "var(--text)" }}>{workout.name}</div>
+              <div className="text-sm font-bold tabular-nums" style={{ color: "var(--accent)" }}>{formatDuration(elapsed)}</div>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Timer size={20} style={{ color: "var(--text-muted)" }} />
-            <button
-              onClick={finishSession}
-              className="text-[0.8rem] font-bold text-white px-4 py-1.5 rounded-lg cursor-pointer border-none"
-              style={{ background: "#34C759" }}
-            >
-              Finish
-            </button>
-          </div>
+          <button
+            onClick={finishSession}
+            className="text-[0.8rem] font-bold text-white px-5 py-2 rounded-xl cursor-pointer border-none"
+            style={{ background: "var(--accent-green)" }}
+          >
+            Finish
+          </button>
         </div>
 
         {/* Stats Bar */}
-        <div className="flex px-4 pb-2 gap-4">
+        <div className="flex px-4 pb-2 gap-6">
           <div>
-            <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>Duration</div>
-            <div className="text-sm font-bold" style={{ color: "var(--accent)" }}>{formatDuration(elapsed)}</div>
+            <div className="text-[0.5rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Volume</div>
+            <div className="text-[0.82rem] font-bold" style={{ color: "var(--text)" }}>{totalVolume.toLocaleString()} kg</div>
           </div>
           <div>
-            <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>Volume</div>
-            <div className="text-sm font-bold" style={{ color: "var(--text)" }}>{totalVolume.toLocaleString()} kg</div>
-          </div>
-          <div>
-            <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>Sets</div>
-            <div className="text-sm font-bold" style={{ color: "var(--text)" }}>{totalSets}</div>
+            <div className="text-[0.5rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Sets</div>
+            <div className="text-[0.82rem] font-bold" style={{ color: "var(--text)" }}>{totalSets}</div>
           </div>
         </div>
 
@@ -516,12 +545,12 @@ function SessionContent() {
           const completedWorking = workingSets.filter((s) => s.completed).length;
 
           return (
-            <div key={exIdx} className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+            <div key={exIdx} className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
               {/* Exercise Header */}
               <div className="px-4 pt-3 pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="text-base font-bold truncate" style={{ color: "var(--accent)" }}>{ex.name}</span>
+                    <span className="text-[0.92rem] font-bold truncate" style={{ color: "var(--accent)" }}>{ex.name}</span>
                     {ex.supersetTag && (
                       <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: "#FF9500", color: "#fff" }}>
                         SS-{ex.supersetTag}
@@ -574,14 +603,14 @@ function SessionContent() {
                     <div
                       key={setIdx}
                       className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 items-center px-2 py-1.5 rounded-lg mb-0.5"
-                      style={{ background: set.completed ? "rgba(52, 199, 89, 0.12)" : "transparent" }}
+                      style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "transparent" }}
                     >
                       {/* Set label */}
-                      <div>
+                      <div className="text-center">
                         {set.isWarmup ? (
-                          <span className="text-[0.8rem] font-bold" style={{ color: "#FF9500" }}>W</span>
+                          <span className="text-[0.78rem] font-bold" style={{ color: "var(--accent-orange)" }}>W</span>
                         ) : (
-                          <span className="text-[0.8rem] font-bold" style={{ color: "var(--text)" }}>
+                          <span className="text-[0.78rem] font-bold" style={{ color: set.completed ? "var(--accent-green)" : "var(--text-secondary)" }}>
                             {(workingIdx ?? 0) + 1}
                           </span>
                         )}
@@ -589,7 +618,7 @@ function SessionContent() {
 
                       {/* Previous */}
                       <div className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>
-                        {prevSet && prevSet.weight > 0 ? `${prevSet.weight}kg \u00d7 ${prevSet.reps}` : "\u2014"}
+                        {prevSet && prevSet.weight > 0 ? `${prevSet.weight}×${prevSet.reps}` : "\u2014"}
                       </div>
 
                       {/* Weight Input */}
@@ -600,7 +629,7 @@ function SessionContent() {
                         value={set.weight ?? ""}
                         onChange={(e) => updateSet(exIdx, setIdx, "weight", e.target.value ? parseFloat(e.target.value) : undefined)}
                         className="session-input text-center"
-                        style={{ color: set.completed ? "#34C759" : "var(--text)", fontWeight: set.completed ? 700 : 600 }}
+                        style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                       />
 
                       {/* Reps Input */}
@@ -610,17 +639,17 @@ function SessionContent() {
                         value={set.reps || ""}
                         onChange={(e) => updateSet(exIdx, setIdx, "reps", e.target.value ? parseInt(e.target.value, 10) : 0)}
                         className="session-input text-center"
-                        style={{ color: set.completed ? "#34C759" : "var(--text)", fontWeight: set.completed ? 700 : 600 }}
+                        style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                       />
 
                       {/* Complete Check */}
                       <div className="flex justify-center">
                         <button
                           onClick={() => toggleSetComplete(exIdx, setIdx)}
-                          className="w-[30px] h-[30px] rounded-full flex items-center justify-center border-none cursor-pointer"
-                          style={{ background: set.completed ? "#34C759" : "var(--bg-elevated)" }}
+                          className="w-[28px] h-[28px] rounded-lg flex items-center justify-center border-none cursor-pointer transition-colors"
+                          style={{ background: set.completed ? "var(--accent-green)" : "var(--bg-elevated)", border: set.completed ? "none" : "1px solid var(--border)" }}
                         >
-                          <Check size={16} style={{ color: set.completed ? "#fff" : "var(--text-muted)" }} />
+                          <Check size={14} strokeWidth={3} style={{ color: set.completed ? "#fff" : "var(--text-muted)" }} />
                         </button>
                       </div>
                     </div>
@@ -644,24 +673,7 @@ function SessionContent() {
       {/* ── Bottom Actions ── */}
       <div className="px-4 mt-4 flex flex-col gap-2 pb-4">
         <button
-          onClick={() => {
-            setExercises((prev) => [
-              ...prev,
-              {
-                name: "Nuevo Ejercicio",
-                exerciseRef: { name: "Nuevo Ejercicio", sets: 3, reps: "10", rest: "60s", load: "", rpe: "", primaryMuscles: [] },
-                exIndex: prev.length,
-                notes: "",
-                restSeconds: 60,
-                sets: [
-                  { reps: 10, weight: undefined, completed: false, isWarmup: false },
-                  { reps: 10, weight: undefined, completed: false, isWarmup: false },
-                  { reps: 10, weight: undefined, completed: false, isWarmup: false },
-                ],
-                previousSets: [],
-              },
-            ]);
-          }}
+          onClick={() => setShowAddExercise(true)}
           className="w-full py-3 rounded-xl text-[0.85rem] font-bold border-none cursor-pointer flex items-center justify-center gap-2"
           style={{ background: "var(--accent)", color: "#fff" }}
         >
@@ -707,6 +719,14 @@ function SessionContent() {
           </div>
         </div>
       )}
+
+      {/* ── Add Exercise Modal ── */}
+      <AddExerciseModal
+        open={showAddExercise}
+        onClose={() => setShowAddExercise(false)}
+        onSelect={addExerciseFromLibrary}
+        recentExerciseNames={exercises.map((e) => e.name)}
+      />
 
       {/* ── Discard Modal ── */}
       {confirmDiscard && (

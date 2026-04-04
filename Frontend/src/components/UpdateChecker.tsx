@@ -32,23 +32,23 @@ export default function UpdateChecker() {
   return (
     <div
       className="fixed top-0 left-0 right-0 z-[70] animate-fade-in"
-      style={{ background: 'linear-gradient(135deg, #2C6BED, #1a4fd4)', paddingTop: 'env(safe-area-inset-top, 8px)' }}
+      style={{ background: 'var(--accent-green, #30D158)', paddingTop: 'env(safe-area-inset-top, 8px)' }}
     >
       <div className="max-w-[540px] mx-auto flex items-center gap-3 px-4 py-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.2)' }}>
           <Download size={18} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-white text-[0.82rem] font-bold">Nueva versión disponible</div>
-          <div className="text-white/60 text-[0.65rem]">v{update.latestVersion} lista para descargar</div>
+          <div className="text-white text-[0.82rem] font-bold">Actualización disponible</div>
+          <div className="text-white/70 text-[0.65rem]">v{update.latestVersion}</div>
         </div>
-        <a
-          href={update.downloadUrl}
-          className="text-[0.78rem] font-bold px-3.5 py-1.5 rounded-lg no-underline shrink-0"
-          style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
+        <button
+          onClick={() => window.open(update!.downloadUrl, '_system')}
+          className="text-[0.78rem] font-bold px-3.5 py-1.5 rounded-lg border-none cursor-pointer shrink-0"
+          style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}
         >
-          Actualizar
-        </a>
+          Descargar
+        </button>
         <button
           onClick={() => setDismissed(true)}
           className="bg-transparent border-none cursor-pointer p-1 shrink-0"

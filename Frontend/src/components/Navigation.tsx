@@ -31,11 +31,11 @@ export default function Navigation() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 flex justify-around"
       style={{
-        background: "var(--nav-bg, rgba(255, 255, 255, 0.94))",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        borderTop: "1px solid var(--nav-border, rgba(0, 0, 0, 0.08))",
-        padding: "6px 0 max(10px, env(safe-area-inset-bottom))",
+        background: "var(--nav-bg, rgba(255, 255, 255, 0.96))",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderTop: "1px solid var(--nav-border, rgba(0, 0, 0, 0.06))",
+        padding: "4px 0 max(8px, env(safe-area-inset-bottom))",
       }}
     >
       {links.map(({ href, label, icon: Icon }) => {
@@ -47,24 +47,14 @@ export default function Navigation() {
             className="flex flex-col items-center gap-0.5 no-underline"
             style={{
               color: active ? "var(--accent)" : "var(--text-muted)",
-              fontSize: "0.58rem",
-              fontWeight: active ? 700 : 500,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              minWidth: 48,
-              transition: "color 0.2s ease",
+              fontSize: "0.56rem",
+              fontWeight: active ? 600 : 400,
+              letterSpacing: "0.02em",
+              minWidth: 44,
+              transition: "color 0.15s ease",
             }}
           >
-            <div
-              className="flex items-center justify-center rounded-xl transition-all"
-              style={{
-                width: 36,
-                height: 28,
-                background: active ? "var(--ring)" : "transparent",
-              }}
-            >
-              <Icon size={19} strokeWidth={active ? 2.5 : 1.5} />
-            </div>
+            <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
             {label}
           </Link>
         );
