@@ -15,11 +15,11 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 1.1 | Rest Timer Automático (circular SVG, vibración, configurable) | ✅ COMPLETADO |
 | 1.2 | Tipos de Series (Normal/Warmup/Drop/Failure/AMRAP) | ✅ COMPLETADO |
 | 1.3 | RPE + RIR por Set Individual | ✅ COMPLETADO |
-| 1.4 | Supersets / Circuitos Visuales | ⬜ |
-| 1.5 | Previous Values Inline | ⬜ |
-| 1.6 | Quick Start (Empty Workout) | ⬜ |
-| 1.7 | Reordenar Ejercicios en Vivo | ⬜ |
-| 1.8 | Reemplazar Ejercicio Mid-Workout | ⬜ |
+| 1.4 | Supersets / Circuitos Visuales | ✅ COMPLETADO |
+| 1.5 | Previous Values Inline | ✅ COMPLETADO |
+| 1.6 | Quick Start (Empty Workout) | ✅ COMPLETADO |
+| 1.7 | Reordenar Ejercicios en Vivo | ✅ COMPLETADO |
+| 1.8 | Reemplazar Ejercicio Mid-Workout | ✅ COMPLETADO |
 | 1.9 | Notas por Ejercicio/Set | ⬜ |
 | 1.10 | Post-Workout Summary | ⬜ |
 | 1.11 | Swipe Gestures en Sets | ⬜ |

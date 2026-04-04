@@ -11,6 +11,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - **1.1 Rest Timer Automático**: Componente circular SVG (`RestTimer.tsx`) con ring animado, auto-start al completar set, controles -15s/+15s/Skip, haptic feedback (`haptics.ts`), floating card con backdrop blur, transición slide-up
 - **1.2 Tipos de Series**: `SetType` union (normal/warmup/dropset/failure/amrap) en `storage.ts`, `SetTypeBadge.tsx` tappable con colores (Normal=#, W=naranja, D=morado, F=rojo, A=verde), migración automática de sesiones antiguas, tipos mostrados en resumen post-workout
 - **1.3 RPE + RIR por Set**: Select dropdown RPE (6-10 en pasos de 0.5) por cada set, RIR auto-calculado (10-RPE), columna RPE en grid 6-columnas, mostrado en resumen post-workout con formato "RPE (RIR RIR)"
+- **1.4 Supersets / Circuitos Visuales**: Agrupación visual con borde izquierdo de color por superset (A-F), badge SS-{tag} con color dinámico, botón Link2 para ciclar tags de superset, paleta de 6 colores
+- **1.5 Previous Values Inline**: Columna PREV ahora es tappable — toque para auto-rellenar peso/reps del workout anterior, resaltado en color accent cuando hay datos disponibles
+- **1.6 Quick Start (Empty Workout)**: Botón "⚡ Quick Start" en la página de Plan Semanal, inicia sesión vacía inmediatamente, permite agregar ejercicios ad-hoc desde la librería
+- **1.7 Reordenar Ejercicios en Vivo**: Flechas arriba/abajo en header de cada ejercicio durante sesión activa, swap instantáneo con feedback visual
+- **1.8 Reemplazar Ejercicio Mid-Workout**: Botón RefreshCw en header de ejercicio abre modal en modo reemplazo, sustituye ejercicio manteniendo estructura de sets
 
 ### En Progreso
 - (próximo feature)
