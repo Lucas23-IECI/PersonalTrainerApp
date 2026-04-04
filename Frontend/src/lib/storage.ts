@@ -14,10 +14,13 @@ export interface DailyCheckin {
   notes?: string;
 }
 
+export type SetType = 'normal' | 'warmup' | 'dropset' | 'failure' | 'amrap';
+
 export interface LoggedSet {
   reps: number;
   weight?: number;
   rpe?: number;
+  setType?: SetType;
 }
 
 export interface LoggedExercise {
