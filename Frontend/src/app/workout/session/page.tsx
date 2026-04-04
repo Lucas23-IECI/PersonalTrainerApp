@@ -68,7 +68,10 @@ function SessionContent() {
 
   const isQuickStart = dayId === 'quickstart';
   const workout = useMemo(() => {
-    if (dayId === 'quickstart') return { id: 'quickstart', name: 'Quick Workout', day: '', focus: 'Custom', duration: '', color: '#0A84FF', type: 'full' as const, exercises: [], note: '' } satisfies WorkoutDay;
+    if (dayId === 'quickstart') {
+      const active = getActiveSession();
+      return { id: 'quickstart', name: active?.workoutName || 'Quick Workout', day: '', focus: 'Custom', duration: '', color: '#0A84FF', type: 'full' as const, exercises: [], note: '' } satisfies WorkoutDay;
+    }
     const plan = getWeeklyPlan();
     return getWorkoutById(dayId) || plan[0];
   }, [dayId]);
