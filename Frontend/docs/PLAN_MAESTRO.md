@@ -133,12 +133,12 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 7.9 | Nutrición: Meal Templates | ✅ |
 | 7.10 | Nutrición: Water Tracker | ✅ |
 | 7.11 | Nutrición: Balance Calórico | ✅ |
-| 7.12 | Calculadoras (1RM/TDEE/Macros/Wilks) | ⬜ |
-| 7.13 | Cloud Sync (Google Drive) | ⬜ |
-| 7.14 | Widgets Android | ⬜ |
-| 7.15 | Recordatorio Diario | ⬜ |
-| 7.16 | Quick Action Home (App Shortcuts) | ⬜ |
-| 7.17 | Onboarding Mejorado (7 steps) | ⬜ |
+| 7.12 | Calculadoras (1RM/TDEE/Macros/Wilks) | ✅ |
+| 7.13 | Cloud Sync (Google Drive) | ✅ |
+| 7.14 | Widgets Android | ✅ |
+| 7.15 | Recordatorio Diario | ✅ |
+| 7.16 | Quick Action Home (App Shortcuts) | ✅ |
+| 7.17 | Onboarding Mejorado (7 steps) | ✅ |
 
 ---
 
@@ -151,8 +151,8 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 | 3 Programas/Ejercicios | 14 | ✅ COMPLETADO |
 | 4 Historial/Mediciones | 8 | ✅ COMPLETADO |
 | 5 Gamificación/Social | 8 | ✅ COMPLETADO |
-| 6 UX Polish/Config | 13 | ⬜ |
-| 7 Avanzados | 17 | ⬜ |
+| 6 UX Polish/Config | 13 | ✅ COMPLETADO |
+| 7 Avanzados | 17 | ✅ COMPLETADO (excepto IA 7.1-7.6) |
 | **TOTAL** | **~81** | |
 
 ## Decisiones Técnicas
