@@ -15,6 +15,7 @@ import {
   type WorkoutSession,
   type LoggedExercise,
   type LoggedSet,
+  type SetType,
 } from "@/lib/storage";
 import {
   getSuggestion,
@@ -32,13 +33,15 @@ import {
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
+import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
 import { vibrateTimerComplete } from "@/lib/haptics";
 import type { LibraryExercise } from "@/data/exercises";
 
 // ── Types ──
 interface SessionSet extends LoggedSet {
   completed: boolean;
-  isWarmup: boolean;
+  isWarmup: boolean; // kept for backward compat with active sessions
+  setType: SetType;
 }
 interface SessionExercise {
   name: string;
@@ -91,8 +94,12 @@ function SessionContent() {
 
     const active = getActiveSession();
     if (active && active.dayId === dayId) {
-      // Restore from persisted active session
-      setExercises(active.exercises as SessionExercise[]);
+      // Restore from persisted active session (migrate old isWarmup-only data)
+      const restored = (active.exercises as SessionExercise[]).map(e => ({
+        ...e,
+        sets: e.sets.map(s => ({ ...s, setType: s.setType || (s.isWarmup ? 'warmup' as SetType : 'normal' as SetType) })),
+      }));
+      setExercises(restored);
       setSessionStart(active.sessionStart);
       setStarted(true);
       return;
@@ -113,7 +120,7 @@ function SessionContent() {
         if (targetWeight > 20) {
           const warmups = getWarmupSets(targetWeight);
           warmups.forEach((ws) => {
-            plannedSets.push({ reps: ws.reps, weight: ws.weight, completed: false, isWarmup: true });
+            plannedSets.push({ reps: ws.reps, weight: ws.weight, completed: false, isWarmup: true, setType: 'warmup' });
           });
         }
       }
@@ -126,6 +133,7 @@ function SessionContent() {
           weight: suggestion?.weight ?? prevSet?.weight ?? (parseFloat(ex.load.match(/[\d.]+/)?.[0] || "0") || undefined),
           completed: false,
           isWarmup: false,
+          setType: 'normal',
         });
       }
 
@@ -177,7 +185,7 @@ function SessionContent() {
         exIndex: e.exIndex,
         notes: e.notes,
         restSeconds: e.restSeconds,
-        sets: e.sets.map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, completed: s.completed, isWarmup: s.isWarmup })),
+        sets: e.sets.map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, completed: s.completed, isWarmup: s.isWarmup, setType: s.setType })),
         supersetTag: e.supersetTag,
         previousSets: e.previousSets,
       })),
@@ -186,11 +194,11 @@ function SessionContent() {
 
   // ── Notification data ref — updated when exercises change ──
   useEffect(() => {
-    const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !s.isWarmup));
+    const currentEx = exercises.find((e) => e.sets.some((s) => !s.completed && !isWarmupType(s.setType)));
     notifDataRef.current = {
       exName: currentEx?.name || exercises[exercises.length - 1]?.name || '',
-      completed: exercises.reduce((a, e) => a + e.sets.filter((s) => s.completed && !s.isWarmup).length, 0),
-      total: exercises.reduce((a, e) => a + e.sets.filter((s) => !s.isWarmup).length, 0),
+      completed: exercises.reduce((a, e) => a + e.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length, 0),
+      total: exercises.reduce((a, e) => a + e.sets.filter((s) => !isWarmupType(s.setType)).length, 0),
     };
   }, [exercises]);
 
@@ -238,7 +246,7 @@ function SessionContent() {
   }, [started, finished, router]);
 
   // ── Computed stats ──
-  const totalSets = exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.completed && !s.isWarmup).length, 0);
+  const totalSets = exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length, 0);
   const totalVolume = exercises.reduce(
     (a, ex) => a + ex.sets.filter((s) => s.completed).reduce((v, s) => v + (s.weight || 0) * s.reps, 0), 0
   );
@@ -287,10 +295,10 @@ function SessionContent() {
     setExercises((prev) =>
       prev.map((e, i) => {
         if (i !== exIdx) return e;
-        const lastWorking = [...e.sets].reverse().find((s) => !s.isWarmup);
+        const lastWorking = [...e.sets].reverse().find((s) => !isWarmupType(s.setType));
         return {
           ...e,
-          sets: [...e.sets, { reps: lastWorking?.reps || 10, weight: lastWorking?.weight, completed: false, isWarmup: false }],
+          sets: [...e.sets, { reps: lastWorking?.reps || 10, weight: lastWorking?.weight, completed: false, isWarmup: false, setType: 'normal' as SetType }],
         };
       })
     );
@@ -328,9 +336,9 @@ function SessionContent() {
         notes: '',
         restSeconds: 60,
         sets: [
-          { reps: prev[0]?.reps || 10, weight: prev[0]?.weight || undefined, completed: false, isWarmup: false },
-          { reps: prev[1]?.reps || 10, weight: prev[1]?.weight || undefined, completed: false, isWarmup: false },
-          { reps: prev[2]?.reps || 10, weight: prev[2]?.weight || undefined, completed: false, isWarmup: false },
+          { reps: prev[0]?.reps || 10, weight: prev[0]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
+          { reps: prev[1]?.reps || 10, weight: prev[1]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
+          { reps: prev[2]?.reps || 10, weight: prev[2]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
         ],
         previousSets: prev,
       },
@@ -352,8 +360,8 @@ function SessionContent() {
       name: ex.name,
       plannedSets: ex.exerciseRef.sets,
       plannedReps: ex.exerciseRef.reps,
-      sets: ex.sets.filter((s) => s.completed && !s.isWarmup).map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe })),
-      skipped: ex.sets.filter((s) => s.completed && !s.isWarmup).length === 0,
+      sets: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).map((s) => ({ reps: s.reps, weight: s.weight, rpe: s.rpe, setType: s.setType === 'normal' ? undefined : s.setType })),
+      skipped: ex.sets.filter((s) => s.completed && !isWarmupType(s.setType)).length === 0,
       notes: ex.notes,
       primaryMuscles: ex.exerciseRef.primaryMuscles,
     }));
@@ -417,14 +425,23 @@ function SessionContent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {e.sets.map((set, j) => (
+                    {e.sets.map((set, j) => {
+                      const typeLabel = set.setType && set.setType !== 'normal'
+                        ? { warmup: 'W', dropset: 'D', failure: 'F', amrap: 'A' }[set.setType]
+                        : null;
+                      const typeColor = set.setType === 'dropset' ? '#AF52DE' : set.setType === 'failure' ? '#FF3B30' : set.setType === 'amrap' ? '#30D158' : '#FF9500';
+                      return (
                       <tr key={j}>
-                        <td className="py-1.5 px-1 font-bold" style={{ color: "#FF9500" }}>{j + 1}</td>
+                        <td className="py-1.5 px-1 font-bold" style={{ color: typeColor }}>
+                          {typeLabel || (j + 1)}
+                        </td>
                         <td className="py-1.5">
                           {set.weight ? <span className="font-semibold">{set.weight}kg</span> : "\u2014"} &times; <span className="font-semibold">{set.reps}</span>
+                          {typeLabel && <span className="text-[0.55rem] ml-1.5 opacity-60">({set.setType})</span>}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -543,7 +560,7 @@ function SessionContent() {
       {/* ── Exercise Cards ── */}
       <div className="flex flex-col gap-3 mt-3 px-4">
         {exercises.map((ex, exIdx) => {
-          const workingSets = ex.sets.filter((s) => !s.isWarmup);
+          const workingSets = ex.sets.filter((s) => !isWarmupType(s.setType));
           const completedWorking = workingSets.filter((s) => s.completed).length;
 
           return (
@@ -598,7 +615,8 @@ function SessionContent() {
 
                 {/* Set Rows */}
                 {ex.sets.map((set, setIdx) => {
-                  const workingIdx = set.isWarmup ? undefined : ex.sets.filter((s, si) => si < setIdx && !s.isWarmup).length;
+                  const isWarmup = isWarmupType(set.setType);
+                  const workingIdx = isWarmup ? undefined : ex.sets.filter((s, si) => si < setIdx && !isWarmupType(s.setType)).length;
                   const prevSet = workingIdx !== undefined ? ex.previousSets[workingIdx] : undefined;
 
                   return (
@@ -607,15 +625,17 @@ function SessionContent() {
                       className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 items-center px-2 py-1.5 rounded-lg mb-0.5"
                       style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "transparent" }}
                     >
-                      {/* Set label */}
-                      <div className="text-center">
-                        {set.isWarmup ? (
-                          <span className="text-[0.78rem] font-bold" style={{ color: "var(--accent-orange)" }}>W</span>
-                        ) : (
-                          <span className="text-[0.78rem] font-bold" style={{ color: set.completed ? "var(--accent-green)" : "var(--text-secondary)" }}>
-                            {(workingIdx ?? 0) + 1}
-                          </span>
-                        )}
+                      {/* Set type badge (tappable to cycle) */}
+                      <div className="flex justify-center">
+                        <SetTypeBadge
+                          type={set.setType}
+                          index={(workingIdx ?? 0) + 1}
+                          onCycle={() => {
+                            const next = nextSetType(set.setType);
+                            updateSet(exIdx, setIdx, "setType", next);
+                            updateSet(exIdx, setIdx, "isWarmup", isWarmupType(next));
+                          }}
+                        />
                       </div>
 
                       {/* Previous */}
