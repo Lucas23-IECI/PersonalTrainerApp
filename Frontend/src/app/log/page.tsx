@@ -1,26 +1,43 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   getSessions,
   deleteSession,
+  saveActiveSession,
+  getActiveSession,
   type WorkoutSession,
 } from "@/lib/storage";
-import { Dumbbell, Clock, ChevronDown, ChevronUp, Trash2, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
+import { MUSCLE_LABELS } from "@/data/exercises";
+import {
+  Dumbbell, Clock, ChevronDown, ChevronUp, Trash2, ChevronLeft,
+  ChevronRight, Search, X, RefreshCw, SlidersHorizontal, Flame,
+} from "lucide-react";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
 const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+// 4.3 — Simplified muscle group filters
+const FILTER_MUSCLE_GROUPS = [
+  { id: "chest", label: "Pecho", muscles: ["chest"] },
+  { id: "back", label: "Espalda", muscles: ["upper_back", "lats", "lower_back", "traps"] },
+  { id: "shoulders", label: "Hombros", muscles: ["front_delts", "side_delts", "rear_delts"] },
+  { id: "arms", label: "Brazos", muscles: ["biceps", "triceps", "forearms"] },
+  { id: "legs", label: "Piernas", muscles: ["quads", "hamstrings", "glutes", "calves", "adductors", "hip_flexors"] },
+  { id: "core", label: "Core", muscles: ["abs", "obliques"] },
+];
+
 function getMonthDays(year: number, month: number) {
   const first = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0).getDate();
-  // Monday=0 ... Sunday=6
   let startDow = first.getDay() - 1;
   if (startDow < 0) startDow = 6;
   return { startDow, lastDay };
 }
 
 export default function LogPage() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
@@ -28,6 +45,11 @@ export default function LogPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [filterExercise, setFilterExercise] = useState("");
   const [showFilter, setShowFilter] = useState(false);
+  // 4.3 — Advanced search state
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterMuscleGroup, setFilterMuscleGroup] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     const all = getSessions();
@@ -38,12 +60,38 @@ export default function LogPage() {
     setSessions(all);
   }, []);
 
-  // Set of dates that have sessions (for calendar dots)
-  const trainingDates = useMemo(() => {
-    const s = new Set<string>();
-    sessions.forEach((ses) => s.add(ses.date));
-    return s;
+  // 4.1 — Per-day training stats for colored calendar
+  const dayStats = useMemo(() => {
+    const stats: Record<string, { count: number; volume: number; sets: number }> = {};
+    sessions.forEach((s) => {
+      if (!stats[s.date]) stats[s.date] = { count: 0, volume: 0, sets: 0 };
+      stats[s.date].count++;
+      stats[s.date].sets += s.exercises.reduce((a, e) => a + e.sets.length, 0);
+      stats[s.date].volume += s.exercises.reduce(
+        (a, e) => a + e.sets.reduce((v, set) => v + (set.weight || 0) * set.reps, 0), 0
+      );
+    });
+    return stats;
   }, [sessions]);
+
+  // 4.1 — Intensity thresholds (percentile-based from user data)
+  const intensityThresholds = useMemo(() => {
+    const volumes = Object.values(dayStats).map((s) => s.volume).filter((v) => v > 0);
+    if (volumes.length === 0) return { low: 0, mid: 0 };
+    volumes.sort((a, b) => a - b);
+    return {
+      low: volumes[Math.floor(volumes.length * 0.33)] || 0,
+      mid: volumes[Math.floor(volumes.length * 0.66)] || 0,
+    };
+  }, [dayStats]);
+
+  function getDotStyle(date: string): { color: string; size: string } | null {
+    const stats = dayStats[date];
+    if (!stats) return null;
+    if (stats.volume <= intensityThresholds.low) return { color: "#34C75960", size: "w-1.5 h-1.5" };
+    if (stats.volume <= intensityThresholds.mid) return { color: "#34C759", size: "w-1.5 h-1.5" };
+    return { color: "#30D158", size: "w-2 h-2" };
+  }
 
   // All unique exercise names for autocomplete
   const allExercises = useMemo(() => {
@@ -52,18 +100,27 @@ export default function LogPage() {
     return Array.from(names).sort();
   }, [sessions]);
 
-  // Filtered sessions
+  // 4.3 — Enhanced filtered sessions (date range + muscle group)
   const filtered = useMemo(() => {
     let list = sessions;
     if (selectedDate) list = list.filter((s) => s.date === selectedDate);
+    if (filterDateFrom) list = list.filter((s) => s.date >= filterDateFrom);
+    if (filterDateTo) list = list.filter((s) => s.date <= filterDateTo);
     if (filterExercise) {
       const q = filterExercise.toLowerCase();
       list = list.filter((s) => s.exercises.some((e) => e.name.toLowerCase().includes(q)));
     }
+    if (filterMuscleGroup) {
+      const group = FILTER_MUSCLE_GROUPS.find((g) => g.id === filterMuscleGroup);
+      if (group) {
+        list = list.filter((s) =>
+          s.exercises.some((e) => e.primaryMuscles?.some((m) => group.muscles.includes(m)))
+        );
+      }
+    }
     return list;
-  }, [sessions, selectedDate, filterExercise]);
+  }, [sessions, selectedDate, filterExercise, filterDateFrom, filterDateTo, filterMuscleGroup]);
 
-  // Grouped
   const grouped = useMemo(() => {
     const g: { date: string; sessions: WorkoutSession[] }[] = [];
     filtered.forEach((s) => {
@@ -87,13 +144,56 @@ export default function LogPage() {
     if (expanded === id) setExpanded(null);
   }
 
+  // 4.4 — Repeat a past workout session
+  function handleRepeat(session: WorkoutSession) {
+    const active = getActiveSession();
+    if (active) {
+      if (!confirm("Ya hay una sesión activa. ¿Descartarla y repetir esta?")) return;
+    }
+
+    const exercises = session.exercises
+      .filter((ex) => !ex.skipped)
+      .map((ex, i) => ({
+        name: ex.name,
+        exerciseRef: {
+          name: ex.name,
+          sets: ex.sets.length || ex.plannedSets,
+          reps: ex.plannedReps || String(ex.sets[0]?.reps || 10),
+          load: ex.sets[0]?.weight ? `${ex.sets[0].weight}kg` : "",
+          rest: "60s",
+          primaryMuscles: ex.primaryMuscles,
+        },
+        exIndex: i,
+        notes: "",
+        restSeconds: 60,
+        sets: ex.sets.map((s) => ({
+          reps: s.reps,
+          weight: s.weight,
+          completed: false,
+          isWarmup: false,
+          setType: s.setType || "normal",
+        })),
+        supersetTag: undefined,
+        previousSets: ex.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps })),
+      }));
+
+    saveActiveSession({
+      dayId: "quickstart",
+      workoutName: `${session.workoutName} (Repetir)`,
+      sessionStart: Date.now(),
+      exercises,
+    });
+
+    router.push("/workout/session?day=quickstart");
+  }
+
   function formatDate(d: string) {
     const [y, m, day] = d.split("-");
     const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(day));
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayD = new Date();
+    todayD.setHours(0, 0, 0, 0);
     date.setHours(0, 0, 0, 0);
-    const diff = Math.round((today.getTime() - date.getTime()) / 86400000);
+    const diff = Math.round((todayD.getTime() - date.getTime()) / 86400000);
     if (diff === 0) return "Hoy";
     if (diff === 1) return "Ayer";
     const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -110,6 +210,16 @@ export default function LogPage() {
     else setCalMonth((m) => m + 1);
   }
 
+  function clearAllFilters() {
+    setSelectedDate(null);
+    setFilterExercise("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+    setFilterMuscleGroup("");
+    setShowFilter(false);
+    setShowAdvanced(false);
+  }
+
   const { startDow, lastDay } = getMonthDays(calYear, calMonth);
   const todayStr = new Date().toISOString().slice(0, 10);
 
@@ -117,7 +227,10 @@ export default function LogPage() {
     return `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   }
 
-  const hasActiveFilters = !!selectedDate || !!filterExercise;
+  const hasActiveFilters = !!selectedDate || !!filterExercise || !!filterDateFrom || !!filterDateTo || !!filterMuscleGroup;
+
+  // 4.1 — Selected date summary
+  const selectedDateStats = selectedDate ? dayStats[selectedDate] : null;
 
   return (
     <main className="max-w-[600px] mx-auto px-4 py-5">
@@ -126,7 +239,7 @@ export default function LogPage() {
         {sessions.length} {sessions.length === 1 ? "sesión" : "sesiones"} registradas
       </p>
 
-      {/* Calendar */}
+      {/* 4.1 — Enhanced Calendar with intensity dots */}
       <div className="card mb-4">
         <div className="flex justify-between items-center mb-3">
           <button onClick={prevMonth} className="bg-transparent border-none cursor-pointer text-zinc-500 p-1"><ChevronLeft size={18} /></button>
@@ -144,7 +257,7 @@ export default function LogPage() {
           {Array.from({ length: lastDay }).map((_, i) => {
             const day = i + 1;
             const ds = dateStr(day);
-            const hasTraining = trainingDates.has(ds);
+            const dotStyle = getDotStyle(ds);
             const isToday = ds === todayStr;
             const isSelected = ds === selectedDate;
             return (
@@ -157,23 +270,55 @@ export default function LogPage() {
                 <span className={`text-[0.7rem] leading-none ${isToday ? "font-black text-blue-500" : "text-zinc-600"} ${isSelected ? "font-extrabold" : ""}`}>
                   {day}
                 </span>
-                {hasTraining && (
-                  <div className="w-1.5 h-1.5 rounded-full mt-0.5" style={{ background: isSelected ? "#34C759" : "#34C759" }} />
+                {dotStyle ? (
+                  <div className={`${dotStyle.size} rounded-full mt-0.5`} style={{ background: dotStyle.color }} />
+                ) : (
+                  <div className="w-1.5 h-1.5 mt-0.5" />
                 )}
               </div>
             );
           })}
         </div>
+
+        {/* 4.1 — Selected date mini-summary */}
+        {selectedDate && selectedDateStats && (
+          <div className="mt-3 pt-3 flex items-center justify-between text-[0.7rem]" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+            <span className="text-zinc-400">{formatDate(selectedDate)}</span>
+            <div className="flex gap-3 text-zinc-400">
+              <span className="flex items-center gap-1"><Flame size={10} className="text-orange-500" />{selectedDateStats.count} {selectedDateStats.count === 1 ? "sesión" : "sesiones"}</span>
+              <span>{selectedDateStats.sets} sets</span>
+              {selectedDateStats.volume > 0 && <span>{(selectedDateStats.volume / 1000).toFixed(1)}k kg</span>}
+            </div>
+          </div>
+        )}
+
+        {/* 4.1 — Intensity legend */}
+        <div className="flex items-center justify-center gap-3 mt-3 text-[0.55rem] text-zinc-500">
+          <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C75960" }} /> Ligero</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C759" }} /> Medio</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full" style={{ background: "#30D158" }} /> Intenso</span>
+        </div>
       </div>
 
       {/* Filter bar */}
-      <div className="flex gap-2 mb-4 items-center">
+      <div className="flex gap-2 mb-4 items-center flex-wrap">
         <button
-          onClick={() => setShowFilter(!showFilter)}
+          onClick={() => { setShowFilter(!showFilter); setShowAdvanced(false); }}
           className="flex items-center gap-1 text-[0.7rem] px-2.5 py-1.5 rounded-lg cursor-pointer border-none transition-colors"
           style={{ background: filterExercise ? "#34C75920" : "var(--bg-card)", color: filterExercise ? "#34C759" : "var(--text-muted)" }}
         >
           <Search size={12} /> Ejercicio
+        </button>
+        {/* 4.3 — Advanced filter toggle */}
+        <button
+          onClick={() => { setShowAdvanced(!showAdvanced); setShowFilter(false); }}
+          className="flex items-center gap-1 text-[0.7rem] px-2.5 py-1.5 rounded-lg cursor-pointer border-none transition-colors"
+          style={{
+            background: (filterDateFrom || filterDateTo || filterMuscleGroup) ? "#0A84FF20" : "var(--bg-card)",
+            color: (filterDateFrom || filterDateTo || filterMuscleGroup) ? "#0A84FF" : "var(--text-muted)",
+          }}
+        >
+          <SlidersHorizontal size={12} /> Avanzado
         </button>
         {selectedDate && (
           <span className="flex items-center gap-1 text-[0.65rem] px-2 py-1 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
@@ -181,13 +326,20 @@ export default function LogPage() {
             <button onClick={() => setSelectedDate(null)} className="bg-transparent border-none cursor-pointer text-zinc-400 p-0"><X size={12} /></button>
           </span>
         )}
+        {filterMuscleGroup && (
+          <span className="flex items-center gap-1 text-[0.65rem] px-2 py-1 rounded-lg" style={{ background: "#AF52DE20", color: "#AF52DE" }}>
+            {FILTER_MUSCLE_GROUPS.find((g) => g.id === filterMuscleGroup)?.label}
+            <button onClick={() => setFilterMuscleGroup("")} className="bg-transparent border-none cursor-pointer text-inherit p-0"><X size={10} /></button>
+          </span>
+        )}
         {hasActiveFilters && (
-          <button onClick={() => { setSelectedDate(null); setFilterExercise(""); setShowFilter(false); }} className="text-[0.65rem] text-zinc-500 bg-transparent border-none cursor-pointer underline ml-auto">
+          <button onClick={clearAllFilters} className="text-[0.65rem] text-zinc-500 bg-transparent border-none cursor-pointer underline ml-auto">
             Limpiar
           </button>
         )}
       </div>
 
+      {/* Exercise filter panel */}
       {showFilter && (
         <div className="card mb-4">
           <input
@@ -212,6 +364,54 @@ export default function LogPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* 4.3 — Advanced filter panel */}
+      {showAdvanced && (
+        <div className="card mb-4 space-y-3">
+          <div className="text-[0.75rem] font-bold text-zinc-400 uppercase tracking-wider">Filtros Avanzados</div>
+
+          {/* Date range */}
+          <div>
+            <div className="text-[0.65rem] text-zinc-500 mb-1.5">Rango de fechas</div>
+            <div className="flex gap-2">
+              <input
+                type="date"
+                value={filterDateFrom}
+                onChange={(e) => setFilterDateFrom(e.target.value)}
+                className="flex-1 text-[0.75rem] py-1.5 px-2 rounded-lg border-none"
+                style={{ background: "var(--bg-elevated)", color: "var(--text)", colorScheme: "dark" }}
+              />
+              <input
+                type="date"
+                value={filterDateTo}
+                onChange={(e) => setFilterDateTo(e.target.value)}
+                className="flex-1 text-[0.75rem] py-1.5 px-2 rounded-lg border-none"
+                style={{ background: "var(--bg-elevated)", color: "var(--text)", colorScheme: "dark" }}
+              />
+            </div>
+          </div>
+
+          {/* Muscle group chips */}
+          <div>
+            <div className="text-[0.65rem] text-zinc-500 mb-1.5">Grupo muscular</div>
+            <div className="flex flex-wrap gap-1.5">
+              {FILTER_MUSCLE_GROUPS.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setFilterMuscleGroup(filterMuscleGroup === g.id ? "" : g.id)}
+                  className="text-[0.65rem] px-2.5 py-1 rounded-full cursor-pointer border-none transition-colors"
+                  style={{
+                    background: filterMuscleGroup === g.id ? "#AF52DE" : "var(--bg-elevated)",
+                    color: filterMuscleGroup === g.id ? "#fff" : "var(--text-muted)",
+                  }}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -242,6 +442,10 @@ export default function LogPage() {
             const totalVolume = s.exercises.reduce((acc, e) => acc + e.sets.reduce((a2, set) => a2 + (set.weight || 0) * set.reps, 0), 0);
             const skipped = s.exercises.filter((e) => e.skipped).length;
             const done = s.exercises.length - skipped;
+            // 4.2 — Extra metrics for expanded detail
+            const musclesWorked = [...new Set(s.exercises.flatMap((e) => e.primaryMuscles || []))];
+            const allRpes = s.exercises.flatMap((e) => e.sets.filter((set) => set.rpe).map((set) => set.rpe!));
+            const avgRpe = allRpes.length > 0 ? (allRpes.reduce((a, b) => a + b, 0) / allRpes.length).toFixed(1) : null;
 
             return (
               <div key={s.id} className="card mb-1.5">
@@ -260,6 +464,14 @@ export default function LogPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
+                      {/* 4.4 — Repeat button */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleRepeat(s); }}
+                        className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-blue-500 p-1 transition-colors"
+                        title="Repetir sesión"
+                      >
+                        <RefreshCw size={14} />
+                      </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
                         className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-[#FF3B30] p-1 transition-colors"
@@ -276,6 +488,46 @@ export default function LogPage() {
 
                 {isOpen && (
                   <div className="mt-3">
+                    {/* 4.2 — Metrics summary bar */}
+                    <div className="grid grid-cols-4 gap-2 mb-3 text-center py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
+                      <div>
+                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">Duración</div>
+                        <div className="text-[0.85rem] font-bold">{s.startTime && s.endTime ? formatDuration(s.startTime, s.endTime) : "—"}</div>
+                      </div>
+                      <div>
+                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">Sets</div>
+                        <div className="text-[0.85rem] font-bold">{totalSets}</div>
+                      </div>
+                      <div>
+                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">Volumen</div>
+                        <div className="text-[0.85rem] font-bold">{totalVolume > 0 ? `${(totalVolume / 1000).toFixed(1)}k` : "—"}</div>
+                      </div>
+                      <div>
+                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">RPE</div>
+                        <div className="text-[0.85rem] font-bold">{avgRpe || "—"}</div>
+                      </div>
+                    </div>
+
+                    {/* 4.2 — Muscles worked pills */}
+                    {musclesWorked.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {musclesWorked.map((m) => (
+                          <span
+                            key={m}
+                            className="text-[0.6rem] px-2 py-0.5 rounded-full"
+                            style={{ background: "#AF52DE20", color: "#AF52DE" }}
+                          >
+                            {MUSCLE_LABELS[m as keyof typeof MUSCLE_LABELS] || m}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 4.2 — Exercise count summary */}
+                    <div className="text-[0.65rem] text-zinc-500 mb-2">
+                      {done} ejercicio{done !== 1 ? "s" : ""}{skipped > 0 && ` · ${skipped} saltado${skipped !== 1 ? "s" : ""}`}
+                    </div>
+
                     {s.exercises.map((ex, i) => (
                       <div key={i} className="py-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
                         <div className={`text-[0.82rem] font-bold mb-2 ${ex.skipped ? "text-zinc-400 line-through" : ""}`}>
