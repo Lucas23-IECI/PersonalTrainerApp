@@ -12,7 +12,7 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 
 | # | Feature | Estado |
 |---|---------|--------|
-| 1.1 | Rest Timer Automático (circular SVG, vibración, configurable) | 🔄 EN PROGRESO |
+| 1.1 | Rest Timer Automático (circular SVG, vibración, configurable) | ✅ COMPLETADO |
 | 1.2 | Tipos de Series (Normal/Warmup/Drop/Failure/AMRAP) | ⬜ |
 | 1.3 | RPE + RIR por Set Individual | ⬜ |
 | 1.4 | Supersets / Circuitos Visuales | ⬜ |

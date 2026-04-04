@@ -7,8 +7,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Unreleased] — Fase 1: Core Workout Experience
 
+### Completado
+- **1.1 Rest Timer Automático**: Componente circular SVG (`RestTimer.tsx`) con ring animado, auto-start al completar set, controles -15s/+15s/Skip, haptic feedback (`haptics.ts`), floating card con backdrop blur, transición slide-up
+
 ### En Progreso
-- **1.1 Rest Timer Automático**: Componente circular SVG con auto-start, vibración, haptics, configurable por ejercicio
+- (próximo feature)
 
 ---
 
