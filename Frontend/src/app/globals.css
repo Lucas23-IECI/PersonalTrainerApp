@@ -356,16 +356,18 @@ tr:last-child td {
 /* ===== Session Inputs ===== */
 .session-input {
   width: 100%;
-  padding: 8px 6px;
+  min-height: 44px;
+  padding: 10px 6px;
   border-radius: 8px;
   border: 1px solid transparent;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   background: var(--bg-elevated);
   color: var(--text);
   outline: none;
   -moz-appearance: textfield;
   transition: border-color 0.12s, background 0.12s;
+  touch-action: manipulation;
 }
 .session-input::-webkit-outer-spin-button,
 .session-input::-webkit-inner-spin-button {

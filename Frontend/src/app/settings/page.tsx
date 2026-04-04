@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
-import { exportAllData, importAllData, exportCSV } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet } from "lucide-react";
+import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, type WeightUnit } from "@/lib/storage";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
 
@@ -16,11 +16,18 @@ export default function SettingsPage() {
   const [overrideActive, setOverrideActive] = useState(false);
   const [importStatus, setImportStatus] = useState<"idle" | "success" | "error">("idle");
   const [isDark, setIsDark] = useState(false);
+  const [unit, setUnit] = useState<WeightUnit>("kg");
+  const [hapticsOn, setHapticsOn] = useState(true);
+  const [soundOn, setSoundOn] = useState(true);
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
     setOverrideActive(override !== null);
     setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
+    const s = getSettings();
+    setUnit(s.unit);
+    setHapticsOn(s.hapticsEnabled);
+    setSoundOn(s.soundEnabled);
   }, []);
 
   function toggleTheme() {
@@ -101,6 +108,85 @@ export default function SettingsPage() {
           </span>
           <span className="text-[0.65rem] text-zinc-500">
             Toca para cambiar
+          </span>
+        </button>
+      </div>
+
+      {/* UNIT TOGGLE — 6.6 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">Unidades de Peso</div>
+        <div className="flex gap-2">
+          {(["kg", "lbs"] as const).map((u) => (
+            <button
+              key={u}
+              onClick={() => {
+                setUnit(u);
+                saveSettings({ ...getSettings(), unit: u });
+              }}
+              className="flex-1 py-2 rounded-lg text-sm font-bold border-none cursor-pointer transition-colors"
+              style={{
+                background: unit === u ? "var(--accent)" : "var(--bg-elevated)",
+                color: unit === u ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <Weight size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} />
+              {u.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* HAPTIC & SOUND SETTINGS — 6.8 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">Sonido y Vibración</div>
+        <button
+          onClick={() => {
+            const next = !hapticsOn;
+            setHapticsOn(next);
+            saveSettings({ ...getSettings(), hapticsEnabled: next });
+          }}
+          className="btn btn-ghost w-full text-sm justify-between mb-1.5"
+        >
+          <span className="flex items-center gap-2">
+            {hapticsOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            Vibración
+          </span>
+          <span
+            className="w-10 h-5 rounded-full relative transition-colors inline-block"
+            style={{ background: hapticsOn ? "var(--accent-green)" : "var(--bg-elevated)" }}
+          >
+            <span
+              className="w-4 h-4 rounded-full absolute top-0.5 transition-all inline-block"
+              style={{
+                background: "#fff",
+                left: hapticsOn ? "calc(100% - 18px)" : "2px",
+              }}
+            />
+          </span>
+        </button>
+        <button
+          onClick={() => {
+            const next = !soundOn;
+            setSoundOn(next);
+            saveSettings({ ...getSettings(), soundEnabled: next });
+          }}
+          className="btn btn-ghost w-full text-sm justify-between"
+        >
+          <span className="flex items-center gap-2">
+            {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            Sonidos
+          </span>
+          <span
+            className="w-10 h-5 rounded-full relative transition-colors inline-block"
+            style={{ background: soundOn ? "var(--accent-green)" : "var(--bg-elevated)" }}
+          >
+            <span
+              className="w-4 h-4 rounded-full absolute top-0.5 transition-all inline-block"
+              style={{
+                background: "#fff",
+                left: soundOn ? "calc(100% - 18px)" : "2px",
+              }}
+            />
           </span>
         </button>
       </div>

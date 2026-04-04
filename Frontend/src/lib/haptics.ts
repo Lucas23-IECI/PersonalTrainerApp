@@ -1,12 +1,18 @@
 /**
  * Haptic feedback utilities.
  * Uses @capacitor/haptics on native, falls back to navigator.vibrate on web.
+ * Respects user settings (hapticsEnabled).
  */
 
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { getSettings } from './storage';
 
 function canVibrate(): boolean {
   return typeof navigator !== 'undefined' && !!navigator.vibrate;
+}
+
+function isEnabled(): boolean {
+  return getSettings().hapticsEnabled;
 }
 
 async function isNative(): Promise<boolean> {
@@ -20,6 +26,7 @@ async function isNative(): Promise<boolean> {
 
 /** Strong double-pulse vibration for timer completion */
 export async function vibrateTimerComplete() {
+  if (!isEnabled()) return;
   if (await isNative()) {
     await Haptics.notification({ type: NotificationType.Warning });
   } else if (canVibrate()) {
@@ -29,6 +36,7 @@ export async function vibrateTimerComplete() {
 
 /** Light tap for button presses & UI interactions */
 export async function vibrateLight() {
+  if (!isEnabled()) return;
   if (await isNative()) {
     await Haptics.impact({ style: ImpactStyle.Light });
   } else if (canVibrate()) {
@@ -38,6 +46,7 @@ export async function vibrateLight() {
 
 /** Medium impact — set completion, weight stepper taps */
 export async function vibrateMedium() {
+  if (!isEnabled()) return;
   if (await isNative()) {
     await Haptics.impact({ style: ImpactStyle.Medium });
   } else if (canVibrate()) {
@@ -47,6 +56,7 @@ export async function vibrateMedium() {
 
 /** Heavy impact — PR alerts, important events */
 export async function vibrateHeavy() {
+  if (!isEnabled()) return;
   if (await isNative()) {
     await Haptics.impact({ style: ImpactStyle.Heavy });
   } else if (canVibrate()) {
@@ -56,6 +66,7 @@ export async function vibrateHeavy() {
 
 /** Success notification — session complete, badge unlock */
 export async function vibrateSuccess() {
+  if (!isEnabled()) return;
   if (await isNative()) {
     await Haptics.notification({ type: NotificationType.Success });
   } else if (canVibrate()) {
@@ -65,6 +76,7 @@ export async function vibrateSuccess() {
 
 /** Selection change — tab switches, picker changes */
 export async function vibrateSelection() {
+  if (!isEnabled()) return;
   if (await isNative()) {
     await Haptics.selectionStart();
     await Haptics.selectionChanged();

@@ -37,7 +37,32 @@ import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
 import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
 import { vibrateTimerComplete, vibrateMedium, vibrateHeavy, vibrateSuccess, vibrateLight } from "@/lib/haptics";
-import type { LibraryExercise } from "@/data/exercises";
+import { exerciseLibrary, type LibraryExercise, type ExerciseCategory } from "@/data/exercises";
+
+// Default rest times (seconds) by exercise category
+const REST_BY_CATEGORY: Record<ExerciseCategory, number> = {
+  barbell: 150,
+  dumbbell: 90,
+  machine: 90,
+  cable: 75,
+  bodyweight: 60,
+  band: 45,
+  cardio: 30,
+};
+
+function getDefaultRest(exerciseId?: string, restStr?: string): number {
+  // If the workout explicitly defines rest, respect it
+  if (restStr) {
+    const parsed = parseInt(restStr.replace(/[^0-9]/g, ""), 10);
+    if (parsed > 0) return parsed;
+  }
+  // Look up category from library
+  if (exerciseId) {
+    const lib = exerciseLibrary.find((e) => e.id === exerciseId);
+    if (lib) return REST_BY_CATEGORY[lib.category];
+  }
+  return 60;
+}
 
 // ── Types ──
 interface SessionSet extends LoggedSet {
@@ -138,8 +163,8 @@ function SessionContent() {
     const exs: SessionExercise[] = workout.exercises.map((ex, i) => {
       const history = getExerciseHistory(ex.name, 1);
       const prev = history[0]?.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps })) || [];
-      const restStr = ex.rest || "60s";
-      const restSec = parseInt(restStr.replace(/[^0-9]/g, ""), 10) || 60;
+      const restStr = ex.rest || "";
+      const restSec = getDefaultRest(ex.exerciseId, restStr);
       const progEx = programDay?.exercises[i];
 
       const plannedSets: SessionSet[] = [];
@@ -364,7 +389,7 @@ function SessionContent() {
         exerciseRef: { name: libEx.name, sets: 3, reps: '10', rest: '60s', load: '', rpe: '', primaryMuscles: libEx.primaryMuscles },
         exIndex: p.length,
         notes: '',
-        restSeconds: 60,
+        restSeconds: REST_BY_CATEGORY[libEx.category] || 60,
         sets: [
           { reps: prev[0]?.reps || 10, weight: prev[0]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
           { reps: prev[1]?.reps || 10, weight: prev[1]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
@@ -936,8 +961,13 @@ function SessionContent() {
                         type="number"
                         inputMode="decimal"
                         step={0.5}
+                        min={0}
+                        pattern="[0-9]*\.?[0-9]*"
+                        enterKeyHint="next"
+                        placeholder="kg"
                         value={set.weight ?? ""}
                         onChange={(e) => updateSet(exIdx, setIdx, "weight", e.target.value ? parseFloat(e.target.value) : undefined)}
+                        onFocus={(e) => e.target.select()}
                         className="session-input text-center"
                         style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                       />
@@ -946,8 +976,13 @@ function SessionContent() {
                       <input
                         type="number"
                         inputMode="numeric"
+                        min={0}
+                        pattern="[0-9]*"
+                        enterKeyHint="next"
+                        placeholder="reps"
                         value={set.reps || ""}
                         onChange={(e) => updateSet(exIdx, setIdx, "reps", e.target.value ? parseInt(e.target.value, 10) : 0)}
+                        onFocus={(e) => e.target.select()}
                         className="session-input text-center"
                         style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                       />

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, type Variants, type HTMLMotionProps } from "framer-motion";
-import { type ReactNode } from "react";
+import { motion, type Variants, type HTMLMotionProps, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
+import { type ReactNode, useRef, useCallback, useState } from "react";
 
 // ── Fade-in page wrapper ──
 export function PageTransition({ children, className }: { children: ReactNode; className?: string }) {
@@ -86,5 +86,61 @@ export function CelebrationPop({ children, className }: { children: ReactNode; c
     >
       {children}
     </motion.div>
+  );
+}
+
+// ── Swipe Tabs container ──
+const SWIPE_THRESHOLD = 50;
+
+interface SwipeTabsProps<T extends string> {
+  tabs: T[];
+  current: T;
+  onChange: (tab: T) => void;
+  children: ReactNode;
+  className?: string;
+}
+
+export function SwipeTabs<T extends string>({ tabs, current, onChange, children, className }: SwipeTabsProps<T>) {
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const swiping = useRef(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    swiping.current = false;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Only trigger if horizontal movement is dominant
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dy) > Math.abs(dx)) return;
+    const idx = tabs.indexOf(current);
+    if (dx < 0 && idx < tabs.length - 1) {
+      onChange(tabs[idx + 1]);
+    } else if (dx > 0 && idx > 0) {
+      onChange(tabs[idx - 1]);
+    }
+  }, [tabs, current, onChange]);
+
+  return (
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className={className}
+    >
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -30 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
