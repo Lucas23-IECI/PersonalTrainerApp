@@ -154,6 +154,9 @@ export interface UserSettings {
   weightIncrement: number; // kg step for +/- buttons (default 2.5)
   language: "es" | "en";
   autoBackup: boolean;
+  dailyReminderEnabled: boolean; // 7.15
+  reminderHour: number; // 7.15 — 0-23
+  reminderMinute: number; // 7.15 — 0-59
 }
 
 const SETTINGS_KEY = "mark-pt-settings";
@@ -165,6 +168,9 @@ const DEFAULT_SETTINGS: UserSettings = {
   weightIncrement: 2.5,
   language: "es",
   autoBackup: true,
+  dailyReminderEnabled: false,
+  reminderHour: 18,
+  reminderMinute: 0,
 };
 
 export function getSettings(): UserSettings {
