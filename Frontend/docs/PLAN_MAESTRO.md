@@ -96,24 +96,24 @@ Transformar MARK PT de un tracker básico a una app de fitness de nivel profesio
 
 ---
 
-## FASE 6: UX Polish y Configuración
+## FASE 6: UX Polish y Configuración ✅
 *Paralela a Fases 3-5*
 
 | # | Feature | Estado |
 |---|---------|--------|
-| 6.1 | Animaciones/Transiciones (framer-motion) | ⬜ |
-| 6.2 | Haptic Feedback (@capacitor/haptics) | ⬜ |
-| 6.3 | Smooth Scrolling | ⬜ |
-| 6.4 | Weight Stepper (+/- buttons) | ⬜ |
-| 6.5 | Swipe entre Tabs | ⬜ |
-| 6.6 | Unidades kg/lbs toggle | ⬜ |
-| 6.7 | Timer Default por Tipo ejercicio | ⬜ |
-| 6.8 | Configurar Sonidos/Vibración | ⬜ |
-| 6.9 | Teclado Numérico optimizado | ⬜ |
-| 6.10 | Incrementos Peso Configurables | ⬜ |
-| 6.11 | Backup/Restore Auto | ⬜ |
-| 6.12 | i18n ES/EN | ⬜ |
-| 6.13 | Splash Screen | ⬜ |
+| 6.1 | Animaciones/Transiciones (framer-motion) | ✅ |
+| 6.2 | Haptic Feedback (@capacitor/haptics) | ✅ |
+| 6.3 | Smooth Scrolling | ✅ |
+| 6.4 | Weight Stepper (+/- buttons) | ✅ |
+| 6.5 | Swipe entre Tabs | ✅ |
+| 6.6 | Unidades kg/lbs toggle | ✅ |
+| 6.7 | Timer Default por Tipo ejercicio | ✅ |
+| 6.8 | Configurar Sonidos/Vibración | ✅ |
+| 6.9 | Teclado Numérico optimizado | ✅ |
+| 6.10 | Incrementos Peso Configurables | ✅ |
+| 6.11 | Backup/Restore Auto | ✅ |
+| 6.12 | i18n ES/EN | ✅ |
+| 6.13 | Splash Screen | ✅ |
 
 ---
 

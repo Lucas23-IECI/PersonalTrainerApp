@@ -20,6 +20,7 @@ import {
   type CustomMeal,
 } from "@/lib/storage";
 import { Check, Plus, ShoppingCart, Pill, ChefHat, UtensilsCrossed, Trash2 } from "lucide-react";
+import { SwipeTabs } from "@/components/motion";
 
 type Tab = "tracker" | "plan" | "shopping" | "supps" | "cooking";
 
@@ -111,6 +112,7 @@ export default function NutritionPage() {
         ))}
       </div>
 
+      <SwipeTabs tabs={["tracker", "plan", "shopping", "supps", "cooking"] as const} current={tab} onChange={(t) => setTab(t as Tab)}>
       {/* TRACKER */}
       {tab === "tracker" && (
         <div>
@@ -299,6 +301,7 @@ export default function NutritionPage() {
           ))}
         </div>
       )}
+      </SwipeTabs>
     </main>
   );
 }

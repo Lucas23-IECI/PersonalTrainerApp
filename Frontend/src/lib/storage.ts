@@ -130,6 +130,61 @@ export interface ActiveSessionData {
   }[];
 }
 
+// === User Settings ===
+
+export type WeightUnit = "kg" | "lbs";
+
+export interface UserSettings {
+  unit: WeightUnit;
+  hapticsEnabled: boolean;
+  soundEnabled: boolean;
+  weightIncrement: number; // kg step for +/- buttons (default 2.5)
+  language: "es" | "en";
+  autoBackup: boolean;
+}
+
+const SETTINGS_KEY = "mark-pt-settings";
+
+const DEFAULT_SETTINGS: UserSettings = {
+  unit: "kg",
+  hapticsEnabled: true,
+  soundEnabled: true,
+  weightIncrement: 2.5,
+  language: "es",
+  autoBackup: true,
+};
+
+export function getSettings(): UserSettings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export function saveSettings(s: UserSettings) {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
+
+/** Convert kg to lbs */
+export function kgToLbs(kg: number): number {
+  return Math.round(kg * 2.20462 * 10) / 10;
+}
+
+/** Convert lbs to kg */
+export function lbsToKg(lbs: number): number {
+  return Math.round(lbs / 2.20462 * 10) / 10;
+}
+
+/** Format weight with current unit, value is always stored in kg */
+export function formatWeight(kg: number, unit: WeightUnit): string {
+  if (unit === "lbs") return `${kgToLbs(kg)} lbs`;
+  return `${kg} kg`;
+}
+
 const KEYS = {
   checkins: "mark-pt-checkins",
   sessions: "mark-pt-sessions",
@@ -463,7 +518,9 @@ export function exportAllData(): string {
       if (raw) data[key] = JSON.parse(raw);
     } catch { /* skip corrupted */ }
   });
-  // Also export phase override and custom programs
+  // Also export settings, phase override and custom programs
+  const settings = localStorage.getItem(SETTINGS_KEY);
+  if (settings) data["settings"] = JSON.parse(settings);
   const override = localStorage.getItem("mark-pt-phase-override");
   if (override) data["phaseOverride"] = override;
   for (let i = 0; i < 8; i++) {
@@ -480,6 +537,7 @@ export function importAllData(json: string): boolean {
     Object.entries(KEYS).forEach(([key, storageKey]) => {
       if (data[key]) localStorage.setItem(storageKey, JSON.stringify(data[key]));
     });
+    if (data["settings"]) localStorage.setItem(SETTINGS_KEY, JSON.stringify(data["settings"]));
     if (data["phaseOverride"]) localStorage.setItem("mark-pt-phase-override", data["phaseOverride"]);
     for (let i = 0; i < 8; i++) {
       if (data["customProgram" + i]) {
@@ -514,4 +572,33 @@ export function exportCSV(): string {
   }
 
   return rows.join("\n");
+}
+
+// === Auto Backup (6.11) ===
+
+const BACKUP_KEY = "mark-pt-auto-backup";
+const BACKUP_DATE_KEY = "mark-pt-auto-backup-date";
+
+/** Run auto-backup if enabled — keeps one rolling backup in localStorage */
+export function runAutoBackup() {
+  if (typeof window === "undefined") return;
+  if (!getSettings().autoBackup) return;
+  const lastBackup = localStorage.getItem(BACKUP_DATE_KEY);
+  const now = today();
+  if (lastBackup === now) return; // max once per day
+  const data = exportAllData();
+  localStorage.setItem(BACKUP_KEY, data);
+  localStorage.setItem(BACKUP_DATE_KEY, now);
+}
+
+/** Restore from the auto-backup stored in localStorage */
+export function restoreAutoBackup(): boolean {
+  const data = localStorage.getItem(BACKUP_KEY);
+  if (!data) return false;
+  return importAllData(data);
+}
+
+/** Get the date of the last auto-backup */
+export function getAutoBackupDate(): string | null {
+  return localStorage.getItem(BACKUP_DATE_KEY);
 }
