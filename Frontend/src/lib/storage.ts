@@ -489,3 +489,29 @@ export function importAllData(json: string): boolean {
     return true;
   } catch { return false; }
 }
+
+/**
+ * Export sessions as CSV compatible with Strong/Hevy apps.
+ * Columns: Date, Workout Name, Exercise Name, Set Order, Weight, Reps, RPE, Duration (s), Notes
+ */
+export function exportCSV(): string {
+  const sessions = getSessions().filter((s) => s.completed);
+  sessions.sort((a, b) => a.date.localeCompare(b.date));
+
+  const rows: string[] = ["Date,Workout Name,Exercise Name,Set Order,Weight,Reps,RPE,Duration (s),Notes"];
+
+  for (const session of sessions) {
+    const durationSec = Math.round((session.endTime - session.startTime) / 1000);
+    for (const exercise of session.exercises) {
+      if (exercise.skipped) continue;
+      exercise.sets.forEach((set, idx) => {
+        const note = (exercise.notes || "").replace(/"/g, '""');
+        rows.push(
+          `${session.date},"${session.workoutName}","${exercise.name}",${idx + 1},${set.weight || 0},${set.reps},${set.rpe || ""},${durationSec},"${note}"`
+        );
+      });
+    }
+  }
+
+  return rows.join("\n");
+}
