@@ -58,6 +58,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ---
 
+## [Unreleased] — Fase 3 Final: Ejercicios Enriquecidos (3.11-3.14)
+
+### Completado
+- **3.11 Historial Inline por Ejercicio**: Al expandir un ejercicio en AddExerciseModal o en la página de Ejercicios, muestra inline el último registro: peso top × reps, RPE promedio y fecha. Usa `getExerciseHistory()` de `progression.ts`.
+- **3.12 Favoritos y Etiquetas**: Sistema de favoritos (estrella toggle) y etiquetas por ejercicio. `exercise-favorites.ts` con CRUD para favoritos y tags, persistido en localStorage. Estrella dorada visible en listados, toggle en cada fila.
+- **3.13 Ordenar Librería Multi-criterio**: Dropdown de ordenamiento en AddExerciseModal y página de Ejercicios. 4 opciones: A-Z, Dificultad, Favoritos primero, Recientes primero. Aplicado sobre la lista filtrada.
+- **3.14 GIFs/Videos Ejercicios (wger API)**: Integración con wger.de API para imágenes de ejercicios. `wger-api.ts` con mapeo de 60+ ejercicios a IDs wger, caché en localStorage (7 días TTL), fetch lazy al expandir ejercicio.
+
+### FASE 3 COMPLETA ✅ (14/14 features)
+
+---
+
 ## [1.2.0] — 2025-06-XX
 
 ### Added
