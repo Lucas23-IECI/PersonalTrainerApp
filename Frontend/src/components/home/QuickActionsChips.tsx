@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Scale, Calculator, Camera, Plus, Moon } from "lucide-react";
+import { Scale, Calculator, Camera, Plus, Moon, Timer, StretchHorizontal, HeartPulse } from "lucide-react";
 
 interface Props {
   onOpenCheckin: () => void;
@@ -11,6 +11,9 @@ interface Props {
 const chips = [
   { label: "Pesar", icon: Scale, action: "checkin" as const },
   { label: "Sueño", icon: Moon, action: "sleep" as const },
+  { label: "Timer", icon: Timer, href: "/timer" },
+  { label: "Stretching", icon: StretchHorizontal, href: "/stretching" },
+  { label: "Cardio", icon: HeartPulse, href: "/cardio" },
   { label: "Calculadoras", icon: Calculator, href: "/calculators" },
   { label: "Fotos", icon: Camera, href: "/photos" },
   { label: "Entreno vacío", icon: Plus, href: "/workout/session" },

@@ -37,6 +37,7 @@ import {
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
 import ExerciseProgressInline from "@/components/workout/ExerciseProgressInline";
+import WorkoutShareCard from "@/components/workout/WorkoutShareCard";
 import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
 import { vibrateTimerComplete, vibrateMedium, vibrateHeavy, vibrateSuccess, vibrateLight } from "@/lib/haptics";
 import { exerciseLibrary, type LibraryExercise, type ExerciseCategory } from "@/data/exercises";
@@ -124,6 +125,7 @@ function SessionContent() {
   const summaryRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [swipeState, setSwipeState] = useState<{ key: string; startX: number; dx: number } | null>(null);
 
   // Rest timer
@@ -708,6 +710,12 @@ function SessionContent() {
         </div>{/* end summaryRef */}
         <div className="flex gap-2 mb-3">
           <button
+            onClick={() => setShowShareCard(true)}
+            className="btn btn-primary flex-1 flex items-center justify-center gap-2"
+          >
+            <Share2 size={16} /> Share Card
+          </button>
+          <button
             onClick={shareWorkoutSummary}
             disabled={sharing}
             className="btn btn-ghost flex-1 flex items-center justify-center gap-2"
@@ -716,10 +724,12 @@ function SessionContent() {
               <span className="text-xs">Generando...</span>
             ) : (
               <>
-                <Share2 size={16} /> Compartir
+                <Download size={16} /> Screenshot
               </>
             )}
           </button>
+        </div>
+        <div className="flex gap-2 mb-3">
           <button
             onClick={copySummaryAsText}
             className="btn btn-ghost flex-1 flex items-center justify-center gap-2"
@@ -735,6 +745,9 @@ function SessionContent() {
           <button onClick={() => router.push("/")} className="btn btn-ghost flex-1">Dashboard</button>
           <button onClick={() => router.push("/workout")} className="btn btn-primary flex-1">Ver Plan</button>
         </div>
+        {showShareCard && (
+          <WorkoutShareCard session={savedSession} onClose={() => setShowShareCard(false)} />
+        )}
       </main>
     );
   }

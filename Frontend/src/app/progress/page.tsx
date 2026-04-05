@@ -26,6 +26,7 @@ const BodyWeightPRChart = dynamic(() => import("@/components/charts/BodyWeightPR
 const MuscleDistributionRadar = dynamic(() => import("@/components/charts/MuscleDistributionRadar"), { ssr: false });
 const TrainingStreakCard = dynamic(() => import("@/components/charts/TrainingStreakCard"), { ssr: false });
 const PRSystemComplete = dynamic(() => import("@/components/charts/PRSystemComplete"), { ssr: false });
+const OverloadDashboard = dynamic(() => import("@/components/charts/OverloadDashboard"), { ssr: false });
 
 type Tab = "cuerpo" | "fuerza" | "volumen";
 
@@ -407,6 +408,9 @@ export default function ProgressPage() {
 
           {/* E1RM Chart (Feature 2.1) */}
           <E1RMChart />
+
+          {/* Progressive Overload Dashboard (Feature F1.5) */}
+          <OverloadDashboard />
 
           {/* PR System Complete (Feature 2.8) */}
           <PRSystemComplete />
