@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   output: "export",
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   headers: async () => [
     {
       source: "/sw.js",

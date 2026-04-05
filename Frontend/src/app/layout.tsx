@@ -7,6 +7,7 @@ import ActiveWorkoutBar from "@/components/ActiveWorkoutBar";
 import UpdateChecker from "@/components/UpdateChecker";
 import SplashScreen from "@/components/SplashScreen";
 import AutoBackup from "@/components/AutoBackup";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "MARK PT - Personal Trainer",
@@ -40,9 +41,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OnboardingGate />
         <PWAManager />
         <UpdateChecker />
-        <div className="pb-[70px]">
-          {children}
-        </div>
+        <ErrorBoundary>
+          <div className="pb-[70px]">
+            {children}
+          </div>
+        </ErrorBoundary>
         <ActiveWorkoutBar />
         <Navigation />
         <script

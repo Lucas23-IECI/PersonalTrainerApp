@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
 
 permissions:
@@ -37,27 +39,70 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
+      # ── Signed release APK (on tag push) ──
+      - name: Decode keystore
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/markpt-release.keystore
+
+      - name: Create keystore.properties
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cat > android/keystore.properties <<EOF
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=markpt-release.keystore
+          EOF
+
+      - name: Build release APK (signed)
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: android
+        run: ./gradlew assembleRelease
+
+      - name: Rename release APK
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: cp android/app/build/outputs/apk/release/app-release.apk mark-pt.apk
+
+      # ── Debug APK (on push to main without tag) ──
       - name: Build debug APK
+        if: "!startsWith(github.ref, 'refs/tags/v')"
         working-directory: android
         run: ./gradlew assembleDebug
 
-      - name: Rename APK
+      - name: Rename debug APK
+        if: "!startsWith(github.ref, 'refs/tags/v')"
         run: cp android/app/build/outputs/apk/debug/app-debug.apk mark-pt.apk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mark-pt-debug
+          name: mark-pt-apk
           path: mark-pt.apk
 
-      - name: Create/Update Release
+      # ── Versioned release (on tag) ──
+      - name: Create versioned release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "MARK PT ${{ github.ref_name }}"
+          body: |
+            ## MARK PT ${{ github.ref_name }}
+
+            APK firmado listo para instalar.
+            Descargá `mark-pt.apk` e instalalo en tu Android 7.0+.
+          files: mark-pt.apk
+          make_latest: true
+
+      # ── Latest release (on push to main) ──
+      - name: Update latest release
+        if: github.ref == 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "MARK PT - Última versión"
+          name: "MARK PT - Última versión (dev)"
           body: |
-            APK actualizado automáticamente con cada push a main.
+            APK debug actualizado automáticamente con cada push a main.
             Descargá `mark-pt.apk` e instalalo en tu Android.
           files: mark-pt.apk
-          prerelease: false
-          make_latest: true
+          prerelease: true
+          make_latest: false
