@@ -32,7 +32,7 @@ export default function DayCard({ workout: w, isToday, isExpanded, onToggle, onS
                 HOY
               </span>
             )}
-            <span className="text-[0.62rem] text-zinc-500 font-medium">{w.day}</span>
+            <span className="text-[0.62rem] font-medium" style={{ color: "var(--text-muted)" }}>{w.day}</span>
             <span className="text-[0.78rem] font-bold" style={{ color: w.color }}>
               {w.name}
             </span>
@@ -66,7 +66,7 @@ export default function DayCard({ workout: w, isToday, isExpanded, onToggle, onS
                 HOY
               </span>
             )}
-            <span className="text-[0.65rem] text-zinc-500 font-medium">{w.day}</span>
+            <span className="text-[0.65rem] font-medium" style={{ color: "var(--text-muted)" }}>{w.day}</span>
           </div>
           <div className="text-[0.9rem] font-bold mb-1" style={{ color: w.color }}>
             {w.name}
@@ -81,7 +81,7 @@ export default function DayCard({ workout: w, isToday, isExpanded, onToggle, onS
             </div>
           )}
         </div>
-        <div className="text-zinc-600 ml-2 shrink-0">
+        <div className="ml-2 shrink-0" style={{ color: "var(--text-secondary)" }}>
           {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </div>
       </div>
@@ -97,8 +97,9 @@ function ExpandedContent({ workout: w, isRest, onStart }: { workout: WorkoutDay;
     <div className="mt-3">
       {w.note && (
         <div
-          className="text-[0.7rem] text-zinc-400 mb-3 py-2 px-3 rounded-lg"
+          className="text-[0.7rem] mb-3 py-2 px-3 rounded-lg"
           style={{
+            color: "var(--text-muted)",
             background: "var(--bg-elevated)",
             borderLeft: `3px solid ${w.color}`,
           }}
@@ -108,7 +109,7 @@ function ExpandedContent({ workout: w, isRest, onStart }: { workout: WorkoutDay;
       )}
 
       {isRest && w.exercises.length === 0 ? (
-        <div className="text-center py-6 text-zinc-600">
+        <div className="text-center py-6" style={{ color: "var(--text-secondary)" }}>
           <div className="text-2xl mb-2">🧘</div>
           <div className="text-sm">Recuperación</div>
         </div>
@@ -122,7 +123,7 @@ function ExpandedContent({ workout: w, isRest, onStart }: { workout: WorkoutDay;
               return (
                 <div key={i}>
                   {showSS && (
-                    <div className="text-[0.6rem] text-[#2C6BED] font-bold py-1 mt-1">
+                    <div className="text-[0.6rem] font-bold py-1 mt-1" style={{ color: "var(--accent)" }}>
                       ↔ Superset {ex.superset}
                     </div>
                   )}
@@ -135,20 +136,20 @@ function ExpandedContent({ workout: w, isRest, onStart }: { workout: WorkoutDay;
                     }}
                   >
                     <div>
-                      <span className="text-zinc-800 font-semibold">{ex.name}</span>
+                      <span className="font-semibold" style={{ color: "var(--text)" }}>{ex.name}</span>
                       {ex.notes && (
-                        <div className="text-[0.6rem] text-zinc-600 mt-0.5 leading-tight">
+                        <div className="text-[0.6rem] mt-0.5 leading-tight" style={{ color: "var(--text-secondary)" }}>
                           {ex.notes}
                         </div>
                       )}
                     </div>
-                    <span className="text-zinc-500 text-[0.72rem] text-right">
+                    <span className="text-[0.72rem] text-right" style={{ color: "var(--text-muted)" }}>
                       {ex.sets}×{ex.reps}
                     </span>
-                    <span className="text-zinc-600 text-[0.65rem] text-right min-w-[50px]">
+                    <span className="text-[0.65rem] text-right min-w-[50px]" style={{ color: "var(--text-secondary)" }}>
                       {ex.load}
                     </span>
-                    <span className="text-zinc-400 text-[0.65rem] text-right">
+                    <span className="text-[0.65rem] text-right" style={{ color: "var(--text-muted)" }}>
                       RPE {ex.rpe}
                     </span>
                   </div>

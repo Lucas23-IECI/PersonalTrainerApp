@@ -109,7 +109,7 @@ export default function TrainingStreakCard() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Flame size={16} className="shrink-0" style={{ color: fireColors[fireLevel] }} />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Racha de Entreno</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Racha de Entreno</div>
         </div>
       </div>
 
@@ -119,42 +119,42 @@ export default function TrainingStreakCard() {
           <div className="text-4xl font-black" style={{ color: fireColors[fireLevel] }}>
             {stats.currentStreak}
           </div>
-          <div className="text-[0.6rem] text-zinc-500">días seguidos</div>
+          <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>días seguidos</div>
         </div>
-        <div className="w-px h-12 bg-zinc-800" />
+        <div className="w-px h-12" style={{ background: "var(--border)" }} />
         <div className="text-center">
-          <div className="text-2xl font-black text-zinc-400">{stats.longestStreak}</div>
-          <div className="text-[0.6rem] text-zinc-500">récord</div>
+          <div className="text-2xl font-black" style={{ color: "var(--text-muted)" }}>{stats.longestStreak}</div>
+          <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>récord</div>
         </div>
       </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-4 gap-1.5">
         <div className="text-center py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
-          <Calendar size={12} className="text-[#2C6BED] mx-auto mb-0.5" />
+          <Calendar size={12} className="mx-auto mb-0.5" style={{ color: "var(--accent)" }} />
           <div className="text-[0.75rem] font-bold">{stats.thisWeek}</div>
-          <div className="text-[0.45rem] text-zinc-500">esta sem</div>
+          <div className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>esta sem</div>
         </div>
         <div className="text-center py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
           <Calendar size={12} className="text-[#34C759] mx-auto mb-0.5" />
           <div className="text-[0.75rem] font-bold">{stats.thisMonth}</div>
-          <div className="text-[0.45rem] text-zinc-500">este mes</div>
+          <div className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>este mes</div>
         </div>
         <div className="text-center py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
           <TrendingUp size={12} className="text-[#FF9500] mx-auto mb-0.5" />
           <div className="text-[0.75rem] font-bold">{stats.avgPerWeek}</div>
-          <div className="text-[0.45rem] text-zinc-500">prom/sem</div>
+          <div className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>prom/sem</div>
         </div>
         <div className="text-center py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
           <Zap size={12} className="text-[#BF5AF2] mx-auto mb-0.5" />
           <div className="text-[0.75rem] font-bold">{stats.consistency}%</div>
-          <div className="text-[0.45rem] text-zinc-500">consist.</div>
+          <div className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>consist.</div>
         </div>
       </div>
 
       {/* Consistency bar */}
       <div className="mt-3">
-        <div className="flex justify-between text-[0.5rem] text-zinc-500 mb-1">
+        <div className="flex justify-between text-[0.5rem] mb-1" style={{ color: "var(--text-muted)" }}>
           <span>Consistencia 12 sem</span>
           <span>{stats.consistency}%</span>
         </div>

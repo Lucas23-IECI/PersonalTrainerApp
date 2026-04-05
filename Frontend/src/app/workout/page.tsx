@@ -52,23 +52,23 @@ export default function WorkoutPage() {
           <Link href="/routines" className="flex items-center gap-1 text-[0.7rem] text-[var(--accent)] no-underline font-semibold">
             <BookOpen size={13} /> Rutinas
           </Link>
-          <Link href="/workout/editor" className="flex items-center gap-1 text-[0.7rem] text-[#2C6BED] no-underline font-semibold">
+          <Link href="/workout/editor" className="flex items-center gap-1 text-[0.7rem] no-underline font-semibold" style={{ color: 'var(--accent)' }}>
             <Pencil size={13} /> Editar
           </Link>
         </div>
       </div>
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[0.68rem] text-zinc-500 uppercase tracking-wider">
+        <p className="text-[0.68rem] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
           {phaseInfo.label}
         </p>
-        <span className="text-[0.6rem] text-zinc-400">
+        <span className="text-[0.6rem]" style={{ color: 'var(--text-muted)' }}>
           Semana {phaseInfo.week} de {phaseInfo.totalWeeks}
         </span>
       </div>
       {/* Phase progress bar */}
-      <div className="w-full h-1.5 rounded-full bg-zinc-800 mb-5">
+      <div className="progress-bar mb-5">
         <div
-          className="h-full rounded-full bg-[#0A84FF] transition-all"
+          className="progress-fill"
           style={{ width: `${phaseInfo.progress}%` }}
         />
       </div>
@@ -96,7 +96,7 @@ export default function WorkoutPage() {
         <button
           onClick={() => setShowActivityModal(true)}
           className="py-3 px-4 rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2"
-          style={{ background: 'var(--bg-card)', border: '1px dashed var(--border)', color: '#FF9500' }}
+          style={{ background: 'var(--bg-card)', border: '1px dashed var(--border)', color: 'var(--accent-orange)' }}
         >
           <Activity size={16} /> Actividad
         </button>

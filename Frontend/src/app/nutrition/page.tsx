@@ -609,8 +609,8 @@ export default function NutritionPage() {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-bold" style={{ color: "var(--text)" }}>{s.name}</span>
                 <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded" style={{
-                  background: s.status === "actual" ? "#34C75922" : s.status === "AGREGAR" ? "#FFCC0022" : "#2C6BED22",
-                  color: s.status === "actual" ? "#34C759" : s.status === "AGREGAR" ? "#FFCC00" : "#2C6BED",
+                  background: s.status === "actual" ? "#34C75922" : s.status === "AGREGAR" ? "#FFCC0022" : "var(--accent-soft)",
+                  color: s.status === "actual" ? "#34C759" : s.status === "AGREGAR" ? "#FFCC00" : "var(--accent)",
                 }}>{s.status}</span>
               </div>
               <div className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>{s.dose} · {s.when}</div>
@@ -757,7 +757,7 @@ function TargetEditorModal({ targets, onSave, onClose }: { targets: NutritionTar
         </p>
         <div className="flex flex-col gap-2.5 mb-4">
           {[
-            { label: "Calorías (kcal)", val: cal, set: setCal, color: "#2C6BED" },
+            { label: "Calorías (kcal)", val: cal, set: setCal, color: "var(--accent)" },
             { label: "Proteína (g)", val: pro, set: setPro, color: "#34C759" },
             { label: "Carbohidratos (g)", val: carbs, set: setCarbs, color: "#FFCC00" },
             { label: "Grasa (g)", val: fat, set: setFat, color: "#AF52DE" },

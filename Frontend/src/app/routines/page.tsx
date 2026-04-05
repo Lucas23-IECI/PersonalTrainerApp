@@ -75,7 +75,7 @@ const LEVEL_LABELS: Record<LibraryProgram["level"], string> = {
 
 const LEVEL_COLORS: Record<LibraryProgram["level"], string> = {
   beginner: "#30D158",
-  intermediate: "#0A84FF",
+  intermediate: "var(--accent)",
   advanced: "#FF453A",
 };
 
@@ -229,27 +229,27 @@ export default function RoutinesPage() {
               >
                 {LEVEL_LABELS[p.level]}
               </span>
-              <span className="text-[0.55rem] font-semibold text-zinc-400 uppercase">
+              <span className="text-[0.55rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
                 {CATEGORY_LABELS[p.category]}
               </span>
             </div>
             <p className="text-[0.9rem] font-bold text-[var(--text)] mb-0.5">{p.name}</p>
-            <p className="text-[0.68rem] text-zinc-500 leading-tight">{p.description}</p>
+            <p className="text-[0.68rem] leading-tight" style={{ color: "var(--text-muted)" }}>{p.description}</p>
           </div>
-          <div className="text-zinc-500 mt-1">
+          <div className="mt-1" style={{ color: "var(--text-muted)" }}>
             {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
         </div>
 
         {/* Meta pills */}
         <div className="flex gap-2 mt-2 flex-wrap">
-          <span className="text-[0.6rem] bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+          <span className="text-[0.6rem] px-2 py-0.5 rounded-full flex items-center gap-1" style={{ background: "var(--bg-elevated)", color: "var(--text)" }}>
             <Calendar size={10} /> {p.daysPerWeek} días/sem
           </span>
-          <span className="text-[0.6rem] bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+          <span className="text-[0.6rem] px-2 py-0.5 rounded-full flex items-center gap-1" style={{ background: "var(--bg-elevated)", color: "var(--text)" }}>
             <Target size={10} /> {p.split}
           </span>
-          <span className="text-[0.6rem] bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full">
+          <span className="text-[0.6rem] px-2 py-0.5 rounded-full" style={{ background: "var(--bg-elevated)", color: "var(--text)" }}>
             {p.duration}
           </span>
         </div>
@@ -258,7 +258,7 @@ export default function RoutinesPage() {
         {p.tags.length > 0 && (
           <div className="flex gap-1 mt-1.5 flex-wrap">
             {p.tags.map((tag) => (
-              <span key={tag} className="text-[0.55rem] text-zinc-500 bg-zinc-800/60 px-1.5 py-0.5 rounded">
+              <span key={tag} className="text-[0.55rem] px-1.5 py-0.5 rounded" style={{ color: "var(--text-muted)", background: "rgba(var(--bg-elevated-rgb, 39,39,41), 0.6)" }}>
                 #{tag}
               </span>
             ))}
@@ -267,15 +267,15 @@ export default function RoutinesPage() {
 
         {/* Expanded detail */}
         {isOpen && (
-          <div className="mt-3 border-t border-zinc-800 pt-3">
+          <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
             {p.days.map((day, di) => (
               <div key={di} className="mb-3">
                 <p className="text-[0.75rem] font-bold text-[var(--accent)] mb-1">{day.name}</p>
-                <p className="text-[0.6rem] text-zinc-500 mb-1">{day.focus}</p>
+                <p className="text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>{day.focus}</p>
                 <div className="overflow-x-auto">
                   <table className="w-full text-[0.6rem]">
                     <thead>
-                      <tr className="text-zinc-500 text-left">
+                      <tr className="text-left" style={{ color: "var(--text-muted)" }}>
                         <th className="pb-1 font-medium">Ejercicio</th>
                         <th className="pb-1 font-medium text-center">Sets</th>
                         <th className="pb-1 font-medium text-center">Reps</th>
@@ -284,7 +284,7 @@ export default function RoutinesPage() {
                     </thead>
                     <tbody>
                       {day.exercises.map((ex, ei) => (
-                        <tr key={ei} className="text-zinc-300">
+                        <tr key={ei} style={{ color: "var(--text)" }}>
                           <td className="py-0.5">{ex.name}</td>
                           <td className="py-0.5 text-center">{ex.sets}</td>
                           <td className="py-0.5 text-center">{ex.reps}</td>
@@ -317,14 +317,14 @@ export default function RoutinesPage() {
           <div className="flex-1" onClick={() => router.push(`/routines/editor?id=${r.id}`)}>
             <p className="text-[0.85rem] font-bold text-[var(--text)]">{r.name}</p>
             {r.description && (
-              <p className="text-[0.65rem] text-zinc-500 mt-0.5 line-clamp-2">{r.description}</p>
+              <p className="text-[0.65rem] mt-0.5 line-clamp-2" style={{ color: "var(--text-muted)" }}>{r.description}</p>
             )}
             <div className="flex gap-2 mt-1.5">
-              <span className="text-[0.58rem] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">
+              <span className="text-[0.58rem] px-2 py-0.5 rounded-full" style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>
                 {r.daysPerWeek} días • {r.days.length} sesiones
               </span>
               {r.split && (
-                <span className="text-[0.58rem] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">
+                <span className="text-[0.58rem] px-2 py-0.5 rounded-full" style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>
                   {r.split}
                 </span>
               )}
@@ -334,7 +334,8 @@ export default function RoutinesPage() {
           {/* 3-dot menu */}
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === r.id ? null : r.id); }}
-            className="text-zinc-500 p-1 -mr-1"
+            className="p-1 -mr-1"
+            style={{ color: "var(--text-muted)" }}
           >
             <MoreVertical size={16} />
           </button>
@@ -348,31 +349,31 @@ export default function RoutinesPage() {
           >
             <button
               onClick={() => router.push(`/routines/editor?id=${r.id}`)}
-              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-zinc-800"
+              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
               <Edit size={13} /> Editar
             </button>
             <button
               onClick={() => handleCloneRoutine(r.id)}
-              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-zinc-800"
+              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
               <Copy size={13} /> Duplicar
             </button>
             <button
               onClick={() => handleExport(r.id)}
-              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-zinc-800"
+              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
               <Share2 size={13} /> Compartir Código
             </button>
             <button
               onClick={() => { setMoveTarget(r.id); setMenuOpen(null); }}
-              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-zinc-800"
+              className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
               <FolderInput size={13} /> Mover a carpeta
             </button>
             <button
               onClick={() => handleDeleteRoutine(r.id)}
-              className="w-full text-left px-3 py-2 text-[0.72rem] text-[#FF453A] flex items-center gap-2 hover:bg-zinc-800"
+              className="w-full text-left px-3 py-2 text-[0.72rem] text-[#FF453A] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
               <Trash2 size={13} /> Eliminar
             </button>
@@ -392,7 +393,7 @@ export default function RoutinesPage() {
       >
         <div className="flex justify-between items-center mb-3">
           <p className="text-[0.85rem] font-bold text-[var(--text)]">Mover a carpeta</p>
-          <button onClick={() => setMoveTarget(null)} className="text-zinc-500"><X size={18} /></button>
+          <button onClick={() => setMoveTarget(null)} style={{ color: "var(--text-muted)" }}><X size={18} /></button>
         </div>
         <button
           onClick={() => handleMoveToFolder(moveTarget, undefined)}
@@ -419,7 +420,7 @@ export default function RoutinesPage() {
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-28" onClick={() => { if (menuOpen) setMenuOpen(null); }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Link href="/workout" className="text-zinc-400">
+        <Link href="/workout" style={{ color: "var(--text-muted)" }}>
           <ArrowLeft size={20} />
         </Link>
         <h1 className="text-xl font-extrabold tracking-tight">Rutinas</h1>
@@ -477,7 +478,7 @@ export default function RoutinesPage() {
                       {LEVEL_LABELS[program.level]}
                     </span>
                     <p className="text-[0.75rem] font-bold text-[var(--text)] mt-1.5 line-clamp-1">{program.name}</p>
-                    <p className="text-[0.58rem] text-zinc-500 mt-0.5 line-clamp-1">
+                    <p className="text-[0.58rem] mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>
                       {program.daysPerWeek} días · {program.split}
                     </p>
                     {reasons[0] && (
@@ -493,13 +494,13 @@ export default function RoutinesPage() {
 
           {/* Search */}
           <div className="relative mb-3">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar programa..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg text-[0.75rem] text-[var(--text)] placeholder-zinc-600"
+              className="w-full pl-9 pr-3 py-2 rounded-lg text-[0.75rem] text-[var(--text)] placeholder-[var(--text-secondary)]"
               style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
             />
           </div>
@@ -532,14 +533,14 @@ export default function RoutinesPage() {
           </div>
 
           {/* Results count */}
-          <p className="text-[0.6rem] text-zinc-500 mb-2">{filteredPrograms.length} programas</p>
+          <p className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>{filteredPrograms.length} programas</p>
 
           {/* Program cards */}
           {filteredPrograms.map(renderProgramCard)}
 
           {filteredPrograms.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-zinc-500 text-[0.8rem]">No se encontraron programas</p>
+              <p className="text-[0.8rem]" style={{ color: "var(--text-muted)" }}>No se encontraron programas</p>
             </div>
           )}
         </>
@@ -583,7 +584,7 @@ export default function RoutinesPage() {
                 onChange={(e) => setNewFolderName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
                 placeholder="Nombre de carpeta..."
-                className="flex-1 px-3 py-2 rounded-lg text-[0.75rem] text-[var(--text)] placeholder-zinc-600"
+                className="flex-1 px-3 py-2 rounded-lg text-[0.75rem] text-[var(--text)] placeholder-[var(--text-secondary)]"
                 style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
               />
               <button
@@ -595,7 +596,8 @@ export default function RoutinesPage() {
               </button>
               <button
                 onClick={() => { setShowNewFolder(false); setNewFolderName(""); }}
-                className="px-2 py-2 text-zinc-500"
+                className="px-2 py-2"
+                style={{ color: "var(--text-muted)" }}
               >
                 <X size={16} />
               </button>
@@ -630,7 +632,7 @@ export default function RoutinesPage() {
                         {folder.name}
                       </span>
                     )}
-                    <span className="text-[0.6rem] text-zinc-500">{folderRoutines.length}</span>
+                    <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{folderRoutines.length}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {renameFolderId !== folder.id && (
@@ -640,24 +642,26 @@ export default function RoutinesPage() {
                           setRenameFolderId(folder.id);
                           setRenameValue(folder.name);
                         }}
-                        className="text-zinc-500 p-1"
+                        className="p-1"
+                        style={{ color: "var(--text-muted)" }}
                       >
                         <Edit size={12} />
                       </button>
                     )}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder.id); }}
-                      className="text-zinc-600 p-1"
+                      className="p-1"
+                      style={{ color: "var(--text-secondary)" }}
                     >
                       <Trash2 size={12} />
                     </button>
-                    {isOpen ? <ChevronUp size={14} className="text-zinc-500" /> : <ChevronDown size={14} className="text-zinc-500" />}
+                    {isOpen ? <ChevronUp size={14} style={{ color: "var(--text-muted)" }} /> : <ChevronDown size={14} style={{ color: "var(--text-muted)" }} />}
                   </div>
                 </div>
                 {isOpen && (
                   <div className="ml-2">
                     {folderRoutines.length === 0 ? (
-                      <p className="text-[0.65rem] text-zinc-600 py-2 pl-4">Carpeta vacía</p>
+                      <p className="text-[0.65rem] py-2 pl-4" style={{ color: "var(--text-secondary)" }}>Carpeta vacía</p>
                     ) : (
                       folderRoutines.map(renderRoutineCard)
                     )}
@@ -673,9 +677,9 @@ export default function RoutinesPage() {
             if (unfiled.length === 0 && folders.length === 0 && routines.length === 0) {
               return (
                 <div className="text-center py-12">
-                  <Dumbbell size={40} className="mx-auto text-zinc-700 mb-3" />
-                  <p className="text-zinc-500 text-[0.82rem] font-semibold mb-1">Sin rutinas todavía</p>
-                  <p className="text-zinc-600 text-[0.7rem]">
+                  <Dumbbell size={40} className="mx-auto mb-3" style={{ color: "var(--text-secondary)" }} />
+                  <p className="text-[0.82rem] font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Sin rutinas todavía</p>
+                  <p className="text-[0.7rem]" style={{ color: "var(--text-secondary)" }}>
                     Creá una desde cero o explorá la biblioteca
                   </p>
                 </div>
@@ -685,7 +689,7 @@ export default function RoutinesPage() {
               return (
                 <div className="mt-2">
                   {folders.length > 0 && (
-                    <p className="text-[0.68rem] text-zinc-500 font-semibold mb-2">Sin carpeta</p>
+                    <p className="text-[0.68rem] font-semibold mb-2" style={{ color: "var(--text-muted)" }}>Sin carpeta</p>
                   )}
                   {unfiled.map(renderRoutineCard)}
                 </div>
@@ -708,9 +712,9 @@ export default function RoutinesPage() {
           >
             <div className="flex justify-between items-center mb-3">
               <p className="text-[0.85rem] font-bold text-[var(--text)]">Importar Rutina</p>
-              <button onClick={() => setShowImportModal(false)} className="text-zinc-500"><X size={18} /></button>
+              <button onClick={() => setShowImportModal(false)} style={{ color: "var(--text-muted)" }}><X size={18} /></button>
             </div>
-            <p className="text-[0.68rem] text-zinc-500 mb-3">
+            <p className="text-[0.68rem] mb-3" style={{ color: "var(--text-muted)" }}>
               Pegá el código que te compartieron para importar la rutina.
             </p>
             <textarea
@@ -719,7 +723,7 @@ export default function RoutinesPage() {
               onChange={(e) => { setImportCode(e.target.value); setImportError(""); }}
               placeholder="Pegar código aquí..."
               rows={4}
-              className="w-full text-[0.72rem] py-2.5 px-3 rounded-lg text-[var(--text)] placeholder-zinc-600 resize-none mb-2"
+              className="w-full text-[0.72rem] py-2.5 px-3 rounded-lg text-[var(--text)] placeholder-[var(--text-secondary)] resize-none mb-2"
               style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
             />
             {importError && (
@@ -747,9 +751,9 @@ export default function RoutinesPage() {
           >
             <div className="flex justify-between items-center mb-3">
               <p className="text-[0.85rem] font-bold text-[var(--text)]">Código de Rutina</p>
-              <button onClick={() => setShareCode(null)} className="text-zinc-500"><X size={18} /></button>
+              <button onClick={() => setShareCode(null)} style={{ color: "var(--text-muted)" }}><X size={18} /></button>
             </div>
-            <p className="text-[0.68rem] text-zinc-500 mb-3">
+            <p className="text-[0.68rem] mb-3" style={{ color: "var(--text-muted)" }}>
               Compartí este código para que alguien pueda importar tu rutina.
             </p>
             <div

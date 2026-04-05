@@ -53,7 +53,7 @@ export default function WorkoutTips({ workout, maxTips = 3 }: WorkoutTipsProps) 
           result.push({
             icon: "💪",
             text: `${muscle} — fresco, dale con todo hoy`,
-            color: "#0A84FF",
+            color: "var(--accent)",
           });
         }
         if (result.length >= maxTips) break;
@@ -67,7 +67,7 @@ export default function WorkoutTips({ workout, maxTips = 3 }: WorkoutTipsProps) 
 
   return (
     <div className="flex flex-col gap-1.5 mb-3">
-      <div className="flex items-center gap-1.5 text-[0.62rem] text-zinc-500 uppercase tracking-wider font-semibold">
+      <div className="flex items-center gap-1.5 text-[0.62rem] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
         <Sparkles size={10} /> Tips para hoy
       </div>
       {tips.map((tip, i) => (

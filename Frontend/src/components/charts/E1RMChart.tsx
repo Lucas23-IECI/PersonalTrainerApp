@@ -91,10 +91,10 @@ export default function E1RMChart() {
     return (
       <div className="card mb-3.5">
         <div className="flex items-center gap-2 mb-2">
-          <TrendingUp size={16} className="text-[#2C6BED]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">1RM Estimado</div>
+          <TrendingUp size={16} style={{ color: "var(--accent)" }} />
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>1RM Estimado</div>
         </div>
-        <div className="text-center py-5 text-zinc-400 text-[0.8rem]">
+        <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
           Necesitás al menos 2 sesiones de un ejercicio
         </div>
       </div>
@@ -105,8 +105,8 @@ export default function E1RMChart() {
     <div className="card mb-3.5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <TrendingUp size={16} className="text-[#2C6BED]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">1RM Estimado</div>
+          <TrendingUp size={16} style={{ color: "var(--accent)" }} />
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>1RM Estimado</div>
         </div>
         {trend !== 0 && (
           <div className={`text-[0.65rem] font-bold ${trend > 0 ? "text-[#34C759]" : "text-[#FF3B30]"}`}>
@@ -123,7 +123,7 @@ export default function E1RMChart() {
           style={{ background: "var(--bg-elevated)", color: "var(--text)" }}
         >
           <span className="truncate">{activeExercise}</span>
-          <ChevronDown size={14} className={`text-zinc-400 transition-transform ${showSelector ? "rotate-180" : ""}`} />
+          <ChevronDown size={14} className="transition-transform" style={{ color: "var(--text-muted)", transform: showSelector ? "rotate(180deg)" : undefined }} />
         </button>
         {showSelector && (
           <div
@@ -154,12 +154,12 @@ export default function E1RMChart() {
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 10, fill: "#636366" }}
+              tick={{ fontSize: 10, fill: "var(--text-muted)" }}
               axisLine={{ stroke: "var(--border-subtle)" }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "#636366" }}
+              tick={{ fontSize: 10, fill: "var(--text-muted)" }}
               axisLine={false}
               tickLine={false}
               domain={["dataMin - 5", "dataMax + 5"]}
@@ -167,13 +167,13 @@ export default function E1RMChart() {
             />
             <Tooltip
               contentStyle={{
-                background: "#1C1C1E",
-                border: "1px solid #38383A",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
                 fontSize: 12,
               }}
-              labelStyle={{ color: "#F5F5F7" }}
-              itemStyle={{ color: "#2C6BED" }}
+              labelStyle={{ color: "var(--text)" }}
+              itemStyle={{ color: "var(--accent)" }}
               formatter={(value, _name, props) => {
                 const p = props.payload as E1RMDataPoint;
                 return [`${value}kg (${p.weight}×${p.reps})`, "e1RM"];
@@ -182,10 +182,10 @@ export default function E1RMChart() {
             <Line
               type="monotone"
               dataKey="e1rm"
-              stroke="#2C6BED"
+              stroke="var(--accent)"
               strokeWidth={2}
-              dot={{ r: 4, fill: "#2C6BED", stroke: "#1C1C1E", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#2C6BED" }}
+              dot={{ r: 4, fill: "var(--accent)", stroke: "var(--bg-card)", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "var(--accent)" }}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -197,7 +197,7 @@ export default function E1RMChart() {
           {chartData.slice(-3).map((d, i) => (
             <div key={i} className="flex-1 text-center py-1.5 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
               <div className="text-[0.7rem] font-bold">~{Math.round(d.e1rm)}kg</div>
-              <div className="text-[0.5rem] text-zinc-500">{d.weight}×{d.reps} · {d.label}</div>
+              <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>{d.weight}×{d.reps} · {d.label}</div>
             </div>
           ))}
         </div>

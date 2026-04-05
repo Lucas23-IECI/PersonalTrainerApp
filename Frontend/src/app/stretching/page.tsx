@@ -210,7 +210,7 @@ export default function StretchingPage() {
   const current = stretchList[currentIdx];
   const progress = current ? timeLeft / current.durationSec : 0;
   const offset = CIRCUMFERENCE * (1 - progress);
-  const routineColor = activeRoutine?.color || "#0A84FF";
+  const routineColor = activeRoutine?.color || "var(--accent)";
 
   if (completed) {
     return (

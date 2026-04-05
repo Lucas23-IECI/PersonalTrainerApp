@@ -92,9 +92,9 @@ export default function TrainingHeatmap() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <CalendarDays size={16} className="text-[#34C759]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Frecuencia de Entreno</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Frecuencia de Entreno</div>
         </div>
-        <div className="text-[0.6rem] text-zinc-400">
+        <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
           {activeDays} días · {totalSessions} sesiones
         </div>
       </div>
@@ -153,7 +153,7 @@ export default function TrainingHeatmap() {
 
       {/* Legend */}
       <div className="flex items-center justify-end gap-1 mt-2">
-        <span className="text-[0.5rem] text-zinc-500">Menos</span>
+        <span className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>Menos</span>
         {[0, 1, 2, 3].map((level) => (
           <div
             key={level}
@@ -165,7 +165,7 @@ export default function TrainingHeatmap() {
             }}
           />
         ))}
-        <span className="text-[0.5rem] text-zinc-500">Más</span>
+        <span className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>Más</span>
       </div>
     </div>
   );

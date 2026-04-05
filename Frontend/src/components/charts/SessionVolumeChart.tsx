@@ -68,9 +68,9 @@ export default function SessionVolumeChart() {
       <div className="card mb-3.5">
         <div className="flex items-center gap-2 mb-2">
           <BarChart3 size={16} className="text-[#34C759]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Volumen por Sesión</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Volumen por Sesión</div>
         </div>
-        <div className="text-center py-5 text-zinc-400 text-[0.8rem]">
+        <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
           Necesitás al menos 2 sesiones completadas
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function SessionVolumeChart() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BarChart3 size={16} className="text-[#34C759]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Volumen por Sesión</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Volumen por Sesión</div>
         </div>
         <div className="flex items-center gap-2">
           {trend !== 0 && (
@@ -90,7 +90,7 @@ export default function SessionVolumeChart() {
               {trend > 0 ? "↑" : "↓"}{Math.abs(Math.round(trend))}kg
             </span>
           )}
-          <span className="text-[0.6rem] text-zinc-400">
+          <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
             Prom: {avgVolume > 1000 ? `${(avgVolume / 1000).toFixed(1)}k` : avgVolume}kg
           </span>
         </div>
@@ -122,8 +122,8 @@ export default function SessionVolumeChart() {
             />
             <Tooltip
               contentStyle={{
-                background: "#1C1C1E",
-                border: "1px solid #38383A",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
                 fontSize: 12,
               }}
@@ -139,7 +139,7 @@ export default function SessionVolumeChart() {
               stroke="#34C759"
               strokeWidth={2}
               fill="url(#volumeGradient)"
-              dot={{ r: 3, fill: "#34C759", stroke: "#1C1C1E", strokeWidth: 2 }}
+              dot={{ r: 3, fill: "#34C759", stroke: "var(--bg-card)", strokeWidth: 2 }}
               activeDot={{ r: 5, fill: "#34C759" }}
             />
           </AreaChart>
@@ -150,15 +150,15 @@ export default function SessionVolumeChart() {
       <div className="grid grid-cols-3 gap-2 mt-3">
         <div className="text-center py-1.5 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
           <div className="text-[0.7rem] font-bold">{Math.max(...chartData.map((d) => d.volume)).toLocaleString()}</div>
-          <div className="text-[0.5rem] text-zinc-500">Máximo kg</div>
+          <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>Máximo kg</div>
         </div>
         <div className="text-center py-1.5 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
           <div className="text-[0.7rem] font-bold">{avgVolume.toLocaleString()}</div>
-          <div className="text-[0.5rem] text-zinc-500">Promedio kg</div>
+          <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>Promedio kg</div>
         </div>
         <div className="text-center py-1.5 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
           <div className="text-[0.7rem] font-bold">{chartData.length}</div>
-          <div className="text-[0.5rem] text-zinc-500">Sesiones</div>
+          <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>Sesiones</div>
         </div>
       </div>
     </div>

@@ -100,16 +100,16 @@ export default function ProfilePage() {
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       {/* HEADER */}
       <div className="flex items-center gap-3 mb-5">
-        <Link href="/" className="text-zinc-400 hover:text-zinc-600">
+        <Link href="/" style={{ color: "var(--text-muted)" }}>
           <ChevronLeft size={22} />
         </Link>
         <div className="flex items-center gap-3 flex-1">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#2C6BED] to-[#1a4fd4] flex items-center justify-center text-white text-xl font-black">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-black" style={{ background: "linear-gradient(to bottom right, var(--accent), var(--accent-hover))" }}>
             {prof.name.charAt(0)}
           </div>
           <div>
             <h1 className="text-lg font-extrabold leading-tight">{prof.name.split(" ")[0]}</h1>
-            <p className="text-[0.65rem] text-zinc-500">{prof.height}cm · {currentWeight}kg · {prof.age} años</p>
+            <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{prof.height}cm · {currentWeight}kg · {prof.age} años</p>
           </div>
         </div>
       </div>
@@ -117,34 +117,34 @@ export default function ProfilePage() {
       {/* QUICK STATS */}
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div className="card py-3 text-center">
-          <Weight size={16} className="mx-auto text-[#2C6BED] mb-1" />
+          <Weight size={16} className="mx-auto mb-1" style={{ color: "var(--accent)" }} />
           <div className="text-lg font-black">{currentWeight}</div>
-          <div className="text-[0.55rem] text-zinc-500 uppercase">kg actual</div>
+          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>kg actual</div>
         </div>
         <div className="card py-3 text-center">
           <Target size={16} className="mx-auto text-[#34C759] mb-1" />
           <div className="text-lg font-black">{prof.goalWeight}</div>
-          <div className="text-[0.55rem] text-zinc-500 uppercase">kg meta</div>
+          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>kg meta</div>
         </div>
         <div className="card py-3 text-center">
           <TrendingDown size={16} className="mx-auto text-[#FF9500] mb-1" />
           <div className="text-lg font-black">{weightLost > 0 ? `-${weightLost.toFixed(1)}` : weightLost.toFixed(1)}</div>
-          <div className="text-[0.55rem] text-zinc-500 uppercase">kg cambio</div>
+          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>kg cambio</div>
         </div>
       </div>
 
       {/* GOAL PROGRESS BAR */}
       <div className="card mb-4">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[0.65rem] text-zinc-500 uppercase tracking-wider">Progreso a Meta</span>
-          <span className="text-sm font-bold text-[#2C6BED]">{goalProgress}%</span>
+          <span className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Progreso a Meta</span>
+          <span className="text-sm font-bold" style={{ color: "var(--accent)" }}>{goalProgress}%</span>
         </div>
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${goalProgress}%`, background: goalProgress >= 80 ? "#34C759" : "#2C6BED" }} />
+          <div className="progress-fill" style={{ width: `${goalProgress}%`, background: goalProgress >= 80 ? "#34C759" : "var(--accent)" }} />
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[0.58rem] text-zinc-500">{prof.weight}kg inicio</span>
-          <span className="text-[0.58rem] text-zinc-500">{prof.goalWeight}kg meta</span>
+          <span className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>{prof.weight}kg inicio</span>
+          <span className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>{prof.goalWeight}kg meta</span>
         </div>
       </div>
 
@@ -155,9 +155,9 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1">
           <span className="font-bold text-sm">Fotos de Progreso</span>
-          <p className="text-[0.6rem] text-zinc-500">Comparar tu transformación visual</p>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Comparar tu transformación visual</p>
         </div>
-        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+        <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
 
       {/* ACHIEVEMENTS LINK */}
@@ -167,21 +167,21 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1">
           <span className="font-bold text-sm">Logros y Badges</span>
-          <p className="text-[0.6rem] text-zinc-500">Tu colección de medallas</p>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Tu colección de medallas</p>
         </div>
-        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+        <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
 
       {/* YEAR REVIEW LINK */}
       <Link href="/year-review" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#30D158] to-[#0A84FF] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#30D158] to-[var(--accent)] flex items-center justify-center">
           <CalendarDays size={18} className="text-white" />
         </div>
         <div className="flex-1">
           <span className="font-bold text-sm">Resumen del Año</span>
-          <p className="text-[0.6rem] text-zinc-500">Tu año en entrenamiento estilo Wrapped</p>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Tu año en entrenamiento estilo Wrapped</p>
         </div>
-        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+        <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
 
       {/* CALCULATORS LINK — 7.12 */}
@@ -191,21 +191,21 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1">
           <span className="font-bold text-sm">Calculadoras</span>
-          <p className="text-[0.6rem] text-zinc-500">1RM, TDEE, Macros, Wilks</p>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>1RM, TDEE, Macros, Wilks</p>
         </div>
-        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+        <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
 
       {/* CLOUD SYNC LINK — 7.13 */}
       <Link href="/cloud-sync" className="card mb-4 flex items-center gap-3 px-4 py-3 group hover:scale-[1.01] active:scale-[0.99] transition-transform">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#64D2FF] to-[#0A84FF] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#64D2FF] to-[var(--accent)] flex items-center justify-center">
           <Cloud size={18} className="text-white" />
         </div>
         <div className="flex-1">
           <span className="font-bold text-sm">Cloud Sync</span>
-          <p className="text-[0.6rem] text-zinc-500">Backup y restauración de datos</p>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Backup y restauración de datos</p>
         </div>
-        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+        <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
 
       {/* QUICK STATS LINK — 7.14 */}
@@ -215,9 +215,9 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1">
           <span className="font-bold text-sm">Quick Stats</span>
-          <p className="text-[0.6rem] text-zinc-500">Widgets rápidos de estadísticas</p>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Widgets rápidos de estadísticas</p>
         </div>
-        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+        <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
 
       {/* QUICK ACTIONS LINK — 7.16 */}
@@ -227,9 +227,9 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1">
           <span className="font-bold text-sm">Acciones Rápidas</span>
-          <p className="text-[0.6rem] text-zinc-500">Atajos a funciones principales</p>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Atajos a funciones principales</p>
         </div>
-        <ChevronLeft size={16} className="text-zinc-400 rotate-180" />
+        <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
 
       {/* TABS */}
@@ -245,7 +245,7 @@ export default function ProfilePage() {
             className="flex-1 py-2 rounded-lg text-[0.72rem] font-semibold transition-all"
             style={{
               background: tab === t.id ? "var(--bg-card)" : "transparent",
-              color: tab === t.id ? "#2C6BED" : "var(--text-muted)",
+              color: tab === t.id ? "var(--accent)" : "var(--text-muted)",
               boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
               cursor: "pointer",
               border: "none",
@@ -260,7 +260,7 @@ export default function ProfilePage() {
       {tab === "info" && (
         <div className="space-y-3">
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Datos Personales</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Datos Personales</div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Nombre" value={prof.name} onChange={(v) => setProf({ ...prof, name: v })} />
               <Field label="Edad" value={String(prof.age)} onChange={(v) => setProf({ ...prof, age: Number(v) || 0 })} type="number" />
@@ -270,7 +270,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Objetivos</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Objetivos</div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Peso Meta (kg)" value={String(prof.goalWeight)} onChange={(v) => setProf({ ...prof, goalWeight: Number(v) || 0 })} type="number" />
               <Field label="Grasa Meta (%)" value={String(prof.goalBodyFat)} onChange={(v) => setProf({ ...prof, goalBodyFat: Number(v) || 0 })} type="number" />
@@ -280,7 +280,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Metabolismo</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Metabolismo</div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="BMR" value={String(prof.bmr)} onChange={(v) => setProf({ ...prof, bmr: Number(v) || 0 })} type="number" />
               <Field label="TDEE" value={String(prof.tdee)} onChange={(v) => setProf({ ...prof, tdee: Number(v) || 0 })} type="number" />
@@ -288,29 +288,29 @@ export default function ProfilePage() {
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Fechas Importantes</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Fechas Importantes</div>
             <div className="grid grid-cols-1 gap-3">
               <div className="flex justify-between items-center">
                 <div>
                   <div className="text-[0.72rem] font-medium">Pesas Fuertes</div>
-                  <div className="text-[0.62rem] text-zinc-500">{prof.heavyWeightsDate}</div>
+                  <div className="text-[0.62rem]" style={{ color: "var(--text-muted)" }}>{prof.heavyWeightsDate}</div>
                 </div>
-                <span className="text-sm font-bold" style={{ color: daysUntil(prof.heavyWeightsDate) <= 0 ? "#34C759" : "#2C6BED" }}>
+                <span className="text-sm font-bold" style={{ color: daysUntil(prof.heavyWeightsDate) <= 0 ? "#34C759" : "var(--accent)" }}>
                   {daysUntil(prof.heavyWeightsDate) <= 0 ? "✓" : `${daysUntil(prof.heavyWeightsDate)}d`}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <div>
                   <div className="text-[0.72rem] font-medium">Brasil</div>
-                  <div className="text-[0.62rem] text-zinc-500">{prof.brazilDate}</div>
+                  <div className="text-[0.62rem]" style={{ color: "var(--text-muted)" }}>{prof.brazilDate}</div>
                 </div>
-                <span className="text-sm font-bold text-[#2C6BED]">{daysUntil(prof.brazilDate)}d</span>
+                <span className="text-sm font-bold" style={{ color: "var(--accent)" }}>{daysUntil(prof.brazilDate)}d</span>
               </div>
             </div>
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-2">Fuerza Histórica</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>Fuerza Histórica</div>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { label: "Squat", value: historicLifts.squat },
@@ -319,7 +319,7 @@ export default function ProfilePage() {
               ].map((l) => (
                 <div key={l.label} className="text-center py-2">
                   <div className="text-xl font-black">{l.value}</div>
-                  <div className="text-[0.6rem] text-zinc-600">{l.label} kg</div>
+                  <div className="text-[0.6rem]" style={{ color: "var(--text-secondary)" }}>{l.label} kg</div>
                 </div>
               ))}
             </div>
@@ -339,8 +339,8 @@ export default function ProfilePage() {
           {latest && (
             <div className="card">
               <div className="flex justify-between items-center mb-3">
-                <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider">Última Medición</div>
-                <div className="flex items-center gap-1 text-[0.62rem] text-zinc-500">
+                <div className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Última Medición</div>
+                <div className="flex items-center gap-1 text-[0.62rem]" style={{ color: "var(--text-muted)" }}>
                   <Calendar size={12} />
                   {latest.date}
                 </div>
@@ -352,7 +352,7 @@ export default function ProfilePage() {
                   const diff = val && initVal ? val - initVal : 0;
                   return val ? (
                     <div key={key} className="flex justify-between items-center py-1" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                      <span className="text-[0.72rem] text-zinc-600">{label}</span>
+                      <span className="text-[0.72rem]" style={{ color: "var(--text-secondary)" }}>{label}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-[0.82rem] font-bold">{val}cm</span>
                         {diff !== 0 && (
@@ -384,32 +384,32 @@ export default function ProfilePage() {
             <div className="card">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
-                  <Ruler size={16} className="text-[#2C6BED]" />
+                  <Ruler size={16} style={{ color: "var(--accent)" }} />
                   <span className="text-sm font-bold">Nueva Medición</span>
                 </div>
-                <button onClick={() => setShowMeasForm(false)} className="text-zinc-400" style={{ cursor: "pointer", background: "none", border: "none" }}>
+                <button onClick={() => setShowMeasForm(false)} style={{ color: "var(--text-muted)", cursor: "pointer", background: "none", border: "none" }}>
                   <X size={18} />
                 </button>
               </div>
               <div className="mb-3">
-                <label className="block text-[0.62rem] text-zinc-500 uppercase mb-1">Fecha</label>
+                <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Fecha</label>
                 <input type="date" value={measForm.date} onChange={(e) => setMeasForm({ ...measForm, date: e.target.value })} className="w-full" />
               </div>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                  <label className="block text-[0.62rem] text-zinc-500 uppercase mb-1">Peso (kg)</label>
+                  <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Peso (kg)</label>
                   <input type="number" step={0.1} value={measForm.weight ?? ""} onChange={(e) => setMeasForm({ ...measForm, weight: e.target.value ? Number(e.target.value) : undefined })} className="w-full" />
                 </div>
                 <div>
-                  <label className="block text-[0.62rem] text-zinc-500 uppercase mb-1">Grasa (%)</label>
+                  <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Grasa (%)</label>
                   <input type="number" step={0.1} value={measForm.bodyFat ?? ""} onChange={(e) => setMeasForm({ ...measForm, bodyFat: e.target.value ? Number(e.target.value) : undefined })} className="w-full" />
                 </div>
               </div>
-              <div className="text-[0.62rem] text-zinc-500 uppercase mb-2">Circunferencias (cm)</div>
+              <div className="text-[0.62rem] uppercase mb-2" style={{ color: "var(--text-muted)" }}>Circunferencias (cm)</div>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {CIRCUM_FIELDS.map(({ key, label }) => (
                   <div key={key}>
-                    <label className="block text-[0.58rem] text-zinc-500 mb-0.5">{label}</label>
+                    <label className="block text-[0.58rem] mb-0.5" style={{ color: "var(--text-muted)" }}>{label}</label>
                     <input
                       type="number"
                       step={0.5}
@@ -427,13 +427,13 @@ export default function ProfilePage() {
           {/* Measurement history list */}
           {measurements.length > 0 && (
             <div className="card">
-              <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Historial ({measurements.length})</div>
+              <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Historial ({measurements.length})</div>
               <div className="space-y-2">
                 {[...measurements].reverse().map((m) => (
                   <div key={m.date} className="flex items-center justify-between py-2" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                     <div>
                       <div className="text-[0.75rem] font-medium">{m.date}</div>
-                      <div className="text-[0.6rem] text-zinc-500">
+                      <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
                         {m.weight && `${m.weight}kg`}
                         {m.bodyFat && ` · ${m.bodyFat}%`}
                         {m.waist && ` · cintura ${m.waist}cm`}
@@ -450,9 +450,9 @@ export default function ProfilePage() {
 
           {measurements.length === 0 && !showMeasForm && (
             <div className="card text-center py-6">
-              <Ruler size={28} className="mx-auto text-zinc-300 mb-2" />
-              <p className="text-[0.78rem] text-zinc-500">Aún no hay mediciones</p>
-              <p className="text-[0.65rem] text-zinc-400">Registrá tu primera medición para ver tu progreso</p>
+              <Ruler size={28} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
+              <p className="text-[0.78rem]" style={{ color: "var(--text-muted)" }}>Aún no hay mediciones</p>
+              <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>Registrá tu primera medición para ver tu progreso</p>
             </div>
           )}
         </div>
@@ -463,12 +463,12 @@ export default function ProfilePage() {
         <div className="space-y-3">
           {/* Weight chart */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Peso en el Tiempo</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Peso en el Tiempo</div>
             {weightHistory.length >= 2 ? (
               <MiniChart
                 data={weightHistory.map((w) => w.weight)}
                 labels={weightHistory.map((w) => w.date.slice(5))}
-                color="#2C6BED"
+                color="var(--accent)"
                 goalLine={prof.goalWeight}
               />
             ) : (
@@ -478,7 +478,7 @@ export default function ProfilePage() {
 
           {/* Waist chart */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Cintura</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Cintura</div>
             {(() => {
               const waistData = measurements.filter((m) => m.waist).map((m) => ({ val: m.waist!, label: m.date.slice(5) }));
               return waistData.length >= 2 ? (
@@ -491,7 +491,7 @@ export default function ProfilePage() {
 
           {/* Body Fat chart */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">% Grasa Corporal</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>% Grasa Corporal</div>
             {(() => {
               const bfData = measurements.filter((m) => m.bodyFat).map((m) => ({ val: m.bodyFat!, label: m.date.slice(5) }));
               return bfData.length >= 2 ? (
@@ -504,7 +504,7 @@ export default function ProfilePage() {
 
           {/* Arms chart */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Brazos</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Brazos</div>
             {(() => {
               const armData = measurements.filter((m) => m.armR).map((m) => ({ val: m.armR!, label: m.date.slice(5) }));
               return armData.length >= 2 ? (
@@ -517,7 +517,7 @@ export default function ProfilePage() {
 
           {/* 4.8 — Chest chart */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Pecho</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Pecho</div>
             {(() => {
               const chestData = measurements.filter((m) => m.chest).map((m) => ({ val: m.chest!, label: m.date.slice(5) }));
               return chestData.length >= 2 ? (
@@ -530,7 +530,7 @@ export default function ProfilePage() {
 
           {/* 4.8 — Thigh chart */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Muslos</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Muslos</div>
             {(() => {
               const thighData = measurements.filter((m) => m.thighR).map((m) => ({ val: m.thighR!, label: m.date.slice(5) }));
               return thighData.length >= 2 ? (
@@ -544,8 +544,8 @@ export default function ProfilePage() {
           {/* 4.8 — First vs Latest comparison */}
           {initial && latest && measurements.length >= 2 && (
             <div className="card">
-              <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-3">Progreso Total</div>
-              <div className="flex justify-between text-[0.55rem] text-zinc-500 mb-2">
+              <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Progreso Total</div>
+              <div className="flex justify-between text-[0.55rem] mb-2" style={{ color: "var(--text-muted)" }}>
                 <span>{initial.date}</span>
                 <span>{latest.date}</span>
               </div>
@@ -557,7 +557,7 @@ export default function ProfilePage() {
                   const diff = last - first;
                   return (
                     <div key={key} className="flex items-center gap-2">
-                      <span className="text-[0.65rem] text-zinc-500 w-16 shrink-0">{label}</span>
+                      <span className="text-[0.65rem] w-16 shrink-0" style={{ color: "var(--text-muted)" }}>{label}</span>
                       <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
                         <div className="h-full rounded-full" style={{
                           width: `${Math.min(100, Math.max(10, (last / Math.max(first, last)) * 100))}%`,
@@ -594,7 +594,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-[0.58rem] text-zinc-500 uppercase mb-1">{label}</label>
+      <label className="block text-[0.58rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>{label}</label>
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} step={type === "number" ? "any" : undefined} className="w-full" />
     </div>
   );
@@ -643,8 +643,8 @@ function MiniChart({
       </svg>
       {/* Labels */}
       <div className="flex justify-between mt-1">
-        <span className="text-[0.55rem] text-zinc-500">{labels[0]}</span>
-        <span className="text-[0.55rem] text-zinc-500">{labels[labels.length - 1]}</span>
+        <span className="text-[0.55rem]" style={{ color: "var(--text-muted)" }}>{labels[0]}</span>
+        <span className="text-[0.55rem]" style={{ color: "var(--text-muted)" }}>{labels[labels.length - 1]}</span>
       </div>
       {/* Value labels */}
       <div className="flex justify-between">
@@ -658,7 +658,7 @@ function MiniChart({
 function EmptyChart({ text }: { text: string }) {
   return (
     <div className="flex items-center justify-center py-8">
-      <p className="text-[0.72rem] text-zinc-400 text-center">{text}</p>
+      <p className="text-[0.72rem] text-center" style={{ color: "var(--text-muted)" }}>{text}</p>
     </div>
   );
 }

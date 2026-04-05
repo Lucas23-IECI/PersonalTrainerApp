@@ -100,7 +100,7 @@ export default function MuscleDistributionRadar() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Crosshair size={16} className="text-[#BF5AF2]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Distribución Muscular</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Distribución Muscular</div>
         </div>
       </div>
 
@@ -139,7 +139,7 @@ export default function MuscleDistributionRadar() {
       </div>
 
       {!hasData ? (
-        <div className="text-center py-5 text-zinc-400 text-[0.8rem]">
+        <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
           Sin datos en este período
         </div>
       ) : (
@@ -154,8 +154,8 @@ export default function MuscleDistributionRadar() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#1C1C1E",
-                    border: "1px solid #38383A",
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border)",
                     borderRadius: 8,
                     fontSize: 12,
                   }}
@@ -175,11 +175,11 @@ export default function MuscleDistributionRadar() {
           {/* Insights */}
           <div className="grid grid-cols-2 gap-2 mt-2">
             <div className="py-1.5 px-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Más fuerte</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Más fuerte</div>
               <div className="text-[0.7rem] font-bold text-[#34C759]">{strongest.group}</div>
             </div>
             <div className="py-1.5 px-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">A mejorar</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>A mejorar</div>
               <div className="text-[0.7rem] font-bold text-[#FF9500]">{weakest.group}</div>
             </div>
           </div>

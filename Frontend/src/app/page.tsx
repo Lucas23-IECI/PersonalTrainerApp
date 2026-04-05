@@ -128,10 +128,13 @@ export default function Dashboard() {
     <PageTransition>
       <main className="max-w-[540px] mx-auto px-4 pt-4 pb-24">
         {/* ───── HEADER ───── */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <Link href="/profile" className="no-underline">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#2C6BED] to-[#1a4fd4] flex items-center justify-center text-white text-lg font-black">
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center text-white text-lg font-black"
+                style={{ background: "var(--gradient-hero)" }}
+              >
                 {prof.name ? prof.name.charAt(0) : "M"}
               </div>
             </Link>
@@ -139,20 +142,20 @@ export default function Dashboard() {
               <h1 className="text-[1.05rem] font-extrabold tracking-tight leading-none">
                 {prof.name ? `${getGreeting()}, ${prof.name.split(" ")[0]}` : "MARK PT"}
               </h1>
-              <p className="text-[0.6rem] uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-                Fase {phase.id} — {phase.name}
+              <p className="text-[0.6rem] uppercase tracking-widest mt-0.5" style={{ color: "var(--text-muted)" }}>
+                Fase {phase.id} · {phase.name}
               </p>
             </Link>
           </div>
           <div className="flex items-center gap-2">
             {streak > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(255, 149, 0, 0.1)" }}>
-                <Flame size={16} style={{ color: "var(--accent-orange)" }} />
-                <span className="text-sm font-bold" style={{ color: "var(--accent-orange)" }}>{streak}</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(255, 149, 0, 0.08)" }}>
+                <Flame size={15} style={{ color: "var(--accent-orange)" }} />
+                <span className="text-[0.8rem] font-bold" style={{ color: "var(--accent-orange)" }}>{streak}</span>
               </div>
             )}
             <Link href="/settings" className="transition-colors" style={{ color: "var(--text-muted)" }} title="Ajustes">
-              <Settings size={20} />
+              <Settings size={20} strokeWidth={1.6} />
             </Link>
           </div>
         </div>
@@ -164,27 +167,27 @@ export default function Dashboard() {
         <StaggerList>
           <StaggerItem>
             {todayWorkout && todayWorkout.exercises.length > 0 ? (
-              <div className="card mb-4" style={{ background: "linear-gradient(135deg, #2C6BED 0%, #1a4fd4 100%)", color: "#fff" }}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[0.6rem] uppercase tracking-widest opacity-70">Hoy</span>
-                  <span className="text-[0.6rem] opacity-70"><Clock size={10} className="inline mr-1" />{todayWorkout.duration}</span>
+              <div className="hero-card mb-4" style={{ background: "var(--gradient-hero)" }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[0.6rem] uppercase tracking-widest opacity-60 font-medium">Hoy</span>
+                  <span className="text-[0.6rem] opacity-60 font-medium"><Clock size={10} className="inline mr-1" />{todayWorkout.duration}</span>
                 </div>
-                <div className="text-xl font-black mb-1">{todayWorkout.name}</div>
-                <div className="text-[0.72rem] opacity-80 mb-4">
+                <div className="text-xl font-black mb-1 tracking-tight">{todayWorkout.name}</div>
+                <div className="text-[0.72rem] opacity-70 mb-5 leading-relaxed">
                   {todayWorkout.exercises.slice(0, 4).map((e) => e.name).join(" · ")}
                   {todayWorkout.exercises.length > 4 && ` (+${todayWorkout.exercises.length - 4})`}
                 </div>
                 {!todayTrained ? (
                   <Link
                     href={`/workout/session?day=${todayWorkout.id}`}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-[0.9rem] no-underline"
-                    style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", color: "#fff" }}
+                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-bold text-[0.88rem] no-underline tracking-tight"
+                    style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(12px)", color: "#fff" }}
                   >
-                    <Play size={18} /> EMPEZAR ENTRENO
+                    <Play size={17} /> EMPEZAR ENTRENO
                   </Link>
                 ) : (
-                  <div className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-[0.9rem]" style={{ background: "rgba(52,199,89,0.3)" }}>
-                    <Check size={18} /> COMPLETADO
+                  <div className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-[0.88rem]" style={{ background: "rgba(52,199,89,0.25)" }}>
+                    <Check size={17} /> COMPLETADO
                   </div>
                 )}
               </div>
@@ -217,24 +220,24 @@ export default function Dashboard() {
 
           {/* ───── QUICK STATS ROW ───── */}
           <StaggerItem>
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              <div className="card py-3 text-center">
-                <div className="text-2xl font-black">{streak}</div>
-                <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>racha</div>
+            <div className="grid grid-cols-3 gap-2.5 mb-4">
+              <div className="stat-block">
+                <div className="stat-value">{streak}</div>
+                <div className="stat-label">racha</div>
               </div>
               <button
                 onClick={() => setCheckinOpen(true)}
-                className="card py-3 text-center"
-                style={{ cursor: "pointer", border: checkin ? "1px solid var(--accent-green)" : "1px solid var(--border-subtle)" }}
+                className="stat-block"
+                style={{ cursor: "pointer", border: checkin ? `1px solid var(--accent-green)` : undefined }}
               >
-                <div className="text-2xl font-black">{currentWeight || "—"}</div>
-                <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>
+                <div className="stat-value">{currentWeight || "—"}</div>
+                <div className="stat-label">
                   {checkin ? "✓ kg" : "kg"}
                 </div>
               </button>
-              <div className="card py-3 text-center">
-                <div className="text-2xl font-black" style={{ color: "var(--accent)" }}>F{phase.id}</div>
-                <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>fase</div>
+              <div className="stat-block">
+                <div className="stat-value" style={{ color: "var(--accent)" }}>F{phase.id}</div>
+                <div className="stat-label">fase</div>
               </div>
             </div>
           </StaggerItem>
@@ -244,7 +247,7 @@ export default function Dashboard() {
             <Link href="/nutrition" className="no-underline text-inherit">
               <div className="card mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Macros Hoy</span>
+                  <span className="section-label">Macros Hoy</span>
                   <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
                 </div>
                 <div className="space-y-2.5">
@@ -303,14 +306,14 @@ export default function Dashboard() {
             <StaggerItem>
               <div className="card mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Actividad Reciente</span>
-                  <Link href="/log" className="text-[0.65rem] no-underline" style={{ color: "var(--accent)" }}>Ver todo →</Link>
+                  <span className="section-label">Actividad Reciente</span>
+                  <Link href="/log" className="text-[0.65rem] no-underline font-semibold" style={{ color: "var(--accent)" }}>Ver todo →</Link>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {recentSessions.map((s, i) => (
-                    <div key={i} className="flex items-center justify-between py-2" style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : undefined }}>
+                    <div key={i} className="flex items-center justify-between py-2.5" style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : undefined }}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(44, 107, 237, 0.1)" }}>
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "var(--accent-soft)" }}>
                           <Dumbbell size={14} style={{ color: "var(--accent)" }} />
                         </div>
                         <div>
@@ -348,10 +351,10 @@ export default function Dashboard() {
           {/* ───── SLEEP CARD ───── */}
           <StaggerItem>
             <Link href="/sleep" className="no-underline text-inherit">
-              <div className="card mb-4 flex items-center justify-between" style={{ borderLeft: "3px solid #5E5CE6" }}>
+              <div className="card mb-4 flex items-center justify-between" style={{ borderLeft: "3px solid var(--accent-violet)" }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(94,92,230,0.1)" }}>
-                    <Moon size={16} style={{ color: "#5E5CE6" }} />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(175,82,222,0.08)" }}>
+                    <Moon size={16} style={{ color: "var(--accent-violet)" }} />
                   </div>
                   <div>
                     <div className="text-[0.75rem] font-semibold">Sueño</div>

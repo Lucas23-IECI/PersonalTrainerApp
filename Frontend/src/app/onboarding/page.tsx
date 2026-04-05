@@ -107,10 +107,10 @@ export default function OnboardingPage() {
       {/* PROGRESS BAR */}
       <div className="pt-6 mb-2">
         <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
-          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: "linear-gradient(90deg, #30D158, #0A84FF)" }} />
+          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: "linear-gradient(90deg, #30D158, var(--accent))" }} />
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[0.6rem] text-zinc-500">Paso {step} de 7</span>
+          <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Paso {step} de 7</span>
           {step > 1 && (
             <button onClick={prev} className="text-[0.6rem] flex items-center gap-0.5 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--accent)" }}>
               <ChevronLeft size={12} /> Atrás
@@ -127,7 +127,7 @@ export default function OnboardingPage() {
               <Dumbbell size={32} />
             </div>
             <h1 className="text-2xl font-black mb-1 text-center">MARK PT</h1>
-            <p className="text-sm text-zinc-500 mb-8 text-center">Tu entrenador personal</p>
+            <p className="text-sm mb-8 text-center" style={{ color: "var(--text-muted)" }}>Tu entrenador personal</p>
             <input
               type="text"
               value={name}
@@ -148,7 +148,7 @@ export default function OnboardingPage() {
               <Ruler size={24} />
             </div>
             <h2 className="text-xl font-black mb-1 text-center">Datos Físicos</h2>
-            <p className="text-sm text-zinc-500 mb-6 text-center">Para calcular tu TDEE y calorías</p>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>Para calcular tu TDEE y calorías</p>
 
             <div className="flex gap-2 mb-4">
               {(["male", "female"] as const).map((g) => (
@@ -168,15 +168,15 @@ export default function OnboardingPage() {
 
             <div className="space-y-3">
               <div>
-                <label className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-1 block">Edad</label>
+                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>Edad</label>
                 <input type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="22" className="w-full py-3 px-4 rounded-xl text-center" style={{ background: "var(--bg-card)" }} />
               </div>
               <div>
-                <label className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-1 block">Altura (cm)</label>
+                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>Altura (cm)</label>
                 <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} placeholder="177" className="w-full py-3 px-4 rounded-xl text-center" style={{ background: "var(--bg-card)" }} />
               </div>
               <div>
-                <label className="text-[0.65rem] text-zinc-500 uppercase tracking-wider mb-1 block">Peso actual (kg)</label>
+                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>Peso actual (kg)</label>
                 <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="80" className="w-full py-3 px-4 rounded-xl text-center" style={{ background: "var(--bg-card)" }} />
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function OnboardingPage() {
               <Award size={24} />
             </div>
             <h2 className="text-xl font-black mb-1 text-center">Tu Experiencia</h2>
-            <p className="text-sm text-zinc-500 mb-6 text-center">Esto nos ayuda a personalizar tus rutinas</p>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>Esto nos ayuda a personalizar tus rutinas</p>
 
             <div className="space-y-2">
               {EXPERIENCE_OPTIONS.map((opt) => (
@@ -204,7 +204,7 @@ export default function OnboardingPage() {
                   }}
                 >
                   <span className="font-bold text-sm block">{opt.label}</span>
-                  <span className="text-[0.65rem] text-zinc-500">{opt.desc}</span>
+                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{opt.desc}</span>
                 </button>
               ))}
             </div>
@@ -218,7 +218,7 @@ export default function OnboardingPage() {
               <Target size={24} />
             </div>
             <h2 className="text-xl font-black mb-1 text-center">Tu Objetivo</h2>
-            <p className="text-sm text-zinc-500 mb-6 text-center">¿Qué querés lograr?</p>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>¿Qué querés lograr?</p>
 
             <div className="space-y-2">
               {GOAL_OPTIONS.map((opt) => (
@@ -232,7 +232,7 @@ export default function OnboardingPage() {
                   }}
                 >
                   <span className="font-bold text-sm block">{opt.emoji} {opt.label}</span>
-                  <span className="text-[0.65rem] text-zinc-500">{opt.desc}</span>
+                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{opt.desc}</span>
                 </button>
               ))}
             </div>
@@ -242,11 +242,11 @@ export default function OnboardingPage() {
         {/* STEP 5: DAYS PER WEEK */}
         {step === 5 && (
           <div className="animate-fade-in">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "#0A84FF", color: "#fff" }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--accent)", color: "#fff" }}>
               <Calendar size={24} />
             </div>
             <h2 className="text-xl font-black mb-1 text-center">Días por Semana</h2>
-            <p className="text-sm text-zinc-500 mb-6 text-center">¿Cuántos días podés entrenar?</p>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>¿Cuántos días podés entrenar?</p>
 
             <div className="flex gap-2 justify-center mb-4">
               {[3, 4, 5, 6].map((d) => (
@@ -264,7 +264,7 @@ export default function OnboardingPage() {
                 </button>
               ))}
             </div>
-            <p className="text-center text-sm text-zinc-500">
+            <p className="text-center text-sm" style={{ color: "var(--text-muted)" }}>
               {daysPerWeek === 3 && "Full Body recomendado"}
               {daysPerWeek === 4 && "Upper/Lower Split ideal"}
               {daysPerWeek === 5 && "Push/Pull/Legs perfecto"}
@@ -280,7 +280,7 @@ export default function OnboardingPage() {
               <Dumbbell size={24} />
             </div>
             <h2 className="text-xl font-black mb-1 text-center">Equipamiento</h2>
-            <p className="text-sm text-zinc-500 mb-6 text-center">¿Con qué contás para entrenar?</p>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>¿Con qué contás para entrenar?</p>
 
             <div className="space-y-2">
               {EQUIPMENT_OPTIONS.map((opt) => (
@@ -294,7 +294,7 @@ export default function OnboardingPage() {
                   }}
                 >
                   <span className="font-bold text-sm block">{opt.label}</span>
-                  <span className="text-[0.65rem] text-zinc-500">{opt.desc}</span>
+                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{opt.desc}</span>
                 </button>
               ))}
             </div>
@@ -304,35 +304,35 @@ export default function OnboardingPage() {
         {/* STEP 7: SUMMARY */}
         {step === 7 && (
           <div className="animate-fade-in">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #30D158, #0A84FF)", color: "#fff" }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #30D158, var(--accent))", color: "#fff" }}>
               <Check size={24} />
             </div>
             <h2 className="text-xl font-black mb-1 text-center">¡Todo Listo!</h2>
-            <p className="text-sm text-zinc-500 mb-6 text-center">Confirmá tus datos para empezar</p>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>Confirmá tus datos para empezar</p>
 
             <div className="card p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] text-zinc-500 uppercase">Nombre</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Nombre</span>
                 <span className="text-sm font-bold">{name}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] text-zinc-500 uppercase">Datos</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Datos</span>
                 <span className="text-sm font-bold">{gender === "male" ? "♂️" : "♀️"} {age} años · {height}cm · {weight}kg</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] text-zinc-500 uppercase">Experiencia</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Experiencia</span>
                 <span className="text-sm font-bold">{EXPERIENCE_OPTIONS.find((e) => e.value === experience)?.label}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] text-zinc-500 uppercase">Objetivo</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Objetivo</span>
                 <span className="text-sm font-bold">{GOAL_OPTIONS.find((g) => g.value === goal)?.label}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] text-zinc-500 uppercase">Frecuencia</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Frecuencia</span>
                 <span className="text-sm font-bold">{daysPerWeek} días/semana</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] text-zinc-500 uppercase">Equipamiento</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Equipamiento</span>
                 <span className="text-sm font-bold">{EQUIPMENT_OPTIONS.find((e) => e.value === equipment)?.label}</span>
               </div>
             </div>
@@ -349,7 +349,7 @@ export default function OnboardingPage() {
           <button
             onClick={next}
             className="btn w-full py-3.5 text-base font-bold text-white border-none cursor-pointer rounded-xl flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #0A84FF, #2C6BED)" }}
+            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent))" }}
           >
             Siguiente <ChevronRight size={18} />
           </button>

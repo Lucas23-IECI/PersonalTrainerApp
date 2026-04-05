@@ -311,7 +311,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
                   const m = calcMacros(selectedFood, g);
                   return (
                     <div className="flex gap-3 mb-3">
-                      <MacroPill label="kcal" value={m.calories} color="#2C6BED" />
+                      <MacroPill label="kcal" value={m.calories} color="var(--accent)" />
                       <MacroPill label="P" value={m.protein} color="#34C759" />
                       <MacroPill label="C" value={m.carbs} color="#FFCC00" />
                       <MacroPill label="F" value={m.fat} color="#AF52DE" />
@@ -540,7 +540,7 @@ function QuickAddModal({ slot, onAdd, onClose }: {
         </p>
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
-            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "#2C6BED" }}>Calorías *</label>
+            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "var(--accent)" }}>Calorías *</label>
             <input type="number" inputMode="numeric" value={cal} onChange={(e) => setCal(e.target.value)} autoFocus
               className="w-full text-center text-lg font-bold rounded-xl py-2.5 border"
               style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
@@ -651,7 +651,7 @@ function CreateFoodModal({ existing, onSave, onClose }: {
           </div>
           <div className="grid grid-cols-4 gap-1.5">
             {[
-              { label: "kcal *", val: cal, set: setCal, color: "#2C6BED" },
+              { label: "kcal *", val: cal, set: setCal, color: "var(--accent)" },
               { label: "Prot (g)", val: pro, set: setPro, color: "#34C759" },
               { label: "Carbs (g)", val: carbs, set: setCarbs, color: "#FFCC00" },
               { label: "Fat (g)", val: fat, set: setFat, color: "#AF52DE" },

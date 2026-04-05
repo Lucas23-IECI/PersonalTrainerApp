@@ -17,8 +17,8 @@ export default function NextWorkoutPreview() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(52, 199, 89, 0.1)" }}
+              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(52, 199, 89, 0.08)" }}
             >
               <CalendarDays size={16} style={{ color: "var(--accent-green)" }} />
             </div>

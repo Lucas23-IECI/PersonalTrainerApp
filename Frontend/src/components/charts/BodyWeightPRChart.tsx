@@ -92,9 +92,9 @@ export default function BodyWeightPRChart() {
       <div className="card mb-3.5">
         <div className="flex items-center gap-2 mb-2">
           <Scale size={16} className="text-[#64D2FF]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Peso + Fuerza</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Peso + Fuerza</div>
         </div>
-        <div className="text-center py-5 text-zinc-400 text-[0.8rem]">
+        <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
           Necesitás pesajes y sesiones para ver este gráfico
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function BodyWeightPRChart() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Scale size={16} className="text-[#64D2FF]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Peso Corporal + PRs</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Peso Corporal + PRs</div>
         </div>
         <button
           onClick={() => setShowPRs(!showPRs)}
@@ -152,8 +152,8 @@ export default function BodyWeightPRChart() {
             )}
             <Tooltip
               contentStyle={{
-                background: "#1C1C1E",
-                border: "1px solid #38383A",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
                 fontSize: 12,
               }}
@@ -169,7 +169,7 @@ export default function BodyWeightPRChart() {
               name="Peso (kg)"
               stroke="#64D2FF"
               strokeWidth={2}
-              dot={{ r: 3, fill: "#64D2FF", stroke: "#1C1C1E", strokeWidth: 2 }}
+              dot={{ r: 3, fill: "#64D2FF", stroke: "var(--bg-card)", strokeWidth: 2 }}
               connectNulls
             />
             {showPRs && (

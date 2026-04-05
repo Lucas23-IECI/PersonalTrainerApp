@@ -6,7 +6,6 @@ import {
   Dumbbell,
   UtensilsCrossed,
   ClipboardList,
-  TrendingUp,
   Home,
   Target,
   User,
@@ -29,36 +28,47 @@ export default function Navigation() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex justify-around"
+      className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: "var(--nav-bg, rgba(255, 255, 255, 0.96))",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid var(--nav-border, rgba(0, 0, 0, 0.06))",
-        padding: "4px 0 max(8px, env(safe-area-inset-bottom))",
+        background: "var(--nav-bg)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        borderTop: "1px solid var(--nav-border)",
+        padding: "6px 8px max(10px, env(safe-area-inset-bottom))",
       }}
     >
-      {links.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-        return (
-          <Link
-            key={href}
-            href={href}
-            className="flex flex-col items-center gap-0.5 no-underline"
-            style={{
-              color: active ? "var(--accent)" : "var(--text-muted)",
-              fontSize: "0.56rem",
-              fontWeight: active ? 600 : 400,
-              letterSpacing: "0.02em",
-              minWidth: 44,
-              transition: "color 0.15s ease",
-            }}
-          >
-            <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
-            {label}
-          </Link>
-        );
-      })}
+      <div className="flex justify-around items-center max-w-[540px] mx-auto">
+        {links.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+          return (
+            <Link
+              key={href}
+              href={href}
+              className="flex flex-col items-center gap-[3px] no-underline relative"
+              style={{
+                color: active ? "var(--accent)" : "var(--text-muted)",
+                fontSize: "0.55rem",
+                fontWeight: active ? 600 : 500,
+                letterSpacing: "0.01em",
+                minWidth: 48,
+                transition: "color 0.2s ease",
+              }}
+            >
+              <div
+                className="flex items-center justify-center rounded-xl transition-all duration-200"
+                style={{
+                  width: 36,
+                  height: 28,
+                  background: active ? "var(--accent-soft)" : "transparent",
+                }}
+              >
+                <Icon size={20} strokeWidth={active ? 2.2 : 1.6} />
+              </div>
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

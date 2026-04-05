@@ -147,8 +147,8 @@ export default function PRSystemComplete() {
   if (groups.length === 0) {
     return (
       <div className="card mb-3.5 text-center py-6">
-        <Trophy size={24} className="mx-auto mb-2 text-zinc-600" />
-        <div className="text-sm text-zinc-500">Completá sesiones para ver tus PRs</div>
+        <Trophy size={24} className="mx-auto mb-2" style={{ color: "var(--text-secondary)" }} />
+        <div className="text-sm" style={{ color: "var(--text-muted)" }}>Completá sesiones para ver tus PRs</div>
       </div>
     );
   }
@@ -158,7 +158,7 @@ export default function PRSystemComplete() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Trophy size={16} className="text-[#FFD700] shrink-0" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
             Records Personales
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function PRSystemComplete() {
                     {hasRecent && <span className="text-[0.5rem]">🆕</span>}
                     <div className="text-[0.7rem] font-semibold truncate">{g.exerciseName}</div>
                   </div>
-                  <div className="text-[0.55rem] text-zinc-500">
+                  <div className="text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
                     e1RM: {Math.round(g.bestE1rm)}kg · {g.prs.length} rango{g.prs.length > 1 ? "s" : ""}
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export default function PRSystemComplete() {
                       </span>
                     ))}
                   </div>
-                  {isExpanded ? <ChevronUp size={12} className="text-zinc-500" /> : <ChevronDown size={12} className="text-zinc-500" />}
+                  {isExpanded ? <ChevronUp size={12} style={{ color: "var(--text-muted)" }} /> : <ChevronDown size={12} style={{ color: "var(--text-muted)" }} />}
                 </div>
               </button>
 
@@ -235,7 +235,7 @@ export default function PRSystemComplete() {
                       <Trophy size={12} className="text-[#FFD700]" />
                       <span className="text-[0.65rem] font-bold text-white">{g.exerciseName}</span>
                     </div>
-                    <span className="text-[0.5rem] text-zinc-500">MARK PT</span>
+                    <span className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>MARK PT</span>
                   </div>
                   {g.prs.map((p) => (
                     <div
@@ -247,24 +247,24 @@ export default function PRSystemComplete() {
                           : "rgba(28, 28, 30, 0.5)",
                         borderLeft: p.date >= twoWeeksStr
                           ? "2px solid #FFD700"
-                          : "2px solid #38383A",
+                          : "2px solid var(--border)",
                       }}
                     >
                       <div>
                         <span className="font-bold text-white">{p.repRange}</span>
-                        <span className="text-zinc-500 mx-1.5">→</span>
-                        <span className="font-semibold" style={{ color: "#0A84FF" }}>
+                        <span className="mx-1.5" style={{ color: "var(--text-muted)" }}>→</span>
+                        <span className="font-semibold" style={{ color: "var(--accent)" }}>
                           {p.weight}kg × {p.reps}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-zinc-500">
+                      <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
                         <span>~{Math.round(p.e1rm)}kg e1RM</span>
                         <span>{p.date.slice(5)}</span>
                         {p.date >= twoWeeksStr && <Trophy size={8} className="text-[#FFD700]" />}
                       </div>
                     </div>
                   ))}
-                  <div className="text-center text-[0.5rem] text-zinc-600 pt-1">
+                  <div className="text-center text-[0.5rem] pt-1" style={{ color: "var(--text-secondary)" }}>
                     Best e1RM: {Math.round(g.bestE1rm)}kg
                   </div>
                 </div>
@@ -285,7 +285,7 @@ export default function PRSystemComplete() {
       </div>
 
       {!expandedExercise && filteredGroups.length > 8 && (
-        <div className="text-center mt-2 text-[0.55rem] text-zinc-500">
+        <div className="text-center mt-2 text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
           +{filteredGroups.length - 8} ejercicios más
         </div>
       )}

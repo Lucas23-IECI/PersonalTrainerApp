@@ -91,9 +91,9 @@ export default function MuscleVolumeChart() {
       <div className="card mb-3.5">
         <div className="flex items-center gap-2 mb-2">
           <Target size={16} className="text-[#FF9500]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Volumen por Músculo</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Volumen por Músculo</div>
         </div>
-        <div className="text-center py-5 text-zinc-400 text-[0.8rem]">
+        <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
           Sin datos de volumen en este período
         </div>
       </div>
@@ -105,9 +105,9 @@ export default function MuscleVolumeChart() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Target size={16} className="text-[#FF9500]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Volumen por Músculo</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Volumen por Músculo</div>
         </div>
-        <div className="text-[0.6rem] text-zinc-400">
+        <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
           {totalVolume > 1000 ? `${(totalVolume / 1000).toFixed(1)}k` : totalVolume}kg total
         </div>
       </div>
@@ -151,8 +151,8 @@ export default function MuscleVolumeChart() {
             />
             <Tooltip
               contentStyle={{
-                background: "#1C1C1E",
-                border: "1px solid #38383A",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
                 fontSize: 12,
               }}

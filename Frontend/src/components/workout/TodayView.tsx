@@ -74,7 +74,7 @@ export default function TodayView({ plan, todayWorkout, onStart, onPlanChange }:
         <div className="card text-center py-8">
           <div className="text-3xl mb-2">🎉</div>
           <div className="text-sm font-bold" style={{ color: "var(--text)" }}>Día de descanso</div>
-          <div className="text-[0.7rem] text-zinc-500 mt-1">Recuperá y volvé mañana más fuerte</div>
+          <div className="text-[0.7rem] mt-1" style={{ color: "var(--text-muted)" }}>Recuperá y volvé mañana más fuerte</div>
         </div>
       )}
 
@@ -82,7 +82,7 @@ export default function TodayView({ plan, todayWorkout, onStart, onPlanChange }:
       {otherDays.length > 0 && (
         <>
           <div className="flex items-center justify-between mt-1">
-            <div className="text-[0.65rem] text-zinc-500 uppercase tracking-wider font-semibold">
+            <div className="text-[0.65rem] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
               Resto de la semana
             </div>
             {showReset && (
@@ -133,7 +133,8 @@ function SortableDayCard({ workout, isExpanded, onToggle, onStart }: {
       <div
         {...attributes}
         {...listeners}
-        className="mt-3 cursor-grab active:cursor-grabbing text-zinc-600 shrink-0"
+        className="mt-3 cursor-grab active:cursor-grabbing shrink-0"
+        style={{ color: "var(--text-secondary)" }}
       >
         <GripVertical size={14} />
       </div>
@@ -161,7 +162,7 @@ function HeroCard({ workout: w, onStart }: { workout: WorkoutDay; onStart: (id: 
       <div className="card text-center py-8" style={{ borderColor: w.color + "40" }}>
         <div className="text-3xl mb-2">🧘</div>
         <div className="text-sm font-bold" style={{ color: w.color }}>{w.name}</div>
-        <div className="text-[0.7rem] text-zinc-500 mt-1">Recuperación activa</div>
+        <div className="text-[0.7rem] mt-1" style={{ color: "var(--text-muted)" }}>Recuperación activa</div>
       </div>
     );
   }
@@ -181,7 +182,7 @@ function HeroCard({ workout: w, onStart }: { workout: WorkoutDay; onStart: (id: 
         >
           HOY
         </span>
-        <span className="text-[0.65rem] text-zinc-500 font-medium">{w.day}</span>
+        <span className="text-[0.65rem] font-medium" style={{ color: "var(--text-muted)" }}>{w.day}</span>
       </div>
 
       <div className="text-lg font-extrabold mb-1" style={{ color: w.color }}>
@@ -213,11 +214,11 @@ function HeroCard({ workout: w, onStart }: { workout: WorkoutDay; onStart: (id: 
             style={{ borderBottom: "1px solid var(--border-subtle)" }}
           >
             <span className="font-semibold" style={{ color: "var(--text)" }}>{ex.name}</span>
-            <span className="text-zinc-500">{ex.sets}×{ex.reps}</span>
+            <span style={{ color: "var(--text-muted)" }}>{ex.sets}×{ex.reps}</span>
           </div>
         ))}
         {remaining > 0 && (
-          <div className="text-[0.68rem] text-zinc-500 mt-1.5">
+          <div className="text-[0.68rem] mt-1.5" style={{ color: "var(--text-muted)" }}>
             +{remaining} ejercicio{remaining > 1 ? "s" : ""} más
           </div>
         )}
@@ -225,8 +226,9 @@ function HeroCard({ workout: w, onStart }: { workout: WorkoutDay; onStart: (id: 
 
       {w.note && (
         <div
-          className="text-[0.68rem] text-zinc-400 mb-3 py-2 px-3 rounded-lg"
+          className="text-[0.68rem] mb-3 py-2 px-3 rounded-lg"
           style={{
+            color: "var(--text-muted)",
             background: "var(--bg-elevated)",
             borderLeft: `3px solid ${w.color}`,
           }}

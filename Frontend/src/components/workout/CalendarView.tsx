@@ -74,12 +74,12 @@ export default function CalendarView({ plan, todayIndex, onStart }: CalendarView
                   {trained ? <Check size={12} strokeWidth={3} /> : workout.name.charAt(0)}
                 </div>
               ) : (
-                <div className="w-6 h-6 rounded-full bg-zinc-800/30 flex items-center justify-center text-[0.5rem] text-zinc-500">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[0.5rem]" style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>
                   —
                 </div>
               )}
               {workout && !trained && workout.exercises.length > 0 && (
-                <span className="text-[0.5rem] text-zinc-500 leading-tight truncate max-w-full px-0.5">
+                <span className="text-[0.5rem] leading-tight truncate max-w-full px-0.5" style={{ color: "var(--text-muted)" }}>
                   {workout.duration}
                 </span>
               )}
@@ -103,7 +103,7 @@ export default function CalendarView({ plan, todayIndex, onStart }: CalendarView
       )}
 
       {!selectedWorkout && (
-        <div className="text-center py-8 text-zinc-500 text-[0.75rem]">
+        <div className="text-center py-8 text-[0.75rem]" style={{ color: "var(--text-muted)" }}>
           Tocá un día para ver el detalle
         </div>
       )}

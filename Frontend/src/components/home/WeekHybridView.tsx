@@ -15,10 +15,10 @@ export default function WeekHybridView({ weekStatus }: Props) {
   return (
     <div className="card mb-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+        <span className="section-label">
           Esta Semana
         </span>
-        <Link href="/weekly-report" className="text-[0.65rem] no-underline" style={{ color: "var(--accent)" }}>
+        <Link href="/weekly-report" className="text-[0.65rem] no-underline font-semibold" style={{ color: "var(--accent)" }}>
           Reporte →
         </Link>
       </div>
@@ -44,7 +44,7 @@ export default function WeekHybridView({ weekStatus }: Props) {
                   background: d.trained
                     ? "var(--accent-green)"
                     : isToday
-                      ? "rgba(44, 107, 237, 0.08)"
+                      ? "var(--accent-soft)"
                       : "var(--bg-elevated)",
                   border: isToday && !d.trained ? "2px solid var(--accent)" : "none",
                 }}

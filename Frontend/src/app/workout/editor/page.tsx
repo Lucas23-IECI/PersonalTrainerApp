@@ -35,7 +35,7 @@ export default function WorkoutEditorPage() {
     setProgram(structuredClone(getProgramForPhase(phase.id)));
   }, [phase.id]);
 
-  if (!program) return <div className="py-10 text-center text-zinc-500">Cargando...</div>;
+  if (!program) return <div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>Cargando...</div>;
 
   function updateExercise(dayId: string, exIdx: number, updates: Partial<ProgramExercise>) {
     setProgram((prev) => {
@@ -120,15 +120,16 @@ export default function WorkoutEditorPage() {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1 text-sm text-zinc-500 bg-transparent border-none cursor-pointer p-0"
+          className="flex items-center gap-1 text-sm bg-transparent border-none cursor-pointer p-0"
+          style={{ color: "var(--text-muted)" }}
         >
           <ChevronLeft size={16} /> Volver
         </button>
         <div className="flex gap-2">
           <button
             onClick={handleReset}
-            className="flex items-center gap-1 text-[0.7rem] text-zinc-500 bg-transparent cursor-pointer py-1 px-2 rounded-lg"
-            style={{ border: "1px solid var(--border)" }}
+            className="flex items-center gap-1 text-[0.7rem] bg-transparent cursor-pointer py-1 px-2 rounded-lg"
+            style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
           >
             <RotateCcw size={12} /> Reset
           </button>
@@ -136,7 +137,7 @@ export default function WorkoutEditorPage() {
             onClick={handleSave}
             disabled={!dirty}
             className="flex items-center gap-1 text-[0.7rem] font-bold text-white px-3 py-1 rounded-lg border-none cursor-pointer"
-            style={{ background: dirty ? "#2C6BED" : "var(--bg-elevated)", opacity: dirty ? 1 : 0.5 }}
+            style={{ background: dirty ? "var(--accent)" : "var(--bg-elevated)", opacity: dirty ? 1 : 0.5 }}
           >
             <Save size={12} /> Guardar
           </button>
@@ -150,7 +151,7 @@ export default function WorkoutEditorPage() {
       )}
 
       <h1 className="text-xl font-extrabold tracking-tight mb-0.5">Editor de Rutina</h1>
-      <p className="text-[0.68rem] text-zinc-500 mb-4">
+      <p className="text-[0.68rem] mb-4" style={{ color: "var(--text-muted)" }}>
         {phase.name} · {program.name}
       </p>
 
@@ -170,11 +171,11 @@ export default function WorkoutEditorPage() {
                 <div className="text-[0.85rem] font-bold" style={{ color: day.color }}>
                   {day.name}
                 </div>
-                <div className="text-[0.6rem] text-zinc-500">
+                <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
                   {day.exercises.length} ejercicios · {day.focus}
                 </div>
               </div>
-              {isOpen ? <ChevronUp size={16} className="text-zinc-500" /> : <ChevronDown size={16} className="text-zinc-500" />}
+              {isOpen ? <ChevronUp size={16} style={{ color: "var(--text-muted)" }} /> : <ChevronDown size={16} style={{ color: "var(--text-muted)" }} />}
             </div>
 
             {/* Expanded exercises */}
@@ -188,10 +189,10 @@ export default function WorkoutEditorPage() {
                       {/* Exercise row */}
                       <div className="flex items-center gap-2">
                         <div className="flex flex-col gap-0.5">
-                          <button onClick={() => moveExercise(day.id, i, i - 1)} disabled={i === 0} className="text-zinc-400 bg-transparent border-none cursor-pointer p-0" style={{ opacity: i === 0 ? 0.2 : 1 }}>
+                          <button onClick={() => moveExercise(day.id, i, i - 1)} disabled={i === 0} className="bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)", opacity: i === 0 ? 0.2 : 1 }}>
                             <ChevronUp size={12} />
                           </button>
-                          <button onClick={() => moveExercise(day.id, i, i + 1)} disabled={i === day.exercises.length - 1} className="text-zinc-400 bg-transparent border-none cursor-pointer p-0" style={{ opacity: i === day.exercises.length - 1 ? 0.2 : 1 }}>
+                          <button onClick={() => moveExercise(day.id, i, i + 1)} disabled={i === day.exercises.length - 1} className="bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)", opacity: i === day.exercises.length - 1 ? 0.2 : 1 }}>
                             <ChevronDown size={12} />
                           </button>
                         </div>
@@ -199,12 +200,13 @@ export default function WorkoutEditorPage() {
                           className="flex-1 cursor-pointer"
                           onClick={() => setEditingEx(isEditing ? null : { dayId: day.id, exIdx: i })}
                         >
-                          <div className="text-[0.78rem] font-semibold text-zinc-800">{ex.name}</div>
-                          <div className="text-[0.62rem] text-zinc-500">{ex.sets}×{ex.reps} · {ex.rest} · RPE {ex.rpe}</div>
+                          <div className="text-[0.78rem] font-semibold" style={{ color: "var(--text)" }}>{ex.name}</div>
+                          <div className="text-[0.62rem]" style={{ color: "var(--text-muted)" }}>{ex.sets}×{ex.reps} · {ex.rest} · RPE {ex.rpe}</div>
                         </div>
                         <button
                           onClick={() => removeExercise(day.id, i)}
-                          className="text-zinc-400 bg-transparent border-none cursor-pointer p-1"
+                          className="bg-transparent border-none cursor-pointer p-1"
+                          style={{ color: "var(--text-muted)" }}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -214,7 +216,7 @@ export default function WorkoutEditorPage() {
                       {isEditing && (
                         <div className="mt-2 py-2 px-2 rounded-lg grid grid-cols-2 gap-2" style={{ background: "var(--bg-elevated)" }}>
                           <div className="col-span-2">
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Nombre</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Nombre</label>
                             <input
                               type="text"
                               value={ex.name}
@@ -223,7 +225,7 @@ export default function WorkoutEditorPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Sets</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Sets</label>
                             <input
                               type="number"
                               value={ex.sets}
@@ -232,7 +234,7 @@ export default function WorkoutEditorPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Reps</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Reps</label>
                             <input
                               type="text"
                               value={ex.reps}
@@ -241,7 +243,7 @@ export default function WorkoutEditorPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">RPE</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>RPE</label>
                             <input
                               type="text"
                               value={ex.rpe}
@@ -250,7 +252,7 @@ export default function WorkoutEditorPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Descanso</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Descanso</label>
                             <input
                               type="text"
                               value={ex.rest}
@@ -259,7 +261,7 @@ export default function WorkoutEditorPage() {
                             />
                           </div>
                           <div className="col-span-2">
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Carga</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Carga</label>
                             <input
                               type="text"
                               value={ex.load}
@@ -268,7 +270,7 @@ export default function WorkoutEditorPage() {
                             />
                           </div>
                           <div className="col-span-2 flex items-center gap-2">
-                            <label className="text-[0.6rem] text-zinc-600">Compuesto</label>
+                            <label className="text-[0.6rem]" style={{ color: "var(--text-secondary)" }}>Compuesto</label>
                             <input
                               type="checkbox"
                               checked={ex.isCompound}
@@ -284,8 +286,8 @@ export default function WorkoutEditorPage() {
                 {/* Add exercise button */}
                 <button
                   onClick={() => addExercise(day.id)}
-                  className="mt-2 w-full flex items-center justify-center gap-1 text-[0.72rem] font-semibold text-[#2C6BED] py-2 rounded-lg cursor-pointer bg-transparent"
-                  style={{ border: "1px dashed #2C6BED40" }}
+                  className="mt-2 w-full flex items-center justify-center gap-1 text-[0.72rem] font-semibold py-2 rounded-lg cursor-pointer bg-transparent"
+                  style={{ color: "var(--accent)", border: "1px dashed color-mix(in srgb, var(--accent) 25%, transparent)" }}
                 >
                   <Plus size={14} /> Agregar ejercicio
                 </button>
@@ -293,7 +295,7 @@ export default function WorkoutEditorPage() {
             )}
 
             {isOpen && isRest && (
-              <div className="mt-2 text-center text-[0.75rem] text-zinc-400 py-3">
+              <div className="mt-2 text-center text-[0.75rem] py-3" style={{ color: "var(--text-muted)" }}>
                 {day.type === "football" ? "⚽ Fútbol — no editable" : "🛋️ Día de descanso"}
               </div>
             )}

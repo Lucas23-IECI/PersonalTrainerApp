@@ -50,7 +50,7 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-bold" style={{ color: "var(--text)" }}>Registrar Actividad</h3>
-          <button onClick={onClose} className="bg-transparent border-none cursor-pointer p-1 text-zinc-500">
+          <button onClick={onClose} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
             <X size={20} />
           </button>
         </div>
@@ -68,7 +68,7 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
                 >
                   <span className="text-xl">{cat.icon}</span>
                   <span className="text-[0.68rem] font-semibold" style={{ color: "var(--text)" }}>{cat.name}</span>
-                  <span className="text-[0.55rem] text-zinc-500">MET {cat.metValue}</span>
+                  <span className="text-[0.55rem]" style={{ color: "var(--text-muted)" }}>MET {cat.metValue}</span>
                 </button>
               ))}
             </div>
@@ -85,7 +85,7 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
         {/* Custom activity name input */}
         {showCustom && !selected && (
           <div className="mb-4">
-            <label className="text-[0.68rem] text-zinc-500 block mb-1">Nombre de la actividad</label>
+            <label className="text-[0.68rem] block mb-1" style={{ color: "var(--text-muted)" }}>Nombre de la actividad</label>
             <input
               type="text"
               value={customName}
@@ -117,7 +117,7 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
               <span className="text-2xl">{selected.icon}</span>
               <div>
                 <div className="font-bold text-sm" style={{ color: "var(--text)" }}>{selected.name}</div>
-                <div className="text-[0.6rem] text-zinc-500">MET {selected.metValue}</div>
+                <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>MET {selected.metValue}</div>
               </div>
               <button
                 onClick={() => { setSelected(null); setShowCustom(false); }}
@@ -128,7 +128,7 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
             </div>
 
             {/* Duration stepper */}
-            <label className="text-[0.68rem] text-zinc-500 block mb-1.5">Duración</label>
+            <label className="text-[0.68rem] block mb-1.5" style={{ color: "var(--text-muted)" }}>Duración</label>
             <div className="flex items-center gap-3 mb-4">
               <button
                 onClick={() => setDuration(Math.max(5, duration - 5))}
@@ -139,7 +139,7 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
               </button>
               <div className="flex-1 text-center">
                 <span className="text-2xl font-black" style={{ color: "var(--text)" }}>{duration}</span>
-                <span className="text-[0.7rem] text-zinc-500 ml-1">min</span>
+                <span className="text-[0.7rem] ml-1" style={{ color: "var(--text-muted)" }}>min</span>
               </div>
               <button
                 onClick={() => setDuration(Math.min(300, duration + 5))}
@@ -155,15 +155,15 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
               className="text-center py-3 rounded-lg mb-4"
               style={{ background: "var(--bg-elevated)" }}
             >
-              <div className="text-[0.6rem] text-zinc-500 uppercase tracking-wider">Calorías estimadas</div>
+              <div className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Calorías estimadas</div>
               <div className="text-xl font-black" style={{ color: "#FF9500" }}>{calories} kcal</div>
-              <div className="text-[0.55rem] text-zinc-600">
+              <div className="text-[0.55rem]" style={{ color: "var(--text-secondary)" }}>
                 MET {metValue} × {profile.weight}kg × {(duration / 60).toFixed(1)}h
               </div>
             </div>
 
             {/* Rating */}
-            <label className="text-[0.68rem] text-zinc-500 block mb-1.5">¿Cómo estuvo?</label>
+            <label className="text-[0.68rem] block mb-1.5" style={{ color: "var(--text-muted)" }}>¿Cómo estuvo?</label>
             <div className="flex gap-2 mb-4">
               {([1, 2, 3, 4, 5] as const).map((r) => (
                 <button
@@ -181,7 +181,7 @@ export default function AddActivityModal({ onClose, onSaved }: AddActivityModalP
             </div>
 
             {/* Notes */}
-            <label className="text-[0.68rem] text-zinc-500 block mb-1.5">Notas (opcional)</label>
+            <label className="text-[0.68rem] block mb-1.5" style={{ color: "var(--text-muted)" }}>Notas (opcional)</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

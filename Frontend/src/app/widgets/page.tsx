@@ -70,7 +70,7 @@ export default function WidgetsPage() {
       title: "Total Sesiones",
       value: `${totalSessions}`,
       icon: Dumbbell,
-      gradient: "from-[#0A84FF] to-[#2C6BED]",
+      gradient: "from-[var(--accent)] to-[var(--accent)]",
       sub: "Desde que empezaste",
     },
     {
@@ -91,12 +91,12 @@ export default function WidgetsPage() {
 
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-zinc-500 mb-4 bg-transparent border-none cursor-pointer p-0">
+      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
         <ChevronLeft size={16} /> Volver
       </button>
 
       <h1 className="text-xl font-black tracking-tight mb-1">Quick Stats</h1>
-      <p className="text-[0.7rem] text-zinc-500 mb-5">
+      <p className="text-[0.7rem] mb-5" style={{ color: "var(--text-muted)" }}>
         Widgets rápidos con tus estadísticas. En Android, mantené presionado el ícono de la app para accesos directos.
       </p>
 
@@ -108,16 +108,16 @@ export default function WidgetsPage() {
           >
             <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl bg-gradient-to-br ${w.gradient} opacity-15`} />
             <w.icon size={20} className="mb-2" style={{ color: "var(--accent)" }} />
-            <div className="text-[0.6rem] text-zinc-500 uppercase tracking-wider mb-1">{w.title}</div>
+            <div className="text-[0.6rem] uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>{w.title}</div>
             <div className="text-xl font-black">{w.value}</div>
-            <div className="text-[0.6rem] text-zinc-500 mt-1">{w.sub}</div>
+            <div className="text-[0.6rem] mt-1" style={{ color: "var(--text-muted)" }}>{w.sub}</div>
           </div>
         ))}
       </div>
 
       <div className="card mt-5 p-4">
         <div className="text-[0.75rem] font-bold mb-2">📱 Widget Android</div>
-        <p className="text-[0.65rem] text-zinc-500 leading-relaxed">
+        <p className="text-[0.65rem] leading-relaxed" style={{ color: "var(--text-muted)" }}>
           Cuando esta app está instalada como APK, podés añadir un widget de acceso rápido
           a tu escritorio de Android que muestra tu racha y los entrenos de la semana.
           Mantené presionado en un espacio vacío del escritorio → Widgets → MARK PT.

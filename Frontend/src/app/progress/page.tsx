@@ -132,14 +132,14 @@ export default function ProgressPage() {
     <PageTransition>
     <main className="max-w-[600px] mx-auto px-4 py-5">
       <h1 className="text-[1.3rem] font-black tracking-tight mb-1">Progreso</h1>
-      <p className="text-[0.7rem] text-zinc-600 mb-4">
+      <p className="text-[0.7rem] mb-4" style={{ color: "var(--text-secondary)" }}>
         {checkins.length} check-ins · {trainingDays} días de entreno
       </p>
 
       {/* 4.7 — Executive Summary: This week vs Last week */}
       {(weeklySummary.thisWeek.sessions > 0 || weeklySummary.lastWeek.sessions > 0) && (
         <div className="card mb-4">
-          <div className="text-[0.6rem] text-zinc-500 uppercase tracking-widest mb-2.5">Resumen Semanal</div>
+          <div className="text-[0.6rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-muted)" }}>Resumen Semanal</div>
           <div className="grid grid-cols-4 gap-2 text-center">
             {([
               { label: "Sesiones", curr: weeklySummary.thisWeek.sessions, prev: weeklySummary.lastWeek.sessions, fmt: (v: number) => String(v) },
@@ -152,7 +152,7 @@ export default function ProgressPage() {
               const trendColor = diff > 5 ? "#34C759" : diff < -5 ? "#FF3B30" : "var(--text-muted)";
               return (
                 <div key={item.label}>
-                  <div className="text-[0.5rem] text-zinc-500 uppercase">{item.label}</div>
+                  <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{item.label}</div>
                   <div className="text-[1rem] font-black">{item.fmt(item.curr)}</div>
                   {item.prev > 0 && (
                     <div className="flex items-center justify-center gap-0.5 mt-0.5">
@@ -195,7 +195,7 @@ export default function ProgressPage() {
           <div className="grid grid-cols-4 gap-1.5 mb-4">
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{unit === "lbs" ? kgToLbs(latestWeight) : latestWeight}{unit}</div>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Peso</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Peso</div>
               {weightChange !== 0 && (
                 <div className={`text-[0.6rem] font-bold ${weightChange < 0 ? "text-[#34C759]" : "text-[#FF3B30]"}`}>
                   {weightChange > 0 ? "+" : ""}{(unit === "lbs" ? kgToLbs(weightChange) : weightChange).toFixed(1)}
@@ -204,30 +204,30 @@ export default function ProgressPage() {
             </div>
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{sleepAvg}h</div>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Sueño</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Sueño</div>
             </div>
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{energyAvg}</div>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Energía</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Energía</div>
             </div>
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{streak}</div>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Racha</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Racha</div>
             </div>
           </div>
 
           {/* Weight Chart */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>
               Evolución de Peso
             </div>
             {weightData.length < 2 ? (
-              <div className="text-center py-5 text-zinc-400 text-[0.8rem]">
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
                 Necesitás al menos 2 pesajes en check-ins
               </div>
             ) : (
               <div className="relative h-[140px]">
-                <div className="absolute left-0 top-0 bottom-0 w-[35px] flex flex-col justify-between text-[0.55rem] text-zinc-400">
+                <div className="absolute left-0 top-0 bottom-0 w-[35px] flex flex-col justify-between text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
                   <span>{maxW.toFixed(1)}</span>
                   <span>{((maxW + minW) / 2).toFixed(1)}</span>
                   <span>{minW.toFixed(1)}</span>
@@ -248,12 +248,12 @@ export default function ProgressPage() {
                       const y1 = ((maxW - weightData[i - 1].weight!) / rangeW) * 140;
                       const x2 = i * 40 + 10;
                       const y2 = ((maxW - d.weight!) / rangeW) * 140;
-                      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#2C6BED" strokeWidth="2" />;
+                      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--accent)" strokeWidth="2" />;
                     })}
                     {weightData.map((d, i) => {
                       const x = i * 40 + 10;
                       const y = ((maxW - d.weight!) / rangeW) * 140;
-                      return <circle key={i} cx={x} cy={y} r="4" fill="#2C6BED" stroke="#fff" strokeWidth="2" />;
+                      return <circle key={i} cx={x} cy={y} r="4" fill="var(--accent)" stroke="#fff" strokeWidth="2" />;
                     })}
                   </svg>
                 </div>
@@ -264,23 +264,23 @@ export default function ProgressPage() {
           {/* Sleep History */}
           <div className="card mb-3.5">
             <div className="flex items-center justify-between mb-2.5">
-              <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Sueño</div>
+              <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Sueño</div>
               <Link href="/sleep" className="text-[0.58rem] no-underline font-semibold" style={{ color: "#5E5CE6" }}>Ver detalle →</Link>
             </div>
             <div className="flex items-center gap-3 mb-2.5">
               <div className="text-center">
                 <div className="text-lg font-black">{sleepAvg}h</div>
-                <div className="text-[0.5rem] text-zinc-500 uppercase">Promedio</div>
+                <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Promedio</div>
               </div>
               {getSleepQualityAvg(7) > 0 && (
                 <div className="text-center">
                   <div className="text-lg">{QUALITY_EMOJIS[Math.round(getSleepQualityAvg(7))]}</div>
-                  <div className="text-[0.5rem] text-zinc-500 uppercase">Calidad</div>
+                  <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Calidad</div>
                 </div>
               )}
             </div>
             {checkins.length === 0 ? (
-              <div className="text-center py-5 text-zinc-400 text-[0.8rem]">Sin datos todavía</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Sin datos todavía</div>
             ) : (
               <>
                 <div className="flex gap-0.5 items-end h-[60px]">
@@ -294,12 +294,12 @@ export default function ProgressPage() {
                           className={`w-full max-w-[14px] rounded-sm min-h-[2px] opacity-70 ${bad ? "bg-[#FF3B30]" : "bg-[#34C759]"}`}
                           style={{ height: `${pct}%` }}
                         />
-                        <span className="text-[0.45rem] text-zinc-400">{c.date.slice(-2)}</span>
+                        <span className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>{c.date.slice(-2)}</span>
                       </div>
                     );
                   })}
                 </div>
-                <div className="mt-1.5 flex justify-between text-[0.55rem] text-zinc-400">
+                <div className="mt-1.5 flex justify-between text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
                   <span className="text-[#FF3B30]">&lt;7h</span>
                   <span className="text-[#34C759]">≥7h</span>
                 </div>
@@ -309,11 +309,11 @@ export default function ProgressPage() {
 
           {/* Energy Trend */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>
               Energía · {energyAvg}/5
             </div>
             {checkins.length === 0 ? (
-              <div className="text-center py-2.5 text-zinc-400 text-[0.8rem]">Sin datos todavía</div>
+              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Sin datos todavía</div>
             ) : (
               <div className="flex gap-0.5 items-end h-[40px]">
                 {checkins.slice(-21).map((c, i) => {
@@ -336,14 +336,14 @@ export default function ProgressPage() {
 
           {/* Check-in History */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">Check-ins</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Check-ins</div>
             {checkins.length === 0 ? (
-              <div className="text-center py-2.5 text-zinc-400 text-[0.8rem]">Hacé tu primer check-in desde el dashboard</div>
+              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Hacé tu primer check-in desde el dashboard</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-[0.7rem]" style={{ borderCollapse: "collapse" }}>
                   <thead>
-                    <tr className="text-[0.55rem] text-zinc-400 uppercase">
+                    <tr className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>
                       <th className="text-left py-1 font-semibold">Fecha</th>
                       <th className="text-center py-1 font-semibold">Peso</th>
                       <th className="text-center py-1 font-semibold">Sueño</th>
@@ -357,11 +357,11 @@ export default function ProgressPage() {
                       const energyLabels = ["", "1", "2", "3", "4", "5"];
                       return (
                         <tr key={i} style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                          <td className="py-1.5 text-zinc-500">{c.date.slice(5)}</td>
+                          <td className="py-1.5" style={{ color: "var(--text-muted)" }}>{c.date.slice(5)}</td>
                           <td className="py-1.5 text-center font-bold">{c.weight ? `${c.weight}` : "—"}</td>
                           <td className={`py-1.5 text-center ${(c.sleepHours || 0) < 7 ? "text-[#FF3B30]" : "text-[#34C759]"}`}>{c.sleepHours || "—"}h</td>
                           <td className="py-1.5 text-center">{energyLabels[c.energy]}/5</td>
-                          <td className="py-1.5 text-center text-zinc-600">{sorenessLabels[c.soreness]}</td>
+                          <td className="py-1.5 text-center" style={{ color: "var(--text-secondary)" }}>{sorenessLabels[c.soreness]}</td>
                         </tr>
                       );
                     })}
@@ -387,7 +387,7 @@ export default function ProgressPage() {
                   <AlertTriangle size={20} className="text-[#FF9500] shrink-0" />
                   <div>
                     <div className="text-sm font-bold text-[#FF9500]">Semana de Deload</div>
-                    <div className="text-[0.68rem] text-zinc-500">Reducí volumen -40%, mantené intensidad.</div>
+                    <div className="text-[0.68rem]" style={{ color: "var(--text-muted)" }}>Reducí volumen -40%, mantené intensidad.</div>
                   </div>
                 </div>
               );
@@ -398,7 +398,7 @@ export default function ProgressPage() {
                   <AlertTriangle size={18} className="text-[#FFCC00] shrink-0" />
                   <div>
                     <div className="text-[0.75rem] font-bold">Deload la próxima semana</div>
-                    <div className="text-[0.65rem] text-zinc-500">Pusheá fuerte esta semana.</div>
+                    <div className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>Pusheá fuerte esta semana.</div>
                   </div>
                 </div>
               );
@@ -425,17 +425,17 @@ export default function ProgressPage() {
             <div className="card p-3 text-center">
               <Dumbbell size={16} className="text-[#34C759] mx-auto mb-1" />
               <div className="text-xl font-black">{trainingDays}</div>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Días entreno</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Días entreno</div>
             </div>
             <div className="card p-3 text-center">
-              <Activity size={16} className="text-[#2C6BED] mx-auto mb-1" />
+              <Activity size={16} className="mx-auto mb-1" style={{ color: "var(--accent)" }} />
               <div className="text-xl font-black">{sessions.reduce((a, s) => a + s.exercises.reduce((b, e) => b + e.sets.length, 0), 0)}</div>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Sets totales</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Sets totales</div>
             </div>
             <div className="card p-3 text-center">
               <Flame size={16} className="text-[#FF9500] mx-auto mb-1" />
               <div className="text-xl font-black">{streak}</div>
-              <div className="text-[0.5rem] text-zinc-500 uppercase">Racha</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Racha</div>
             </div>
           </div>
 
@@ -453,9 +453,9 @@ export default function ProgressPage() {
 
           {/* Sets per week chart */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">Sets por Semana</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Sets por Semana</div>
             {weeklyVolume.length < 2 ? (
-              <div className="text-center py-5 text-zinc-400 text-[0.8rem]">Necesitás al menos 2 semanas de datos</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Necesitás al menos 2 semanas de datos</div>
             ) : (() => {
               const maxSets = Math.max(...weeklyVolume.map((w) => w.sets));
               return (
@@ -465,9 +465,9 @@ export default function ProgressPage() {
                       const pct = maxSets > 0 ? (w.sets / maxSets) * 100 : 0;
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
-                          <span className="text-[0.55rem] font-bold text-zinc-600">{w.sets}</span>
-                          <div className="w-full max-w-[24px] rounded-t-md" style={{ height: `${pct}%`, minHeight: 4, background: "#2C6BED" }} />
-                          <span className="text-[0.45rem] text-zinc-400">{w.week.slice(5)}</span>
+                          <span className="text-[0.55rem] font-bold" style={{ color: "var(--text-secondary)" }}>{w.sets}</span>
+                          <div className="w-full max-w-[24px] rounded-t-md" style={{ height: `${pct}%`, minHeight: 4, background: "var(--accent)" }} />
+                          <span className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>{w.week.slice(5)}</span>
                         </div>
                       );
                     })}
@@ -479,9 +479,9 @@ export default function ProgressPage() {
 
           {/* Volume (weight × reps) per week */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">Volumen Total (kg × reps)</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Volumen Total (kg × reps)</div>
             {weeklyVolume.length < 2 ? (
-              <div className="text-center py-5 text-zinc-400 text-[0.8rem]">Necesitás más datos</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Necesitás más datos</div>
             ) : (() => {
               const maxVol = Math.max(...weeklyVolume.map((w) => w.volume));
               return (
@@ -490,9 +490,9 @@ export default function ProgressPage() {
                     const pct = maxVol > 0 ? (w.volume / maxVol) * 100 : 0;
                     return (
                       <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
-                        <span className="text-[0.5rem] font-bold text-zinc-600">{w.volume > 1000 ? `${(w.volume / 1000).toFixed(0)}k` : w.volume}</span>
+                        <span className="text-[0.5rem] font-bold" style={{ color: "var(--text-secondary)" }}>{w.volume > 1000 ? `${(w.volume / 1000).toFixed(0)}k` : w.volume}</span>
                         <div className="w-full max-w-[24px] rounded-t-md" style={{ height: `${pct}%`, minHeight: 4, background: "#34C759" }} />
-                        <span className="text-[0.45rem] text-zinc-400">{w.week.slice(5)}</span>
+                        <span className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>{w.week.slice(5)}</span>
                       </div>
                     );
                   })}
@@ -503,16 +503,16 @@ export default function ProgressPage() {
 
           {/* Sessions per week */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">Sesiones por Semana</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Sesiones por Semana</div>
             {weeklyVolume.length < 2 ? (
-              <div className="text-center py-5 text-zinc-400 text-[0.8rem]">Necesitás más datos</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Necesitás más datos</div>
             ) : (
               <div className="flex gap-1 items-end h-[70px]">
                 {weeklyVolume.map((w, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
-                    <span className="text-[0.6rem] font-bold text-zinc-600">{w.sessions}</span>
+                    <span className="text-[0.6rem] font-bold" style={{ color: "var(--text-secondary)" }}>{w.sessions}</span>
                     <div className="w-full max-w-[24px] rounded-t-md" style={{ height: `${(w.sessions / 7) * 100}%`, minHeight: 4, background: "#FF9500" }} />
-                    <span className="text-[0.45rem] text-zinc-400">{w.week.slice(5)}</span>
+                    <span className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>{w.week.slice(5)}</span>
                   </div>
                 ))}
               </div>
@@ -521,14 +521,14 @@ export default function ProgressPage() {
 
           {/* Weekly breakdown table */}
           <div className="card">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">Detalle Semanal</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Detalle Semanal</div>
             {weeklyVolume.length === 0 ? (
-              <div className="text-center py-2.5 text-zinc-400 text-[0.8rem]">Sin datos</div>
+              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Sin datos</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-[0.7rem]" style={{ borderCollapse: "collapse" }}>
                   <thead>
-                    <tr className="text-[0.55rem] text-zinc-400 uppercase">
+                    <tr className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>
                       <th className="text-left py-1 font-semibold">Semana</th>
                       <th className="text-center py-1 font-semibold">Sesiones</th>
                       <th className="text-center py-1 font-semibold">Sets</th>
@@ -538,10 +538,10 @@ export default function ProgressPage() {
                   <tbody>
                     {[...weeklyVolume].reverse().map((w, i) => (
                       <tr key={i} style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                        <td className="py-1.5 text-zinc-500">{w.week.slice(5)}</td>
+                        <td className="py-1.5" style={{ color: "var(--text-muted)" }}>{w.week.slice(5)}</td>
                         <td className="py-1.5 text-center font-bold">{w.sessions}</td>
                         <td className="py-1.5 text-center">{w.sets}</td>
-                        <td className="py-1.5 text-right text-zinc-600">{w.volume > 1000 ? `${(w.volume / 1000).toFixed(1)}k` : w.volume}kg</td>
+                        <td className="py-1.5 text-right" style={{ color: "var(--text-secondary)" }}>{w.volume > 1000 ? `${(w.volume / 1000).toFixed(1)}k` : w.volume}kg</td>
                       </tr>
                     ))}
                   </tbody>

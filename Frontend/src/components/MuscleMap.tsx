@@ -27,7 +27,7 @@ export const REGION_MUSCLES: Record<MuscleRegion, MuscleGroup[]> = {
 const REGIONS: MuscleRegion[] = ["espalda", "pecho", "core", "piernas", "brazos", "hombros"];
 
 const RECOVERY_COLORS: Record<string, string> = {
-  fresh: "#0A84FF",
+  fresh: "var(--accent)",
   recovered: "#34C759",
   recovering: "#FFD60A",
   fatigued: "#FF453A",

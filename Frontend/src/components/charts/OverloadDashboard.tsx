@@ -130,9 +130,9 @@ export default function OverloadDashboard() {
       <div className="card mb-3.5">
         <div className="flex items-center gap-2 mb-2">
           <Zap size={14} className="text-[#FF9500]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Sobrecarga Progresiva</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Sobrecarga Progresiva</div>
         </div>
-        <div className="text-center py-5 text-zinc-400 text-[0.8rem]">
+        <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
           Necesitás al menos 2 sesiones con el mismo ejercicio
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function OverloadDashboard() {
 
   const prPoints = dataPoints.filter((p) => p.isPR);
   const chartKey = chartMode === "e1rm" ? "e1rm" : chartMode === "volume" ? "totalVolume" : "topWeight";
-  const chartColor = chartMode === "e1rm" ? "#2C6BED" : chartMode === "volume" ? "#34C759" : "#FF9500";
+  const chartColor = chartMode === "e1rm" ? "var(--accent)" : chartMode === "volume" ? "#34C759" : "#FF9500";
   const chartLabel = chartMode === "e1rm" ? "E1RM (kg)" : chartMode === "volume" ? "Volumen (kg)" : "Peso (kg)";
 
   return (
@@ -167,7 +167,7 @@ export default function OverloadDashboard() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Zap size={14} className="text-[#FF9500]" />
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Sobrecarga Progresiva</div>
+          <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Sobrecarga Progresiva</div>
         </div>
       </div>
 
@@ -175,20 +175,20 @@ export default function OverloadDashboard() {
       <div className="relative mb-3">
         <button
           onClick={() => setShowSelector(!showSelector)}
-          className="w-full flex items-center justify-between bg-zinc-100 dark:bg-zinc-800 rounded-lg px-3 py-2 text-[0.8rem] font-semibold"
+          className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-[0.8rem] font-semibold"
+          style={{ background: "var(--bg-elevated)" }}
         >
           <span className="truncate">{stats.name}</span>
-          <ChevronDown size={14} className={`text-zinc-400 transition-transform ${showSelector ? "rotate-180" : ""}`} />
+          <ChevronDown size={14} className="transition-transform" style={{ color: "var(--text-muted)", transform: showSelector ? "rotate(180deg)" : undefined }} />
         </button>
         {showSelector && (
-          <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-700">
+          <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-lg shadow-xl" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
             {exerciseNames.map((name) => (
               <button
                 key={name}
                 onClick={() => { setSelectedExercise(name); setShowSelector(false); }}
-                className={`w-full text-left px-3 py-2 text-[0.75rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 ${
-                  name === stats.name ? "font-bold text-[#2C6BED]" : "text-zinc-700 dark:text-zinc-300"
-                }`}
+                className="w-full text-left px-3 py-2 text-[0.75rem]"
+                style={{ color: name === stats.name ? "var(--accent)" : "var(--text-secondary)", fontWeight: name === stats.name ? 700 : 400 }}
               >
                 {name}
               </button>
@@ -199,25 +199,25 @@ export default function OverloadDashboard() {
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2 mb-3">
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-2 text-center">
-          <div className="text-[0.55rem] text-zinc-400 uppercase mb-0.5">E1RM Actual</div>
+        <div className="rounded-lg p-2 text-center" style={{ background: "var(--bg-elevated)" }}>
+          <div className="text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-muted)" }}>E1RM Actual</div>
           <div className="text-base font-black">{currentE1RM.toFixed(1)}</div>
-          <div className="text-[0.5rem] text-zinc-400">kg</div>
+          <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>kg</div>
         </div>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-2 text-center">
-          <div className="text-[0.55rem] text-zinc-400 uppercase mb-0.5">Progreso</div>
+        <div className="rounded-lg p-2 text-center" style={{ background: "var(--bg-elevated)" }}>
+          <div className="text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-muted)" }}>Progreso</div>
           <div className={`text-base font-black flex items-center justify-center gap-0.5 ${
             delta > 0 ? "text-[#34C759]" : delta < 0 ? "text-red-500" : ""
           }`}>
             {delta > 0 ? <TrendingUp size={12} /> : delta < 0 ? <TrendingDown size={12} /> : <Minus size={12} />}
             {delta > 0 ? "+" : ""}{delta.toFixed(1)}
           </div>
-          <div className="text-[0.5rem] text-zinc-400">{deltaPct}%</div>
+          <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>{deltaPct}%</div>
         </div>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-2 text-center">
-          <div className="text-[0.55rem] text-zinc-400 uppercase mb-0.5">Sesiones</div>
+        <div className="rounded-lg p-2 text-center" style={{ background: "var(--bg-elevated)" }}>
+          <div className="text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-muted)" }}>Sesiones</div>
           <div className="text-base font-black">{totalSessions}</div>
-          <div className="text-[0.5rem] text-zinc-400">registros</div>
+          <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>registros</div>
         </div>
       </div>
 
@@ -226,8 +226,8 @@ export default function OverloadDashboard() {
         <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold ${
           recentTrend === "up" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
           recentTrend === "down" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
-          "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-        }`}>
+          ""
+        }`} style={recentTrend === "flat" ? { background: "var(--bg-elevated)", color: "var(--text-muted)" } : undefined}>
           {recentTrend === "up" ? <TrendingUp size={10} /> : recentTrend === "down" ? <TrendingDown size={10} /> : <Minus size={10} />}
           {recentTrend === "up" ? "Progresando" : recentTrend === "down" ? "Bajando" : "Estable"}
         </div>
@@ -249,11 +249,11 @@ export default function OverloadDashboard() {
           <button
             key={key}
             onClick={() => setChartMode(key)}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[0.6rem] font-semibold transition-colors ${
-              chartMode === key
-                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-            }`}
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[0.6rem] font-semibold transition-colors"
+            style={chartMode === key
+              ? { background: "var(--text)", color: "var(--bg-card)" }
+              : { background: "var(--bg-elevated)", color: "var(--text-muted)" }
+            }
           >
             <Icon size={10} />
             {label}
@@ -323,11 +323,11 @@ export default function OverloadDashboard() {
 
       {/* Recent sessions table */}
       <div className="mt-3">
-        <div className="text-[0.6rem] text-zinc-400 uppercase tracking-wider mb-1.5">Últimas sesiones</div>
+        <div className="text-[0.6rem] uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Últimas sesiones</div>
         <div className="overflow-x-auto">
           <table className="w-full text-[0.65rem]" style={{ borderCollapse: "collapse" }}>
             <thead>
-              <tr className="text-[0.5rem] text-zinc-400 uppercase">
+              <tr className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>
                 <th className="text-left py-1 font-semibold">Fecha</th>
                 <th className="text-center py-1 font-semibold">Peso</th>
                 <th className="text-center py-1 font-semibold">Reps</th>
@@ -338,10 +338,10 @@ export default function OverloadDashboard() {
             <tbody>
               {[...dataPoints].reverse().slice(0, 8).map((p, i) => (
                 <tr key={i} style={{ borderTop: "1px solid var(--border-subtle, #e4e4e7)" }}>
-                  <td className="py-1.5 text-zinc-500">{p.label}</td>
+                  <td className="py-1.5" style={{ color: "var(--text-muted)" }}>{p.label}</td>
                   <td className="py-1.5 text-center font-bold">{p.topWeight}kg</td>
                   <td className="py-1.5 text-center">{p.topReps}</td>
-                  <td className="py-1.5 text-center text-zinc-400">{p.sets}</td>
+                  <td className="py-1.5 text-center" style={{ color: "var(--text-muted)" }}>{p.sets}</td>
                   <td className="py-1.5 text-right font-bold">
                     {p.isPR && <span className="text-[#FF9500] mr-0.5">★</span>}
                     {p.e1rm}

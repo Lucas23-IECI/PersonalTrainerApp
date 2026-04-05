@@ -18,9 +18,9 @@ function formatDuration(ms: number): string {
 }
 
 const GRADIENTS = [
-  "linear-gradient(135deg, #0A84FF 0%, #5856D6 100%)",
+  "linear-gradient(135deg, var(--accent) 0%, #5856D6 100%)",
   "linear-gradient(135deg, #FF3B30 0%, #FF9500 100%)",
-  "linear-gradient(135deg, #30D158 0%, #0A84FF 100%)",
+  "linear-gradient(135deg, #30D158 0%, var(--accent) 100%)",
   "linear-gradient(135deg, #AF52DE 0%, #FF2D55 100%)",
   "linear-gradient(135deg, #FF9500 0%, #FFD60A 100%)",
 ];

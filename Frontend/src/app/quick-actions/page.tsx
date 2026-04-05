@@ -6,10 +6,10 @@ import { ChevronLeft, Dumbbell, Weight, UtensilsCrossed, Calculator, Cloud, BarC
 
 const ACTIONS = [
   { href: "/workout", label: "Iniciar Entreno", desc: "Empezá una sesión de entrenamiento", icon: Dumbbell, gradient: "from-[#30D158] to-[#34C759]" },
-  { href: "/progress", label: "Registrar Peso", desc: "Anotá tu peso de hoy", icon: Weight, gradient: "from-[#0A84FF] to-[#2C6BED]" },
+  { href: "/progress", label: "Registrar Peso", desc: "Anotá tu peso de hoy", icon: Weight, gradient: "from-[var(--accent)] to-[var(--accent)]" },
   { href: "/nutrition", label: "Nutrición", desc: "Log de comidas y macros", icon: UtensilsCrossed, gradient: "from-[#FF9500] to-[#FF6B00]" },
   { href: "/calculators", label: "Calculadoras", desc: "1RM, TDEE, Macros, Wilks", icon: Calculator, gradient: "from-[#AF52DE] to-[#5856D6]" },
-  { href: "/cloud-sync", label: "Cloud Sync", desc: "Backup y restauración de datos", icon: Cloud, gradient: "from-[#64D2FF] to-[#0A84FF]" },
+  { href: "/cloud-sync", label: "Cloud Sync", desc: "Backup y restauración de datos", icon: Cloud, gradient: "from-[#64D2FF] to-[var(--accent)]" },
   { href: "/widgets", label: "Quick Stats", desc: "Resumen rápido de estadísticas", icon: BarChart3, gradient: "from-[#FF2D55] to-[#FF375F]" },
   { href: "/settings", label: "Ajustes", desc: "Configuración de la app", icon: Settings, gradient: "from-[#636366] to-[#48484A]" },
 ];
@@ -19,7 +19,7 @@ export default function QuickActionsPage() {
 
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-zinc-500 mb-4 bg-transparent border-none cursor-pointer p-0">
+      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
         <ChevronLeft size={16} /> Volver
       </button>
 
@@ -27,7 +27,7 @@ export default function QuickActionsPage() {
         <Zap size={20} style={{ color: "var(--accent)" }} />
         <h1 className="text-xl font-black tracking-tight">Acciones Rápidas</h1>
       </div>
-      <p className="text-[0.7rem] text-zinc-500 mb-5">
+      <p className="text-[0.7rem] mb-5" style={{ color: "var(--text-muted)" }}>
         Accesos directos a las funciones más usadas. En Android, mantené presionado el ícono de MARK PT para ver estos atajos.
       </p>
 
@@ -43,16 +43,16 @@ export default function QuickActionsPage() {
             </div>
             <div className="flex-1 min-w-0">
               <span className="font-bold text-sm block">{a.label}</span>
-              <p className="text-[0.6rem] text-zinc-500 truncate">{a.desc}</p>
+              <p className="text-[0.6rem] truncate" style={{ color: "var(--text-muted)" }}>{a.desc}</p>
             </div>
-            <ChevronLeft size={16} className="text-zinc-400 rotate-180 flex-shrink-0" />
+            <ChevronLeft size={16} className="rotate-180 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
           </Link>
         ))}
       </div>
 
       <div className="card mt-5 p-4">
         <div className="text-[0.75rem] font-bold mb-2">📱 App Shortcuts (Android)</div>
-        <p className="text-[0.65rem] text-zinc-500 leading-relaxed">
+        <p className="text-[0.65rem] leading-relaxed" style={{ color: "var(--text-muted)" }}>
           Con la app instalada, mantené presionado el ícono de MARK PT en tu escritorio
           para acceder a &quot;Iniciar Entreno&quot;, &quot;Registrar Peso&quot; y &quot;Nutrición&quot; directamente
           sin abrir la app.

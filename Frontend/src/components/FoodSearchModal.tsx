@@ -127,7 +127,7 @@ export default function FoodSearchModal({ open, onClose, onAdd }: Props) {
               const m = calcMacros(selected, g);
               return (
                 <div className="flex gap-3 mt-2 text-[0.7rem] font-bold">
-                  <span style={{ color: "#2C6BED" }}>{m.calories} kcal</span>
+                  <span style={{ color: "var(--accent)" }}>{m.calories} kcal</span>
                   <span style={{ color: "#34C759" }}>{m.protein}g P</span>
                   <span style={{ color: "#FFCC00" }}>{m.carbs}g C</span>
                   <span style={{ color: "#AF52DE" }}>{m.fat}g F</span>

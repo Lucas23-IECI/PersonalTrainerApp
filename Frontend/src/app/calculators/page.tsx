@@ -124,12 +124,12 @@ export default function CalculatorsPage() {
 
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-zinc-500 mb-4 bg-transparent border-none cursor-pointer p-0">
+      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
         <ChevronLeft size={16} /> Volver
       </button>
 
       <h1 className="text-xl font-black tracking-tight mb-1">Calculadoras</h1>
-      <p className="text-[0.65rem] text-zinc-500 mb-4">Herramientas de fitness</p>
+      <p className="text-[0.65rem] mb-4" style={{ color: "var(--text-muted)" }}>Herramientas de fitness</p>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-4 overflow-x-auto">
@@ -137,9 +137,11 @@ export default function CalculatorsPage() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[0.7rem] font-semibold whitespace-nowrap cursor-pointer border-none transition-colors ${
-              tab === t.id ? "bg-[#2C6BED] text-white" : "bg-[#F2F2F7] text-zinc-500"
-            }`}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[0.7rem] font-semibold whitespace-nowrap cursor-pointer border-none transition-colors"
+            style={{
+              background: tab === t.id ? "var(--accent)" : "var(--bg-elevated)",
+              color: tab === t.id ? "#fff" : "var(--text-muted)",
+            }}
           >
             {t.icon} {t.label}
           </button>
@@ -153,7 +155,7 @@ export default function CalculatorsPage() {
             <div className="text-[0.75rem] font-bold mb-3">Calculadora 1RM</div>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Peso ({unit})</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Peso ({unit})</label>
                 <input
                   type="number"
                   value={rmWeight}
@@ -165,7 +167,7 @@ export default function CalculatorsPage() {
                 />
               </div>
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Repeticiones</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Repeticiones</label>
                 <input
                   type="number"
                   value={rmReps}
@@ -180,9 +182,9 @@ export default function CalculatorsPage() {
 
             {display1RM > 0 && (
               <div className="text-center py-4 rounded-xl mb-3" style={{ background: "var(--bg-elevated)" }}>
-                <div className="text-[0.6rem] text-zinc-500 uppercase tracking-wider mb-1">1RM Estimado</div>
+                <div className="text-[0.6rem] uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>1RM Estimado</div>
                 <div className="text-3xl font-black" style={{ color: "var(--accent)" }}>{display1RM} {unit}</div>
-                <div className="text-[0.6rem] text-zinc-500 mt-1">Brzycki: {displayBrz} {unit}</div>
+                <div className="text-[0.6rem] mt-1" style={{ color: "var(--text-muted)" }}>Brzycki: {displayBrz} {unit}</div>
               </div>
             )}
           </div>
@@ -196,9 +198,9 @@ export default function CalculatorsPage() {
                   const val = unit === "lbs" ? Math.round(estimated1RM * 2.20462 * row.pct / 100) : Math.round(estimated1RM * row.pct / 100);
                   return (
                     <div key={row.reps} className="flex justify-between items-center py-1 text-sm">
-                      <span className="text-zinc-500">{row.reps} rep{row.reps > 1 ? "s" : ""}</span>
+                      <span style={{ color: "var(--text-muted)" }}>{row.reps} rep{row.reps > 1 ? "s" : ""}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[0.65rem] text-zinc-500">{row.pct}%</span>
+                        <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{row.pct}%</span>
                         <span className="font-bold min-w-[60px] text-right">{val} {unit}</span>
                       </div>
                     </div>
@@ -235,20 +237,20 @@ export default function CalculatorsPage() {
 
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Peso (kg)</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Peso (kg)</label>
                 <input type="number" value={tdeeWeight} onChange={(e) => setTdeeWeight(e.target.value)} placeholder="80" className="w-full text-center text-sm py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="decimal" />
               </div>
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Altura (cm)</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Altura (cm)</label>
                 <input type="number" value={tdeeHeight} onChange={(e) => setTdeeHeight(e.target.value)} placeholder="177" className="w-full text-center text-sm py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="numeric" />
               </div>
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Edad</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Edad</label>
                 <input type="number" value={tdeeAge} onChange={(e) => setTdeeAge(e.target.value)} placeholder="22" className="w-full text-center text-sm py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="numeric" />
               </div>
             </div>
 
-            <div className="text-[0.6rem] text-zinc-500 mb-2">Nivel de actividad</div>
+            <div className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>Nivel de actividad</div>
             <div className="space-y-1.5 mb-3">
               {ACTIVITY_LEVELS.map((al) => (
                 <button
@@ -271,9 +273,9 @@ export default function CalculatorsPage() {
 
             {tTDEE > 0 && (
               <div className="text-center py-4 rounded-xl" style={{ background: "var(--bg-elevated)" }}>
-                <div className="text-[0.6rem] text-zinc-500 mb-1">BMR: {tBMR} kcal/día</div>
-                <div className="text-[0.6rem] text-zinc-500 uppercase tracking-wider mb-1">TDEE</div>
-                <div className="text-3xl font-black" style={{ color: "var(--accent)" }}>{tTDEE} <span className="text-sm font-normal text-zinc-500">kcal/día</span></div>
+                <div className="text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>BMR: {tBMR} kcal/día</div>
+                <div className="text-[0.6rem] uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>TDEE</div>
+                <div className="text-3xl font-black" style={{ color: "var(--accent)" }}>{tTDEE} <span className="text-sm font-normal" style={{ color: "var(--text-muted)" }}>kcal/día</span></div>
                 <div className="flex justify-center gap-4 mt-2 text-[0.65rem]">
                   <span style={{ color: "#34C759" }}>Corte: {Math.round(tTDEE * 0.8)}</span>
                   <span style={{ color: "#FFCC00" }}>Mantener: {tTDEE}</span>
@@ -292,11 +294,11 @@ export default function CalculatorsPage() {
             <div className="text-[0.75rem] font-bold mb-3">Calculadora de Macros</div>
 
             <div className="mb-3">
-              <label className="block text-[0.6rem] text-zinc-500 mb-1">Calorías diarias (kcal)</label>
+              <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Calorías diarias (kcal)</label>
               <input type="number" value={macroCalories} onChange={(e) => setMacroCalories(e.target.value)} placeholder="2300" className="w-full text-center text-lg py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="numeric" />
             </div>
 
-            <div className="text-[0.6rem] text-zinc-500 mb-2">Objetivo</div>
+            <div className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>Objetivo</div>
             <div className="flex gap-2 mb-4">
               {([
                 { id: "cut" as const, label: "Corte", color: "#34C759" },
@@ -330,7 +332,7 @@ export default function CalculatorsPage() {
                       <span className="text-sm font-bold" style={{ color: "var(--text)" }}>{m.label}</span>
                       <span className="text-lg font-black" style={{ color: m.color }}>{m.grams}g</span>
                     </div>
-                    <div className="flex justify-between text-[0.6rem] text-zinc-500">
+                    <div className="flex justify-between text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
                       <span>{m.pct}% de las calorías</span>
                       <span>{m.cal} kcal</span>
                     </div>
@@ -368,29 +370,29 @@ export default function CalculatorsPage() {
             </div>
 
             <div className="mb-3">
-              <label className="block text-[0.6rem] text-zinc-500 mb-1">Peso Corporal ({unit})</label>
+              <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Peso Corporal ({unit})</label>
               <input type="number" value={wilksBW} onChange={(e) => setWilksBW(e.target.value)} placeholder="81" className="w-full text-center text-sm py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="decimal" />
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-4">
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Sentadilla ({unit})</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Sentadilla ({unit})</label>
                 <input type="number" value={wilksSquat} onChange={(e) => setWilksSquat(e.target.value)} placeholder="140" className="w-full text-center text-sm py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="decimal" />
               </div>
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Banca ({unit})</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Banca ({unit})</label>
                 <input type="number" value={wilksBench} onChange={(e) => setWilksBench(e.target.value)} placeholder="100" className="w-full text-center text-sm py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="decimal" />
               </div>
               <div>
-                <label className="block text-[0.6rem] text-zinc-500 mb-1">Peso Muerto ({unit})</label>
+                <label className="block text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Peso Muerto ({unit})</label>
                 <input type="number" value={wilksDeadlift} onChange={(e) => setWilksDeadlift(e.target.value)} placeholder="200" className="w-full text-center text-sm py-2.5 rounded-xl" style={{ background: "var(--bg-elevated)" }} inputMode="decimal" />
               </div>
             </div>
 
             {wilksScore > 0 && (
               <div className="text-center py-4 rounded-xl" style={{ background: "var(--bg-elevated)" }}>
-                <div className="text-[0.6rem] text-zinc-500 mb-1">Total: {wTotal} {unit}</div>
-                <div className="text-[0.6rem] text-zinc-500 uppercase tracking-wider mb-1">Wilks Score</div>
+                <div className="text-[0.6rem] mb-1" style={{ color: "var(--text-muted)" }}>Total: {wTotal} {unit}</div>
+                <div className="text-[0.6rem] uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Wilks Score</div>
                 <div className="text-3xl font-black" style={{ color: "var(--accent)" }}>{wilksScore}</div>
                 <div className="text-[0.65rem] mt-2" style={{ color: "var(--text-muted)" }}>
                   {wilksScore < 200 ? "Principiante" : wilksScore < 300 ? "Intermedio" : wilksScore < 400 ? "Avanzado" : wilksScore < 500 ? "Elite" : "Clase Mundial"}

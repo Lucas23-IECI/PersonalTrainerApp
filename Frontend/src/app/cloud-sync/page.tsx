@@ -163,12 +163,12 @@ export default function CloudSyncPage() {
 
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-zinc-500 mb-4 bg-transparent border-none cursor-pointer p-0">
+      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
         <ChevronLeft size={16} /> Volver
       </button>
 
       <h1 className="text-xl font-black tracking-tight mb-1">Cloud Sync</h1>
-      <p className="text-[0.65rem] text-zinc-500 mb-5">
+      <p className="text-[0.65rem] mb-5" style={{ color: "var(--text-muted)" }}>
         Guardá y restaurá tus datos en la nube
       </p>
 
@@ -186,7 +186,7 @@ export default function CloudSyncPage() {
           <CloudUpload size={18} style={{ color: "var(--accent)" }} />
           <div className="text-[0.75rem] font-bold">Guardar Backup</div>
         </div>
-        <p className="text-[0.6rem] text-zinc-500 mb-3">
+        <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>
           Exporta todos tus datos como archivo JSON. Podés subirlo a Google Drive, iCloud, o cualquier nube.
         </p>
         <button
@@ -202,7 +202,7 @@ export default function CloudSyncPage() {
           )}
         </button>
         {lastSync && (
-          <p className="text-[0.6rem] text-zinc-500 mt-2">Último sync: {lastSync}</p>
+          <p className="text-[0.6rem] mt-2" style={{ color: "var(--text-muted)" }}>Último sync: {lastSync}</p>
         )}
       </div>
 
@@ -212,7 +212,7 @@ export default function CloudSyncPage() {
           <CloudDownload size={18} style={{ color: "#34C759" }} />
           <div className="text-[0.75rem] font-bold">Restaurar Backup</div>
         </div>
-        <p className="text-[0.6rem] text-zinc-500 mb-3">
+        <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>
           Seleccioná un archivo JSON de backup previamente guardado.
         </p>
         <button
@@ -235,11 +235,11 @@ export default function CloudSyncPage() {
           <RefreshCw size={18} style={{ color: "#AF52DE" }} />
           <div className="text-[0.75rem] font-bold">Backup Local (IndexedDB)</div>
         </div>
-        <p className="text-[0.6rem] text-zinc-500 mb-3">
+        <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>
           Backup adicional en IndexedDB del navegador. Sobrevive limpiezas de localStorage.
         </p>
         {idbDate && (
-          <p className="text-[0.6rem] text-zinc-500 mb-2">
+          <p className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>
             Último: {new Date(idbDate).toLocaleString()}
           </p>
         )}
@@ -256,7 +256,7 @@ export default function CloudSyncPage() {
       {/* Info */}
       <div className="card">
         <div className="text-[0.75rem] font-bold mb-2">¿Cómo funciona?</div>
-        <div className="text-[0.65rem] text-zinc-500 space-y-1.5">
+        <div className="text-[0.65rem] space-y-1.5" style={{ color: "var(--text-muted)" }}>
           <p>1. <strong>Guardar</strong> descarga un archivo JSON con todos tus datos.</p>
           <p>2. Subí ese archivo a <strong>Google Drive</strong>, iCloud, Dropbox o donde prefieras.</p>
           <p>3. En otro dispositivo, descargá el archivo y usá <strong>Restaurar</strong>.</p>

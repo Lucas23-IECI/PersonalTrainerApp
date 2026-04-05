@@ -130,7 +130,7 @@ export default function PhotosPage() {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h1 className="text-[1.3rem] font-black tracking-tight mb-1">Fotos de Progreso</h1>
-          <p className="text-[0.7rem] text-zinc-600">{photos.length} fotos · {dates.length} sesiones</p>
+          <p className="text-[0.7rem]" style={{ color: "var(--text-secondary)" }}>{photos.length} fotos · {dates.length} sesiones</p>
         </div>
         <button
           onClick={() => setShowUpload(!showUpload)}
@@ -143,7 +143,7 @@ export default function PhotosPage() {
       {/* Upload panel */}
       {showUpload && (
         <div className="card mb-4 animate-fade-in">
-          <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest font-bold mb-3">Nueva foto</div>
+          <div className="text-[0.65rem] uppercase tracking-widest font-bold mb-3" style={{ color: "var(--text-secondary)" }}>Nueva foto</div>
 
           {/* Pose selector */}
           <div className="flex gap-2 mb-4">
@@ -171,9 +171,9 @@ export default function PhotosPage() {
               className="flex flex-col items-center justify-center gap-2 py-8 rounded-xl cursor-pointer transition-colors"
               style={{ background: "var(--bg-elevated)", border: "2px dashed var(--border)" }}
             >
-              <Camera size={32} className="text-zinc-400" />
-              <span className="text-sm text-zinc-500">Tocar para subir foto</span>
-              <span className="text-[0.6rem] text-zinc-400">JPG, PNG · máx 5MB</span>
+              <Camera size={32} style={{ color: "var(--text-muted)" }} />
+              <span className="text-sm" style={{ color: "var(--text-muted)" }}>Tocar para subir foto</span>
+              <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>JPG, PNG · máx 5MB</span>
             </div>
           ) : (
             <div className="relative mb-3">
@@ -193,11 +193,11 @@ export default function PhotosPage() {
           {/* Optional fields */}
           <div className="grid grid-cols-2 gap-2 mt-3">
             <div>
-              <label className="block text-[0.55rem] text-zinc-500 uppercase mb-1">Peso (kg)</label>
+              <label className="block text-[0.55rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Peso (kg)</label>
               <input type="number" step={0.1} value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="80" className="w-full text-center text-sm py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }} />
             </div>
             <div>
-              <label className="block text-[0.55rem] text-zinc-500 uppercase mb-1">Notas</label>
+              <label className="block text-[0.55rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Notas</label>
               <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Semana 4..." className="w-full text-sm py-2 px-2 rounded-lg" style={{ background: "var(--bg-elevated)" }} />
             </div>
           </div>
@@ -238,18 +238,18 @@ export default function PhotosPage() {
       {/* Compare view */}
       {compareMode && (compareA || compareB) && (
         <div className="card mb-4 animate-fade-in">
-          <div className="text-[0.6rem] text-zinc-500 uppercase tracking-widest font-bold mb-2">Comparación</div>
+          <div className="text-[0.6rem] uppercase tracking-widest font-bold mb-2" style={{ color: "var(--text-muted)" }}>Comparación</div>
           <div className="grid grid-cols-2 gap-2">
             <div className="text-center">
               {compareA ? (
                 <>
                   <img src={compareA.dataUrl} alt="A" className="w-full rounded-xl mb-1" style={{ aspectRatio: "3/4", objectFit: "cover" }} />
                   <div className="text-[0.65rem] font-bold">{compareA.date.slice(5)}</div>
-                  {compareA.weight && <div className="text-[0.6rem] text-zinc-500">{compareA.weight}kg</div>}
+                  {compareA.weight && <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{compareA.weight}kg</div>}
                 </>
               ) : (
                 <div className="flex items-center justify-center rounded-xl" style={{ aspectRatio: "3/4", background: "var(--bg-elevated)" }}>
-                  <span className="text-[0.7rem] text-zinc-400">Elegí foto 1</span>
+                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>Elegí foto 1</span>
                 </div>
               )}
             </div>
@@ -258,18 +258,18 @@ export default function PhotosPage() {
                 <>
                   <img src={compareB.dataUrl} alt="B" className="w-full rounded-xl mb-1" style={{ aspectRatio: "3/4", objectFit: "cover" }} />
                   <div className="text-[0.65rem] font-bold">{compareB.date.slice(5)}</div>
-                  {compareB.weight && <div className="text-[0.6rem] text-zinc-500">{compareB.weight}kg</div>}
+                  {compareB.weight && <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{compareB.weight}kg</div>}
                 </>
               ) : (
                 <div className="flex items-center justify-center rounded-xl" style={{ aspectRatio: "3/4", background: "var(--bg-elevated)" }}>
-                  <span className="text-[0.7rem] text-zinc-400">Elegí foto 2</span>
+                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>Elegí foto 2</span>
                 </div>
               )}
             </div>
           </div>
           {compareA && compareB && compareA.weight && compareB.weight && (
             <div className="text-center mt-2 text-[0.7rem]">
-              <span className="text-zinc-500">Diferencia: </span>
+              <span style={{ color: "var(--text-muted)" }}>Diferencia: </span>
               <span className={`font-bold ${compareB.weight - compareA.weight < 0 ? "text-[#34C759]" : "text-[#FF3B30]"}`}>
                 {compareB.weight - compareA.weight > 0 ? "+" : ""}{(compareB.weight - compareA.weight).toFixed(1)}kg
               </span>
@@ -280,7 +280,7 @@ export default function PhotosPage() {
 
       {/* Photo gallery */}
       {photos.length === 0 && !showUpload && (
-        <div className="text-center py-16 text-zinc-400">
+        <div className="text-center py-16" style={{ color: "var(--text-muted)" }}>
           <ImageIcon size={40} className="mx-auto mb-3 opacity-30" />
           <div className="text-[0.9rem] font-semibold mb-1">Sin fotos todavía</div>
           <div className="text-[0.7rem]">Sacá fotos regularmente para ver tu progreso</div>
@@ -289,7 +289,7 @@ export default function PhotosPage() {
 
       {dates.map((date) => (
         <div key={date} className="mb-5">
-          <div className="text-[0.7rem] font-bold text-zinc-600 uppercase tracking-widest mb-2">
+          <div className="text-[0.7rem] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--text-secondary)" }}>
             {formatDate(date)}
           </div>
           <div className="grid grid-cols-3 gap-1.5">

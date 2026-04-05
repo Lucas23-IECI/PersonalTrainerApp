@@ -283,21 +283,21 @@ export default function LogPage() {
   return (
     <main className="max-w-[600px] mx-auto px-4 py-5">
       <h1 className="text-[1.3rem] font-black tracking-tight mb-1">Historial</h1>
-      <p className="text-[0.7rem] text-zinc-600 mb-4">
+      <p className="text-[0.7rem] mb-4" style={{ color: "var(--text-secondary)" }}>
         {sessions.length} {sessions.length === 1 ? "sesión" : "sesiones"} registradas
       </p>
 
       {/* 4.1 — Enhanced Calendar with intensity dots */}
       <div className="card mb-4">
         <div className="flex justify-between items-center mb-3">
-          <button onClick={prevMonth} className="bg-transparent border-none cursor-pointer text-zinc-500 p-1"><ChevronLeft size={18} /></button>
+          <button onClick={prevMonth} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}><ChevronLeft size={18} /></button>
           <span className="text-sm font-bold">{MONTH_NAMES[calMonth]} {calYear}</span>
-          <button onClick={nextMonth} className="bg-transparent border-none cursor-pointer text-zinc-500 p-1"><ChevronRight size={18} /></button>
+          <button onClick={nextMonth} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}><ChevronRight size={18} /></button>
         </div>
 
         <div className="grid grid-cols-7 gap-0 text-center">
           {WEEKDAYS.map((d) => (
-            <div key={d} className="text-[0.55rem] text-zinc-400 font-bold uppercase py-1">{d}</div>
+            <div key={d} className="text-[0.55rem] font-bold uppercase py-1" style={{ color: "var(--text-muted)" }}>{d}</div>
           ))}
           {Array.from({ length: startDow }).map((_, i) => (
             <div key={`e-${i}`} />
@@ -315,7 +315,9 @@ export default function LogPage() {
                 className="flex flex-col items-center py-1 cursor-pointer rounded-lg transition-colors"
                 style={{ background: isSelected ? "var(--bg-elevated)" : "transparent" }}
               >
-                <span className={`text-[0.7rem] leading-none ${isToday ? "font-black text-blue-500" : "text-zinc-600"} ${isSelected ? "font-extrabold" : ""}`}>
+                <span className={`text-[0.7rem] leading-none ${isToday ? "font-black text-blue-500" : ""} ${isSelected ? "font-extrabold" : ""}`}
+                  style={!isToday ? { color: "var(--text-secondary)" } : undefined}
+                >
                   {day}
                 </span>
                 {dotStyle ? (
@@ -331,8 +333,8 @@ export default function LogPage() {
         {/* 4.1 — Selected date mini-summary */}
         {selectedDate && selectedDateStats && (
           <div className="mt-3 pt-3 flex items-center justify-between text-[0.7rem]" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-            <span className="text-zinc-400">{formatDate(selectedDate)}</span>
-            <div className="flex gap-3 text-zinc-400">
+            <span style={{ color: "var(--text-muted)" }}>{formatDate(selectedDate)}</span>
+            <div className="flex gap-3" style={{ color: "var(--text-muted)" }}>
               <span className="flex items-center gap-1"><Flame size={10} className="text-orange-500" />{selectedDateStats.count} {selectedDateStats.count === 1 ? "sesión" : "sesiones"}</span>
               <span>{selectedDateStats.sets} sets</span>
               {selectedDateStats.volume > 0 && <span>{(selectedDateStats.volume / 1000).toFixed(1)}k kg</span>}
@@ -341,7 +343,7 @@ export default function LogPage() {
         )}
 
         {/* 4.1 — Intensity legend */}
-        <div className="flex items-center justify-center gap-3 mt-3 text-[0.55rem] text-zinc-500">
+        <div className="flex items-center justify-center gap-3 mt-3 text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
           <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C75960" }} /> Ligero</span>
           <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C759" }} /> Medio</span>
           <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full" style={{ background: "#30D158" }} /> Intenso</span>
@@ -362,8 +364,8 @@ export default function LogPage() {
           onClick={() => { setShowAdvanced(!showAdvanced); setShowFilter(false); }}
           className="flex items-center gap-1 text-[0.7rem] px-2.5 py-1.5 rounded-lg cursor-pointer border-none transition-colors"
           style={{
-            background: (filterDateFrom || filterDateTo || filterMuscleGroup) ? "#0A84FF20" : "var(--bg-card)",
-            color: (filterDateFrom || filterDateTo || filterMuscleGroup) ? "#0A84FF" : "var(--text-muted)",
+            background: (filterDateFrom || filterDateTo || filterMuscleGroup) ? "var(--accent-soft)" : "var(--bg-card)",
+            color: (filterDateFrom || filterDateTo || filterMuscleGroup) ? "var(--accent)" : "var(--text-muted)",
           }}
         >
           <SlidersHorizontal size={12} /> Avanzado
@@ -371,7 +373,7 @@ export default function LogPage() {
         {selectedDate && (
           <span className="flex items-center gap-1 text-[0.65rem] px-2 py-1 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
             {formatDate(selectedDate)}
-            <button onClick={() => setSelectedDate(null)} className="bg-transparent border-none cursor-pointer text-zinc-400 p-0"><X size={12} /></button>
+            <button onClick={() => setSelectedDate(null)} className="bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}><X size={12} /></button>
           </span>
         )}
         {filterMuscleGroup && (
@@ -381,7 +383,7 @@ export default function LogPage() {
           </span>
         )}
         {hasActiveFilters && (
-          <button onClick={clearAllFilters} className="text-[0.65rem] text-zinc-500 bg-transparent border-none cursor-pointer underline ml-auto">
+          <button onClick={clearAllFilters} className="text-[0.65rem] bg-transparent border-none cursor-pointer underline ml-auto" style={{ color: "var(--text-muted)" }}>
             Limpiar
           </button>
         )}
@@ -418,11 +420,11 @@ export default function LogPage() {
       {/* 4.3 — Advanced filter panel */}
       {showAdvanced && (
         <div className="card mb-4 space-y-3">
-          <div className="text-[0.75rem] font-bold text-zinc-400 uppercase tracking-wider">Filtros Avanzados</div>
+          <div className="text-[0.75rem] font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Filtros Avanzados</div>
 
           {/* Date range */}
           <div>
-            <div className="text-[0.65rem] text-zinc-500 mb-1.5">Rango de fechas</div>
+            <div className="text-[0.65rem] mb-1.5" style={{ color: "var(--text-muted)" }}>Rango de fechas</div>
             <div className="flex gap-2">
               <input
                 type="date"
@@ -443,7 +445,7 @@ export default function LogPage() {
 
           {/* Muscle group chips */}
           <div>
-            <div className="text-[0.65rem] text-zinc-500 mb-1.5">Grupo muscular</div>
+            <div className="text-[0.65rem] mb-1.5" style={{ color: "var(--text-muted)" }}>Grupo muscular</div>
             <div className="flex flex-wrap gap-1.5">
               {FILTER_MUSCLE_GROUPS.map((g) => (
                 <button
@@ -465,14 +467,14 @@ export default function LogPage() {
 
       {/* Results count when filtered */}
       {hasActiveFilters && (
-        <p className="text-[0.65rem] text-zinc-500 mb-3">
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
           {filtered.length} {filtered.length === 1 ? "sesión" : "sesiones"} encontradas
         </p>
       )}
 
       {/* Session list */}
       {filtered.length === 0 && (
-        <div className="text-center py-10 text-zinc-400">
+        <div className="text-center py-10" style={{ color: "var(--text-muted)" }}>
           <Dumbbell size={32} className="mx-auto mb-2.5 opacity-30" />
           <div className="text-[0.85rem]">{hasActiveFilters ? "Sin resultados" : "No hay sesiones registradas"}</div>
           <div className="text-[0.7rem] mt-1">{hasActiveFilters ? "Probá otros filtros" : "Completá un entrenamiento para verlo acá"}</div>
@@ -481,7 +483,7 @@ export default function LogPage() {
 
       {grouped.map((group) => (
         <div key={group.date} className="mb-4">
-          <div className="text-[0.7rem] font-bold text-zinc-600 uppercase tracking-widest mb-2">
+          <div className="text-[0.7rem] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--text-secondary)" }}>
             {formatDate(group.date)}
           </div>
           {group.sessions.map((s) => {
@@ -512,7 +514,7 @@ export default function LogPage() {
                           </span>
                         )}
                       </div>
-                      <div className="flex gap-1.5 text-[0.65rem] text-zinc-600">
+                      <div className="flex gap-1.5 text-[0.65rem]" style={{ color: "var(--text-secondary)" }}>
                         {s.startTime && s.endTime && (
                           <span className="flex items-center gap-0.5">
                             <Clock size={10} /> {formatDuration(s.startTime, s.endTime)}
@@ -523,7 +525,7 @@ export default function LogPage() {
                       </div>
                       {/* 4.6 — Session notes preview */}
                       {s.sessionNotes && !isOpen && (
-                        <div className="text-[0.62rem] text-zinc-500 mt-1 italic truncate max-w-[200px]">{s.sessionNotes}</div>
+                        <div className="text-[0.62rem] mt-1 italic truncate max-w-[200px]" style={{ color: "var(--text-muted)" }}>{s.sessionNotes}</div>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -539,7 +541,7 @@ export default function LogPage() {
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); cancelEdit(); }}
-                            className="bg-transparent border-none cursor-pointer text-zinc-400 p-1 transition-colors"
+                            className="bg-transparent border-none cursor-pointer p-1 transition-colors" style={{ color: "var(--text-muted)" }}
                             title="Cancelar"
                           >
                             <X size={14} />
@@ -549,7 +551,7 @@ export default function LogPage() {
                         <>
                           <button
                             onClick={(e) => { e.stopPropagation(); startEdit(s); }}
-                            className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-yellow-500 p-1 transition-colors"
+                            className="bg-transparent border-none cursor-pointer hover:text-yellow-500 p-1 transition-colors" style={{ color: "var(--text-muted)" }}
                             title="Editar sesión"
                           >
                             <Pencil size={14} />
@@ -557,21 +559,21 @@ export default function LogPage() {
                           {/* 4.4 — Repeat button */}
                           <button
                             onClick={(e) => { e.stopPropagation(); handleRepeat(s); }}
-                            className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-blue-500 p-1 transition-colors"
+                            className="bg-transparent border-none cursor-pointer hover:text-blue-500 p-1 transition-colors" style={{ color: "var(--text-muted)" }}
                             title="Repetir sesión"
                           >
                             <RefreshCw size={14} />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
-                            className="bg-transparent border-none cursor-pointer text-zinc-400 hover:text-[#FF3B30] p-1 transition-colors"
+                            className="bg-transparent border-none cursor-pointer hover:text-[#FF3B30] p-1 transition-colors" style={{ color: "var(--text-muted)" }}
                             title="Eliminar sesión"
                           >
                             <Trash2 size={14} />
                           </button>
                         </>
                       )}
-                      <div className="text-zinc-600">
+                      <div style={{ color: "var(--text-secondary)" }}>
                         {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </div>
                     </div>
@@ -583,19 +585,19 @@ export default function LogPage() {
                     {/* 4.2 — Metrics summary bar */}
                     <div className="grid grid-cols-4 gap-2 mb-3 text-center py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
                       <div>
-                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">Duración</div>
+                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Duración</div>
                         <div className="text-[0.85rem] font-bold">{s.startTime && s.endTime ? formatDuration(s.startTime, s.endTime) : "—"}</div>
                       </div>
                       <div>
-                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">Sets</div>
+                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Sets</div>
                         <div className="text-[0.85rem] font-bold">{totalSets}</div>
                       </div>
                       <div>
-                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">Volumen</div>
+                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Volumen</div>
                         <div className="text-[0.85rem] font-bold">{totalVolume > 0 ? `${(totalVolume / 1000).toFixed(1)}k` : "—"}</div>
                       </div>
                       <div>
-                        <div className="text-[0.55rem] text-zinc-500 uppercase tracking-wider">RPE</div>
+                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>RPE</div>
                         <div className="text-[0.85rem] font-bold">{avgRpe || "—"}</div>
                       </div>
                     </div>
@@ -604,7 +606,7 @@ export default function LogPage() {
                     {editingId === s.id && editData ? (
                       <div className="mb-3 space-y-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-[0.65rem] text-zinc-500">Rating:</span>
+                          <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>Rating:</span>
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((v) => (
                               <button key={v} onClick={() => updateEditRating(v)} className="bg-transparent border-none cursor-pointer p-0">
@@ -637,12 +639,12 @@ export default function LogPage() {
                               </div>
                             )}
                             {s.sessionNotes && (
-                              <div className="text-[0.68rem] text-zinc-400 italic">{s.sessionNotes}</div>
+                              <div className="text-[0.68rem] italic" style={{ color: "var(--text-muted)" }}>{s.sessionNotes}</div>
                             )}
                           </div>
                         )}
                         {s.editedAt && (
-                          <div className="text-[0.55rem] text-zinc-600 mb-2">Editado {new Date(s.editedAt).toLocaleDateString()}</div>
+                          <div className="text-[0.55rem] mb-2" style={{ color: "var(--text-secondary)" }}>Editado {new Date(s.editedAt).toLocaleDateString()}</div>
                         )}
                       </>
                     )}
@@ -663,20 +665,22 @@ export default function LogPage() {
                     )}
 
                     {/* 4.2 — Exercise count summary */}
-                    <div className="text-[0.65rem] text-zinc-500 mb-2">
+                    <div className="text-[0.65rem] mb-2" style={{ color: "var(--text-muted)" }}>
                       {done} ejercicio{done !== 1 ? "s" : ""}{skipped > 0 && ` · ${skipped} saltado${skipped !== 1 ? "s" : ""}`}
                     </div>
 
                     {(editingId === s.id && editData ? editData.exercises : s.exercises).map((ex, i) => (
                       <div key={i} className="py-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                        <div className={`text-[0.82rem] font-bold mb-2 ${ex.skipped ? "text-zinc-400 line-through" : ""}`}>
+                        <div className={`text-[0.82rem] font-bold mb-2 ${ex.skipped ? "line-through" : ""}`}
+                          style={ex.skipped ? { color: "var(--text-muted)" } : undefined}
+                        >
                           {ex.name}
                           {ex.skipped && <span className="text-[#FF9500] text-[0.6rem] ml-1.5 font-normal">saltado</span>}
                         </div>
                         {ex.sets.length > 0 && (
                           <table className="w-full text-[0.72rem]" style={{ borderCollapse: "collapse" }}>
                             <thead>
-                              <tr className="text-zinc-400 text-[0.6rem] uppercase tracking-wider">
+                              <tr className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                                 <th className="text-left py-1 w-12">Set</th>
                                 <th className="text-left py-1">Peso</th>
                                 <th className="text-left py-1">Reps</th>
@@ -749,7 +753,7 @@ export default function LogPage() {
                           </table>
                         )}
                         {ex.notes && (
-                          <div className="text-[0.65rem] text-zinc-400 mt-1 italic">{ex.notes}</div>
+                          <div className="text-[0.65rem] mt-1 italic" style={{ color: "var(--text-muted)" }}>{ex.notes}</div>
                         )}
                       </div>
                     ))}

@@ -111,12 +111,12 @@ export default function SettingsPage() {
 
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-zinc-500 mb-4 bg-transparent border-none cursor-pointer p-0">
+      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
         <ChevronLeft size={16} /> {t("common.back")}
       </button>
 
       <h1 className="text-xl font-black tracking-tight mb-1">{t("settings.title")}</h1>
-      <p className="text-[0.7rem] text-zinc-500 mb-5">{t("settings.subtitle")}</p>
+      <p className="text-[0.7rem] mb-5" style={{ color: "var(--text-muted)" }}>{t("settings.subtitle")}</p>
 
       {/* THEME TOGGLE */}
       <div className="card mb-3">
@@ -129,7 +129,7 @@ export default function SettingsPage() {
             {isDark ? <Moon size={16} /> : <Sun size={16} />}
             {isDark ? t("settings.darkMode") : t("settings.lightMode")}
           </span>
-          <span className="text-[0.65rem] text-zinc-500">
+          <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>
             {t("settings.tapToChange")}
           </span>
         </button>
@@ -245,7 +245,7 @@ export default function SettingsPage() {
       {/* SLEEP GOAL */}
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">Meta de Sueño</div>
-        <p className="text-[0.65rem] text-zinc-500 mb-3">Horas de sueño objetivo por noche.</p>
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>Horas de sueño objetivo por noche.</p>
         <div className="flex items-center gap-3">
           <input
             type="range"
@@ -315,7 +315,7 @@ export default function SettingsPage() {
       {/* AUTO BACKUP — 6.11 */}
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">{t("settings.backup")}</div>
-        <p className="text-[0.65rem] text-zinc-500 mb-3">{t("settings.backupDesc")}</p>
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("settings.backupDesc")}</p>
         <button
           onClick={() => {
             const next = !autoBackup;
@@ -341,7 +341,7 @@ export default function SettingsPage() {
             />
           </span>
         </button>
-        <p className="text-[0.65rem] text-zinc-500 mb-2">
+        <p className="text-[0.65rem] mb-2" style={{ color: "var(--text-muted)" }}>
           {t("settings.lastBackup")}: {lastBackup || t("settings.noBackup")}
         </p>
         <button
@@ -364,7 +364,7 @@ export default function SettingsPage() {
       {/* DAILY REMINDER — 7.15 */}
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">Recordatorio Diario</div>
-        <p className="text-[0.65rem] text-zinc-500 mb-3">Recibí una notificación diaria para no olvidar tu entrenamiento.</p>
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>Recibí una notificación diaria para no olvidar tu entrenamiento.</p>
         <button
           onClick={async () => {
             const next = !reminderOn;
@@ -398,7 +398,7 @@ export default function SettingsPage() {
         </button>
         {reminderOn && (
           <div className="flex items-center gap-2 mt-1">
-            <Clock size={14} className="text-zinc-500" />
+            <Clock size={14} style={{ color: "var(--text-muted)" }} />
             <select
               value={reminderHour}
               onChange={async (e) => {
@@ -435,7 +435,7 @@ export default function SettingsPage() {
       {/* PHASE OVERRIDE */}
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">{t("settings.phase")}</div>
-        <p className="text-[0.65rem] text-zinc-500 mb-3">
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
           {t("settings.currentPhase")}: <strong style={{ color: "var(--accent)" }}>{currentPhase.name}</strong>
           {overrideActive && <span className="text-[#FF9500] ml-1">(override manual)</span>}
         </p>
@@ -462,7 +462,7 @@ export default function SettingsPage() {
       {/* DATA EXPORT / IMPORT */}
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">{t("settings.data")}</div>
-        <p className="text-[0.65rem] text-zinc-500 mb-3">
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
           {t("settings.dataDesc")}
         </p>
 
@@ -491,7 +491,7 @@ export default function SettingsPage() {
       {/* DOWNLOAD APP */}
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">{t("settings.exportCSV")}</div>
-        <p className="text-[0.65rem] text-zinc-500 mb-3">
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
           {t("settings.csvDesc")}
         </p>
         <button onClick={() => {
@@ -511,7 +511,7 @@ export default function SettingsPage() {
       {/* DOWNLOAD APP */}
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">{t("settings.androidApp")}</div>
-        <p className="text-[0.65rem] text-zinc-500 mb-3">
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
           Descargá la app nativa para tu celular Android.
         </p>
         <button
@@ -525,7 +525,7 @@ export default function SettingsPage() {
       {/* APP INFO */}
       <div className="card">
         <div className="text-[0.75rem] font-bold mb-2">{t("settings.about")}</div>
-        <div className="text-[0.65rem] text-zinc-500 space-y-1">
+        <div className="text-[0.65rem] space-y-1" style={{ color: "var(--text-muted)" }}>
           <div>MARK PT — Personal Trainer</div>
           <div>{t("common.version")}: {APP_VERSION}</div>
           <div>{t("common.localData")}</div>

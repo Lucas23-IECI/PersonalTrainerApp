@@ -292,7 +292,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Nombre del ejercicio"
-              className="w-full text-[0.75rem] py-2 px-2.5 rounded-lg mb-2 text-[var(--text)] placeholder-zinc-600"
+              className="w-full text-[0.75rem] py-2 px-2.5 rounded-lg mb-2 text-[var(--text)] placeholder-[var(--text-secondary)]"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
             />
             <div className="grid grid-cols-2 gap-2 mb-2">
@@ -337,7 +337,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
                 <RotateCcw size={12} className="inline mr-1" />
                 Alternativas para &quot;{alternativesFor}&quot;
               </span>
-              <button onClick={() => setAlternativesFor(null)} className="text-zinc-500"><X size={14} /></button>
+              <button onClick={() => setAlternativesFor(null)} style={{ color: "var(--text-muted)" }}><X size={14} /></button>
             </div>
             {alternatives.map((alt) => (
               <ExerciseRow key={alt.id} exercise={alt} onSelect={handleSelect} isFav={favoritesSet.has(alt.name)} onToggleFav={handleToggleFavorite} />
@@ -443,7 +443,7 @@ function ExerciseRow({
           <div className="text-sm font-semibold truncate flex items-center gap-1.5" style={{ color: 'var(--text)' }}>
             {exercise.name}
             {isCustom && (
-              <span className="text-[0.5rem] font-bold px-1 py-0.5 rounded-full bg-zinc-800 text-zinc-400 shrink-0">CUSTOM</span>
+              <span className="text-[0.5rem] font-bold px-1 py-0.5 rounded-full shrink-0" style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>CUSTOM</span>
             )}
             {/* Favorite star (3.12) */}
             {isFav && <Star size={12} fill="#FFD60A" stroke="#FFD60A" className="shrink-0" />}

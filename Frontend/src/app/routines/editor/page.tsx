@@ -60,7 +60,7 @@ function RoutineEditorContent() {
   }, [routineId]);
 
   if (!routine) {
-    return <div className="py-10 text-center text-zinc-500">Cargando...</div>;
+    return <div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>Cargando...</div>;
   }
 
   // ── Routine-level updates ──
@@ -202,7 +202,8 @@ function RoutineEditorContent() {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => router.push("/routines")}
-          className="flex items-center gap-1 text-sm text-zinc-500 bg-transparent border-none cursor-pointer p-0"
+          className="flex items-center gap-1 text-sm bg-transparent border-none cursor-pointer p-0"
+          style={{ color: "var(--text-muted)" }}
         >
           <ChevronLeft size={16} /> Rutinas
         </button>
@@ -210,7 +211,7 @@ function RoutineEditorContent() {
           onClick={handleSave}
           disabled={!dirty}
           className="flex items-center gap-1 text-[0.7rem] font-bold text-white px-3 py-1.5 rounded-lg border-none cursor-pointer"
-          style={{ background: dirty ? "#2C6BED" : "var(--bg-elevated)", opacity: dirty ? 1 : 0.5 }}
+          style={{ background: dirty ? "var(--accent)" : "var(--bg-elevated)", opacity: dirty ? 1 : 0.5 }}
         >
           <Save size={12} /> Guardar
         </button>
@@ -238,7 +239,7 @@ function RoutineEditorContent() {
             <option key={rule.id} value={rule.id}>{rule.label}</option>
           ))}
         </select>
-        <p className="text-[0.58rem] text-zinc-500 mt-1">
+        <p className="text-[0.58rem] mt-1" style={{ color: "var(--text-muted)" }}>
           {PROGRESSION_RULES.find((r) => r.id === activeRuleId)?.description}
         </p>
       </div>
@@ -257,14 +258,16 @@ function RoutineEditorContent() {
           onChange={(e) => updateRoutineField("description", e.target.value)}
           placeholder="Descripción (opcional)"
           rows={2}
-          className="w-full text-[0.72rem] text-zinc-400 bg-transparent border-none outline-none resize-none p-0"
+          className="w-full text-[0.72rem] bg-transparent border-none outline-none resize-none p-0"
+          style={{ color: "var(--text-muted)" }}
         />
         <input
           type="text"
           value={routine.split}
           onChange={(e) => updateRoutineField("split", e.target.value)}
           placeholder="Split (ej: Push/Pull/Legs)"
-          className="w-full text-[0.68rem] text-zinc-500 bg-transparent border-none outline-none mt-1 p-0"
+          className="w-full text-[0.68rem] bg-transparent border-none outline-none mt-1 p-0"
+          style={{ color: "var(--text-muted)" }}
         />
       </div>
 
@@ -280,29 +283,30 @@ function RoutineEditorContent() {
                 onClick={() => setExpandedDay(isOpen ? null : day.id)}
               >
                 <div className="text-[0.85rem] font-bold text-[var(--accent)]">{day.name}</div>
-                <div className="text-[0.6rem] text-zinc-500">
+                <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
                   {day.exercises.length} ejercicios{day.focus ? ` · ${day.focus}` : ""}
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => removeDay(day.id)}
-                  className="text-zinc-600 bg-transparent border-none cursor-pointer p-1"
+                  className="bg-transparent border-none cursor-pointer p-1"
+                  style={{ color: "var(--text-secondary)" }}
                 >
                   <Trash2 size={14} />
                 </button>
-                <div className="text-zinc-500 cursor-pointer" onClick={() => setExpandedDay(isOpen ? null : day.id)}>
+                <div className="cursor-pointer" style={{ color: "var(--text-muted)" }} onClick={() => setExpandedDay(isOpen ? null : day.id)}>
                   {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </div>
               </div>
             </div>
 
             {isOpen && (
-              <div className="mt-3 border-t border-zinc-800 pt-3">
+              <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
                 {/* Day meta */}
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
-                    <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Nombre del Día</label>
+                    <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Nombre del Día</label>
                     <input
                       type="text"
                       value={day.name}
@@ -312,7 +316,7 @@ function RoutineEditorContent() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Tipo</label>
+                    <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Tipo</label>
                     <select
                       value={day.type}
                       onChange={(e) => updateDay(day.id, { type: e.target.value })}
@@ -325,13 +329,13 @@ function RoutineEditorContent() {
                     </select>
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Foco</label>
+                    <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Foco</label>
                     <input
                       type="text"
                       value={day.focus}
                       onChange={(e) => updateDay(day.id, { focus: e.target.value })}
                       placeholder="Ej: Pecho, hombros, tríceps"
-                      className="w-full text-[0.75rem] py-1.5 px-2 rounded-lg text-[var(--text)] placeholder-zinc-600"
+                      className="w-full text-[0.75rem] py-1.5 px-2 rounded-lg text-[var(--text)] placeholder-[var(--text-secondary)]"
                       style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
                     />
                   </div>
@@ -351,16 +355,16 @@ function RoutineEditorContent() {
                           <button
                             onClick={() => moveExercise(day.id, i, i - 1)}
                             disabled={i === 0}
-                            className="text-zinc-500 bg-transparent border-none cursor-pointer p-0"
-                            style={{ opacity: i === 0 ? 0.2 : 1 }}
+                            className="bg-transparent border-none cursor-pointer p-0"
+                            style={{ opacity: i === 0 ? 0.2 : 1, color: "var(--text-muted)" }}
                           >
                             <ChevronUp size={12} />
                           </button>
                           <button
                             onClick={() => moveExercise(day.id, i, i + 1)}
                             disabled={i === day.exercises.length - 1}
-                            className="text-zinc-500 bg-transparent border-none cursor-pointer p-0"
-                            style={{ opacity: i === day.exercises.length - 1 ? 0.2 : 1 }}
+                            className="bg-transparent border-none cursor-pointer p-0"
+                            style={{ opacity: i === day.exercises.length - 1 ? 0.2 : 1, color: "var(--text-muted)" }}
                           >
                             <ChevronDown size={12} />
                           </button>
@@ -370,7 +374,7 @@ function RoutineEditorContent() {
                           onClick={() => setEditingEx(isEditingThis ? null : { dayId: day.id, exIdx: i })}
                         >
                           <div className="text-[0.78rem] font-semibold text-[var(--text)]">{ex.name}</div>
-                          <div className="text-[0.62rem] text-zinc-500">
+                          <div className="text-[0.62rem]" style={{ color: "var(--text-muted)" }}>
                             {ex.sets}×{ex.reps} · {ex.rest} · RPE {ex.rpe}
                           </div>
                           {suggestions[ex.name] && (
@@ -382,7 +386,8 @@ function RoutineEditorContent() {
                         </div>
                         <button
                           onClick={() => removeExercise(day.id, i)}
-                          className="text-zinc-500 bg-transparent border-none cursor-pointer p-1"
+                          className="bg-transparent border-none cursor-pointer p-1"
+                          style={{ color: "var(--text-muted)" }}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -392,7 +397,7 @@ function RoutineEditorContent() {
                       {isEditingThis && (
                         <div className="mt-2 py-2 px-2 rounded-lg grid grid-cols-2 gap-2" style={{ background: "var(--bg-elevated)" }}>
                           <div className="col-span-2">
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Nombre</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Nombre</label>
                             <input
                               type="text"
                               value={ex.name}
@@ -402,7 +407,7 @@ function RoutineEditorContent() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Sets</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Sets</label>
                             <input
                               type="number"
                               value={ex.sets}
@@ -412,7 +417,7 @@ function RoutineEditorContent() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Reps</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Reps</label>
                             <input
                               type="text"
                               value={ex.reps}
@@ -422,7 +427,7 @@ function RoutineEditorContent() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Descanso</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Descanso</label>
                             <input
                               type="text"
                               value={ex.rest}
@@ -432,7 +437,7 @@ function RoutineEditorContent() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">RPE</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>RPE</label>
                             <input
                               type="text"
                               value={ex.rpe}
@@ -442,13 +447,13 @@ function RoutineEditorContent() {
                             />
                           </div>
                           <div className="col-span-2">
-                            <label className="block text-[0.55rem] text-zinc-600 uppercase mb-0.5">Notas</label>
+                            <label className="block text-[0.55rem] uppercase mb-0.5" style={{ color: "var(--text-secondary)" }}>Notas</label>
                             <input
                               type="text"
                               value={ex.notes || ""}
                               onChange={(e) => updateExercise(day.id, i, { notes: e.target.value || undefined })}
                               placeholder="Notas opcionales..."
-                              className="w-full text-[0.72rem] py-1.5 px-2 rounded-lg text-[var(--text)] placeholder-zinc-600"
+                              className="w-full text-[0.72rem] py-1.5 px-2 rounded-lg text-[var(--text)] placeholder-[var(--text-secondary)]"
                               style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
                             />
                           </div>
@@ -482,7 +487,7 @@ function RoutineEditorContent() {
       </button>
 
       {/* Summary */}
-      <div className="mt-4 text-center text-[0.65rem] text-zinc-500">
+      <div className="mt-4 text-center text-[0.65rem]" style={{ color: "var(--text-muted)" }}>
         {routine.days.length} días · {routine.days.reduce((s, d) => s + d.exercises.length, 0)} ejercicios totales
       </div>
     </main>
@@ -491,7 +496,7 @@ function RoutineEditorContent() {
 
 export default function RoutineEditorPage() {
   return (
-    <Suspense fallback={<div className="py-10 text-center text-zinc-500">Cargando...</div>}>
+    <Suspense fallback={<div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>Cargando...</div>}>
       <RoutineEditorContent />
     </Suspense>
   );
