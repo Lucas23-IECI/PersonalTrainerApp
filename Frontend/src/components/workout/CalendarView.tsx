@@ -21,17 +21,8 @@ export default function CalendarView({ plan, todayIndex, onStart }: CalendarView
   // Map plan to weekday grid (Mon=0 → Sun=6)
   const dayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-  // Map weekStatus by day of week: weekStatus is [Sun, Mon, Tue, ... Sat]
-  // We want Mon-first order: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
-  const reorderedStatus = [
-    weekStatus[1], // Mon
-    weekStatus[2], // Tue
-    weekStatus[3], // Wed
-    weekStatus[4], // Thu
-    weekStatus[5], // Fri
-    weekStatus[6], // Sat
-    weekStatus[0], // Sun
-  ];
+  // weekStatus is already Mon-first (matches getWeekDates: Mon→Sun)
+  const reorderedStatus = weekStatus;
 
   // Map plan days to Mon-first order
   const planByGridIndex = new Map<number, WorkoutDay>();
