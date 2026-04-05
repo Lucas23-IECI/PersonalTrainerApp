@@ -43,6 +43,16 @@ export default function OnboardingPage() {
   function next() {
     setError("");
     if (step === 1 && name.trim().length < 2) { setError("Ingresá tu nombre"); return; }
+    if (step === 1) {
+      const n = name.trim();
+      const isLucas = n.toLowerCase().includes("lucas") && (n.toLowerCase().includes("méndez") || n.toLowerCase().includes("mendez"));
+      if (isLucas) {
+        saveProfile(profileDefaults);
+        localStorage.setItem("mark-pt-onboarding-done", "true");
+        router.push("/");
+        return;
+      }
+    }
     if (step === 2 && (!age || !height || !weight)) { setError("Completá todos los campos"); return; }
     if (step < 7) setStep((step + 1) as Step);
   }

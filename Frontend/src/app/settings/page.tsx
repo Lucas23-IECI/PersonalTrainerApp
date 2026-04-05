@@ -459,12 +459,12 @@ export default function SettingsPage() {
         <p className="text-[0.65rem] text-zinc-500 mb-3">
           Descargá la app nativa para tu celular Android.
         </p>
-        <Link
-          href="/descargar"
-          className="btn btn-primary w-full text-sm no-underline flex items-center justify-center gap-2"
+        <button
+          onClick={() => window.open("https://github.com/Lucas23-IECI/PersonalTrainerApp/releases/latest/download/mark-pt.apk", "_system")}
+          className="btn btn-primary w-full text-sm flex items-center justify-center gap-2"
         >
           <Smartphone size={14} /> {t("settings.downloadAPK")}
-        </Link>
+        </button>
       </div>
 
       {/* APP INFO */}
