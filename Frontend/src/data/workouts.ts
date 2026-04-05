@@ -105,3 +105,27 @@ export function getTodayWorkout(): WorkoutDay | undefined {
   const pd = getTodayProgramWorkout(phase.id);
   return pd ? programDayToWorkoutDay(pd) : undefined;
 }
+
+/**
+ * Get the next upcoming workout day (tomorrow or later).
+ * Searches up to 7 days ahead, skipping rest days.
+ */
+export function getNextWorkoutDay(): { workout: WorkoutDay; daysFromNow: number; dayName: string } | undefined {
+  const phase = getCurrentPhase();
+  const program = getProgramForPhase(phase.id);
+
+  for (let offset = 1; offset <= 7; offset++) {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + offset);
+    const futureDow = futureDate.getDay();
+    const pd = program.days.find((d) => d.dayOfWeek === futureDow);
+    if (pd && pd.type !== "rest" && pd.exercises.length > 0) {
+      return {
+        workout: programDayToWorkoutDay(pd),
+        daysFromNow: offset,
+        dayName: DAY_NAMES[futureDow] || "",
+      };
+    }
+  }
+  return undefined;
+}
