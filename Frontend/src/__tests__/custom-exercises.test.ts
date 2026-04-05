@@ -19,12 +19,12 @@ describe('custom-exercises', () => {
     it('creates an exercise with defaults', () => {
       const ex = createCustomExercise({
         name: 'My Press',
-        category: 'compound',
+        category: 'barbell',
         primaryMuscles: ['chest'],
       });
       expect(ex.id).toMatch(/^custom_/);
       expect(ex.name).toBe('My Press');
-      expect(ex.category).toBe('compound');
+      expect(ex.category).toBe('barbell');
       expect(ex.primaryMuscles).toEqual(['chest']);
       expect(ex.secondaryMuscles).toEqual([]);
       expect(ex.difficulty).toBe('intermediate');
@@ -35,7 +35,7 @@ describe('custom-exercises', () => {
     it('persists and retrieves by id', () => {
       const ex = createCustomExercise({
         name: 'Custom Squat',
-        category: 'compound',
+        category: 'barbell',
         primaryMuscles: ['quads'],
         difficulty: 'advanced',
       });
@@ -48,7 +48,7 @@ describe('custom-exercises', () => {
     it('updates existing exercise when saved with same id', () => {
       const ex = createCustomExercise({
         name: 'Original Name',
-        category: 'isolation',
+        category: 'dumbbell',
         primaryMuscles: ['biceps'],
       });
       const updated = { ...ex, name: 'Updated Name' };
@@ -60,8 +60,8 @@ describe('custom-exercises', () => {
     it('deletes an exercise', () => {
       const ex = createCustomExercise({
         name: 'To Delete',
-        category: 'compound',
-        primaryMuscles: ['back'],
+        category: 'barbell',
+        primaryMuscles: ['upper_back'],
       });
       expect(getCustomExercises()).toHaveLength(1);
       deleteCustomExercise(ex.id);
@@ -97,7 +97,7 @@ describe('custom-exercises', () => {
       const before = getAllExercises().length;
       createCustomExercise({
         name: 'UniqueTestExercise',
-        category: 'isolation',
+        category: 'dumbbell',
         primaryMuscles: ['traps'],
       });
       expect(getAllExercises().length).toBe(before + 1);
@@ -106,7 +106,7 @@ describe('custom-exercises', () => {
     it('findExerciseByName finds custom exercise', () => {
       createCustomExercise({
         name: 'FindMe Exercise',
-        category: 'compound',
+        category: 'barbell',
         primaryMuscles: ['chest'],
       });
       const found = findExerciseByName('FindMe Exercise');
