@@ -43,6 +43,10 @@ const translations: Record<string, Record<Lang, string>> = {
   "settings.lastBackup": { es: "Último backup", en: "Last backup" },
   "settings.noBackup": { es: "Sin backup aún", en: "No backup yet" },
   "settings.backupRestored": { es: "Backup restaurado. Recargá la página.", en: "Backup restored. Reload the page." },
+  "settings.workoutView": { es: "Vista de Entrenamiento", en: "Workout View" },
+  "settings.viewToday": { es: "Hoy", en: "Today" },
+  "settings.viewCarousel": { es: "Carrusel", en: "Carousel" },
+  "settings.viewCalendar": { es: "Calendario", en: "Calendar" },
 
   // Common
   "common.back": { es: "Volver", en: "Back" },

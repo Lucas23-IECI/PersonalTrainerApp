@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
+import ExerciseProgressInline from "@/components/workout/ExerciseProgressInline";
 import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
 import { vibrateTimerComplete, vibrateMedium, vibrateHeavy, vibrateSuccess, vibrateLight } from "@/lib/haptics";
 import { exerciseLibrary, type LibraryExercise, type ExerciseCategory } from "@/data/exercises";
@@ -886,6 +887,9 @@ function SessionContent() {
                   className="w-full text-[0.75rem] bg-transparent border-none outline-none mt-1 p-0"
                   style={{ color: "var(--text-secondary)" }}
                 />
+
+                {/* Inline Progress */}
+                <ExerciseProgressInline exerciseName={ex.name} />
 
                 {/* Rest Timer Config */}
                 <div className="flex items-center gap-2 mt-1.5">

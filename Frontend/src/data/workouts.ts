@@ -65,9 +65,58 @@ function programDayToWorkoutDay(pd: ProgramDay): WorkoutDay {
   };
 }
 
+const WEEK_OVERRIDES_KEY = "mark-pt-week-overrides";
+
+interface WeekOverrides {
+  /** ISO date of the Monday this override applies to */
+  weekStart: string;
+  /** Maps original dayId → new position index (0=Mon, 6=Sun) */
+  swaps: Record<string, number>;
+}
+
+function getMonday(): string {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(d.setDate(diff));
+  return monday.toISOString().split("T")[0];
+}
+
+function getWeekOverrides(): WeekOverrides | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(WEEK_OVERRIDES_KEY);
+    if (!raw) return null;
+    const data: WeekOverrides = JSON.parse(raw);
+    // Only valid if same week
+    if (data.weekStart !== getMonday()) {
+      localStorage.removeItem(WEEK_OVERRIDES_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export function saveWeekSwap(orderedDayIds: string[]): void {
+  const swaps: Record<string, number> = {};
+  orderedDayIds.forEach((id, i) => { swaps[id] = i; });
+  const data: WeekOverrides = { weekStart: getMonday(), swaps };
+  localStorage.setItem(WEEK_OVERRIDES_KEY, JSON.stringify(data));
+}
+
+export function resetWeekOverrides(): void {
+  localStorage.removeItem(WEEK_OVERRIDES_KEY);
+}
+
+export function hasWeekOverrides(): boolean {
+  return getWeekOverrides() !== null;
+}
+
 /**
  * Get the full weekly plan for the current phase.
- * This replaces the old static weeklyPlan.
+ * Applies any week overrides (day swaps).
  */
 export function getWeeklyPlan(): WorkoutDay[] {
   const phase = getCurrentPhase();
@@ -78,7 +127,22 @@ export function getWeeklyPlan(): WorkoutDay[] {
     const bIdx = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
     return aIdx - bIdx;
   });
-  return sorted.map(programDayToWorkoutDay);
+  const plan = sorted.map(programDayToWorkoutDay);
+
+  // Apply week overrides
+  const overrides = getWeekOverrides();
+  if (overrides) {
+    plan.sort((a, b) => {
+      const aIdx = overrides.swaps[a.id] ?? plan.indexOf(a);
+      const bIdx = overrides.swaps[b.id] ?? plan.indexOf(b);
+      return aIdx - bIdx;
+    });
+    // Update day names to match new positions
+    const dayOrder = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    plan.forEach((w, i) => { w.day = dayOrder[i] || w.day; });
+  }
+
+  return plan;
 }
 
 // Keep backward compat — weeklyPlan is now dynamic

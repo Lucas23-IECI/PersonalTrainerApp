@@ -188,6 +188,7 @@ export interface ActiveSessionData {
 // === User Settings ===
 
 export type WeightUnit = "kg" | "lbs";
+export type WorkoutViewMode = "today" | "carousel" | "calendar";
 
 export interface UserSettings {
   unit: WeightUnit;
@@ -199,6 +200,7 @@ export interface UserSettings {
   dailyReminderEnabled: boolean; // 7.15
   reminderHour: number; // 7.15 — 0-23
   reminderMinute: number; // 7.15 — 0-59
+  workoutView: WorkoutViewMode;
 }
 
 const SETTINGS_KEY = "mark-pt-settings";
@@ -213,6 +215,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   dailyReminderEnabled: false,
   reminderHour: 18,
   reminderMinute: 0,
+  workoutView: "today",
 };
 
 export function getSettings(): UserSettings {

@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
-import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock } from "lucide-react";
+import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit, type WorkoutViewMode } from "@/lib/storage";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock, LayoutList, GalleryHorizontalEnd, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
 import { t } from "@/lib/i18n";
@@ -31,6 +31,7 @@ export default function SettingsPage() {
   const [reminderOn, setReminderOn] = useState(false);
   const [reminderHour, setReminderHour] = useState(18);
   const [reminderMinute, setReminderMinute] = useState(0);
+  const [workoutView, setWorkoutView] = useState<WorkoutViewMode>("today");
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
@@ -47,6 +48,7 @@ export default function SettingsPage() {
     setReminderOn(s.dailyReminderEnabled);
     setReminderHour(s.reminderHour);
     setReminderMinute(s.reminderMinute);
+    setWorkoutView(s.workoutView);
   }, []);
 
   function toggleTheme() {
@@ -129,6 +131,34 @@ export default function SettingsPage() {
             {t("settings.tapToChange")}
           </span>
         </button>
+      </div>
+
+      {/* WORKOUT VIEW TOGGLE */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.workoutView")}</div>
+        <div className="flex gap-2">
+          {([
+            { value: "today" as const, icon: LayoutList, label: t("settings.viewToday") },
+            { value: "carousel" as const, icon: GalleryHorizontalEnd, label: t("settings.viewCarousel") },
+            { value: "calendar" as const, icon: CalendarDays, label: t("settings.viewCalendar") },
+          ]).map(({ value, icon: Icon, label }) => (
+            <button
+              key={value}
+              onClick={() => {
+                setWorkoutView(value);
+                saveSettings({ ...getSettings(), workoutView: value });
+              }}
+              className="flex-1 py-2 rounded-lg text-[0.72rem] font-bold border-none cursor-pointer transition-colors flex flex-col items-center gap-1"
+              style={{
+                background: workoutView === value ? "var(--accent)" : "var(--bg-elevated)",
+                color: workoutView === value ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* UNIT TOGGLE — 6.6 */}
