@@ -502,6 +502,7 @@ export interface DayStatus {
   checkedIn: boolean;
   mealsLogged: number;
   totalProtein: number;
+  totalSets: number;
 }
 
 export function getWeekStatus(): DayStatus[] {
@@ -509,18 +510,24 @@ export function getWeekStatus(): DayStatus[] {
   const dayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
   return dates.map((date, i) => {
     const sessions = getSessionsForDate(date);
+    const completedSessions = sessions.filter((s) => s.completed);
     const checkin = getCheckinForDate(date);
     const nutrition = getNutritionForDate(date);
     const totalProtein =
       nutrition.meals.reduce((s, m) => s + m.protein, 0) +
       nutrition.customMeals.reduce((s, m) => s + m.protein, 0);
+    const totalSets = completedSessions.reduce(
+      (sum, s) => sum + s.exercises.reduce((eSum, e) => eSum + (e.skipped ? 0 : e.sets.length), 0),
+      0
+    );
     return {
       date,
       dayLabel: dayLabels[i],
-      trained: sessions.some((s) => s.completed),
+      trained: completedSessions.length > 0,
       checkedIn: !!checkin,
       mealsLogged: nutrition.meals.length + nutrition.customMeals.length,
       totalProtein,
+      totalSets,
     };
   });
 }
