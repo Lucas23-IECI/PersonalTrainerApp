@@ -6,6 +6,10 @@ import Link from "next/link";
 const APK_URL =
   "https://github.com/Lucas23-IECI/PersonalTrainerApp/releases/latest/download/mark-pt.apk";
 
+function handleDownload() {
+  window.open(APK_URL, "_system");
+}
+
 export default function DescargarPage() {
   return (
     <div
@@ -37,9 +41,9 @@ export default function DescargarPage() {
       </p>
 
       {/* Download button */}
-      <a
-        href={APK_URL}
-        className="flex items-center gap-3 px-8 py-4 rounded-2xl text-lg font-semibold no-underline transition-transform active:scale-95"
+      <button
+        onClick={handleDownload}
+        className="flex items-center gap-3 px-8 py-4 rounded-2xl text-lg font-semibold no-underline transition-transform active:scale-95 border-none cursor-pointer"
         style={{
           background: "var(--accent)",
           color: "#fff",
@@ -48,7 +52,7 @@ export default function DescargarPage() {
       >
         <Download size={24} />
         Descargar APK
-      </a>
+      </button>
 
       <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
         ~5 MB &middot; Android 7.0+

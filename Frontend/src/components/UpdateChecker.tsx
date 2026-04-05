@@ -14,10 +14,10 @@ export default function UpdateChecker() {
     // Only check on native app
     if (!isNative()) return;
 
-    // Check once per day max
+    // Check once per hour max
     const lastCheck = localStorage.getItem('mark-pt-update-check');
     const now = Date.now();
-    if (lastCheck && now - parseInt(lastCheck, 10) < 86400000) return;
+    if (lastCheck && now - parseInt(lastCheck, 10) < 3600000) return;
 
     checkForUpdate().then((result) => {
       localStorage.setItem('mark-pt-update-check', String(now));
