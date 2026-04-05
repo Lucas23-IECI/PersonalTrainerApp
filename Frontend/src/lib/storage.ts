@@ -3,6 +3,8 @@
 // All app state persisted with typed helpers
 // =============================================
 
+import { findExerciseByName } from "./custom-exercises";
+
 // === Types ===
 
 export interface DailyCheckin {
@@ -571,6 +573,58 @@ export function getWeeklyMuscleHits(): Record<string, number> {
     });
   });
   return hits;
+}
+
+// === Weekly Muscle Stats (detailed) ===
+
+export interface WeeklyMuscleStats {
+  sets: number;
+  volume: number; // total kg lifted
+  exercises: string[];
+}
+
+export function getWeeklyMuscleData(): Record<string, WeeklyMuscleStats> {
+  const dates = getWeekDates();
+  const data: Record<string, WeeklyMuscleStats> = {};
+
+  const ensure = (m: string) => {
+    if (!data[m]) data[m] = { sets: 0, volume: 0, exercises: [] };
+  };
+
+  dates.forEach((date) => {
+    const sessions = getSessionsForDate(date).filter((s) => s.completed);
+    sessions.forEach((session) => {
+      session.exercises.forEach((ex) => {
+        if (ex.skipped) return;
+        const workingSets = ex.sets.filter((s) => s.setType !== "warmup");
+        const setCount = workingSets.length;
+        const volume = workingSets.reduce((sum, s) => sum + (s.weight || 0) * s.reps, 0);
+
+        // Primary muscles get full credit
+        if (ex.primaryMuscles) {
+          ex.primaryMuscles.forEach((m) => {
+            ensure(m);
+            data[m].sets += setCount;
+            data[m].volume += volume;
+            if (!data[m].exercises.includes(ex.name)) data[m].exercises.push(ex.name);
+          });
+        }
+
+        // Secondary muscles get half credit
+        const libEx = findExerciseByName(ex.name);
+        if (libEx?.secondaryMuscles) {
+          libEx.secondaryMuscles.forEach((m) => {
+            ensure(m);
+            data[m].sets += Math.round(setCount * 0.5);
+            data[m].volume += Math.round(volume * 0.5);
+            if (!data[m].exercises.includes(ex.name)) data[m].exercises.push(ex.name);
+          });
+        }
+      });
+    });
+  });
+
+  return data;
 }
 
 // === Weekly Notes ===
