@@ -32,6 +32,7 @@ export default function SettingsPage() {
   const [reminderHour, setReminderHour] = useState(18);
   const [reminderMinute, setReminderMinute] = useState(0);
   const [workoutView, setWorkoutView] = useState<WorkoutViewMode>("today");
+  const [sleepGoal, setSleepGoal] = useState(8);
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
@@ -49,6 +50,7 @@ export default function SettingsPage() {
     setReminderHour(s.reminderHour);
     setReminderMinute(s.reminderMinute);
     setWorkoutView(s.workoutView);
+    setSleepGoal(s.sleepGoal);
   }, []);
 
   function toggleTheme() {
@@ -238,6 +240,29 @@ export default function SettingsPage() {
             />
           </span>
         </button>
+      </div>
+
+      {/* SLEEP GOAL */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">Meta de Sueño</div>
+        <p className="text-[0.65rem] text-zinc-500 mb-3">Horas de sueño objetivo por noche.</p>
+        <div className="flex items-center gap-3">
+          <input
+            type="range"
+            min={5}
+            max={10}
+            step={0.5}
+            value={sleepGoal}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setSleepGoal(v);
+              saveSettings({ ...getSettings(), sleepGoal: v });
+            }}
+            className="flex-1"
+            style={{ accentColor: "#5E5CE6" }}
+          />
+          <span className="text-lg font-black w-12 text-center" style={{ color: "#5E5CE6" }}>{sleepGoal}h</span>
+        </div>
       </div>
 
       {/* WEIGHT INCREMENT — 6.10 */}

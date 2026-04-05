@@ -12,9 +12,11 @@ import {
   type WorkoutSession,
 } from "@/lib/storage";
 import { getCurrentPhase, getPhaseWeek, isDeloadWeek } from "@/data/phases";
-import { Dumbbell, Flame, AlertTriangle, Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Dumbbell, Flame, AlertTriangle, Activity, TrendingUp, TrendingDown, Minus, Moon } from "lucide-react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { PageTransition, TabContent, SwipeTabs } from "@/components/motion";
+import { getSleepQualityAvg, QUALITY_EMOJIS } from "@/lib/sleep-utils";
 
 const E1RMChart = dynamic(() => import("@/components/charts/E1RMChart"), { ssr: false });
 const MuscleVolumeChart = dynamic(() => import("@/components/charts/MuscleVolumeChart"), { ssr: false });
@@ -260,7 +262,22 @@ export default function ProgressPage() {
 
           {/* Sleep History */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest mb-2.5">Sueño</div>
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="text-[0.65rem] text-zinc-600 uppercase tracking-widest">Sueño</div>
+              <Link href="/sleep" className="text-[0.58rem] no-underline font-semibold" style={{ color: "#5E5CE6" }}>Ver detalle →</Link>
+            </div>
+            <div className="flex items-center gap-3 mb-2.5">
+              <div className="text-center">
+                <div className="text-lg font-black">{sleepAvg}h</div>
+                <div className="text-[0.5rem] text-zinc-500 uppercase">Promedio</div>
+              </div>
+              {getSleepQualityAvg(7) > 0 && (
+                <div className="text-center">
+                  <div className="text-lg">{QUALITY_EMOJIS[Math.round(getSleepQualityAvg(7))]}</div>
+                  <div className="text-[0.5rem] text-zinc-500 uppercase">Calidad</div>
+                </div>
+              )}
+            </div>
             {checkins.length === 0 ? (
               <div className="text-center py-5 text-zinc-400 text-[0.8rem]">Sin datos todavía</div>
             ) : (

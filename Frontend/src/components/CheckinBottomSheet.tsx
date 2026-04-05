@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Moon } from "lucide-react";
+import Link from "next/link";
 import {
   today,
   getCheckinForDate,
   saveCheckin,
   type DailyCheckin,
 } from "@/lib/storage";
+import { QUALITY_EMOJIS, QUALITY_LABELS } from "@/lib/sleep-utils";
 
 interface Props {
   open: boolean;
@@ -24,6 +26,7 @@ const sorenessLabels = ["Nada", "Leve", "Moderado", "Fuerte"];
 export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeight }: Props) {
   const todayStr = today();
   const [sleep, setSleep] = useState(7);
+  const [sleepQuality, setSleepQuality] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [energy, setEnergy] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [soreness, setSoreness] = useState<0 | 1 | 2 | 3>(1);
   const [weight, setWeight] = useState("");
@@ -34,12 +37,14 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
       const existing = getCheckinForDate(todayStr);
       if (existing) {
         setSleep(existing.sleepHours || 7);
+        setSleepQuality(existing.sleepQuality || 3);
         setEnergy(existing.energy);
         setSoreness(existing.soreness);
         setWeight(existing.weight ? String(existing.weight) : "");
         setNotes(existing.notes || "");
       } else {
         setSleep(7);
+        setSleepQuality(3);
         setEnergy(3);
         setSoreness(1);
         setWeight(defaultWeight ? String(defaultWeight) : "");
@@ -52,6 +57,7 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
     const ci: DailyCheckin = {
       date: todayStr,
       sleepHours: sleep,
+      sleepQuality,
       energy,
       soreness,
       weight: weight ? parseFloat(weight) : undefined,
@@ -106,12 +112,15 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
 
               {/* Sleep */}
               <div className="mb-5">
-                <label className="block text-[0.62rem] uppercase mb-2" style={{ color: "var(--text-muted)" }}>
-                  Sueño:{" "}
-                  <strong className="text-base" style={{ color: sleep < 7 ? "var(--accent-red)" : "var(--accent-green)" }}>
-                    {sleep}h
-                  </strong>
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-[0.62rem] uppercase" style={{ color: "var(--text-muted)" }}>
+                    Sueño:{" "}
+                    <strong className="text-base" style={{ color: sleep < 7 ? "var(--accent-red)" : "var(--accent-green)" }}>
+                      {sleep}h
+                    </strong>
+                  </label>
+                  <Link href="/sleep" className="text-[0.58rem] no-underline font-semibold" style={{ color: "#5E5CE6" }}>Ver más →</Link>
+                </div>
                 <input
                   type="range"
                   min={2}
@@ -122,6 +131,32 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
                   className="w-full"
                   style={{ accentColor: sleep < 7 ? "var(--accent-red)" : "var(--accent-green)" }}
                 />
+              </div>
+
+              {/* Sleep Quality */}
+              <div className="mb-5">
+                <label className="flex items-center gap-1.5 text-[0.62rem] uppercase mb-2" style={{ color: "var(--text-muted)" }}>
+                  <Moon size={12} /> Calidad del sueño
+                </label>
+                <div className="flex gap-1.5">
+                  {([1, 2, 3, 4, 5] as const).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setSleepQuality(v)}
+                      className="flex-1 py-2 rounded-lg text-center"
+                      style={{
+                        background: sleepQuality === v ? "#5E5CE620" : "var(--bg-elevated)",
+                        border: `1px solid ${sleepQuality === v ? "#5E5CE6" : "var(--border)"}`,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div className="text-sm">{QUALITY_EMOJIS[v]}</div>
+                      <div className="text-[0.45rem] font-medium" style={{ color: sleepQuality === v ? "#5E5CE6" : "var(--text-muted)" }}>
+                        {QUALITY_LABELS[v]}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Energy */}

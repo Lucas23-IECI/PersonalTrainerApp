@@ -36,6 +36,7 @@ import QuickActionsChips from "@/components/home/QuickActionsChips";
 import GoalCountdown from "@/components/home/GoalCountdown";
 import WeekHybridView from "@/components/home/WeekHybridView";
 import NextWorkoutPreview from "@/components/home/NextWorkoutPreview";
+import SleepLogModal from "@/components/sleep/SleepLogModal";
 
 export default function Dashboard() {
   const todayStr = today();
@@ -45,6 +46,7 @@ export default function Dashboard() {
   const [todayWorkout, setTodayWorkout] = useState<ReturnType<typeof getTodayWorkout>>(undefined);
   const [checkin, setCheckin] = useState<DailyCheckin | null>(null);
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [sleepOpen, setSleepOpen] = useState(false);
   const [todayTrained, setTodayTrained] = useState(false);
   const [todayProtein, setTodayProtein] = useState(0);
   const [todayCalories, setTodayCalories] = useState(0);
@@ -156,7 +158,7 @@ export default function Dashboard() {
         </div>
 
         {/* ───── QUICK ACTIONS CHIPS ───── */}
-        <QuickActionsChips onOpenCheckin={() => setCheckinOpen(true)} />
+        <QuickActionsChips onOpenCheckin={() => setCheckinOpen(true)} onOpenSleep={() => setSleepOpen(true)} />
 
         {/* ───── TODAY'S WORKOUT (hero card) ───── */}
         <StaggerList>
@@ -342,6 +344,26 @@ export default function Dashboard() {
               </div>
             </StaggerItem>
           )}
+
+          {/* ───── SLEEP CARD ───── */}
+          <StaggerItem>
+            <Link href="/sleep" className="no-underline text-inherit">
+              <div className="card mb-4 flex items-center justify-between" style={{ borderLeft: "3px solid #5E5CE6" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(94,92,230,0.1)" }}>
+                    <Moon size={16} style={{ color: "#5E5CE6" }} />
+                  </div>
+                  <div>
+                    <div className="text-[0.75rem] font-semibold">Sueño</div>
+                    <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                      {checkin?.sleepHours ? `${checkin.sleepHours}h anoche` : "Registrá tu sueño"}
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+              </div>
+            </Link>
+          </StaggerItem>
         </StaggerList>
 
         {/* ───── CHECK-IN BOTTOM SHEET ───── */}
@@ -350,6 +372,11 @@ export default function Dashboard() {
           onClose={() => setCheckinOpen(false)}
           onSaved={reload}
           defaultWeight={prof.weight}
+        />
+        <SleepLogModal
+          open={sleepOpen}
+          onClose={() => setSleepOpen(false)}
+          onSaved={reload}
         />
       </main>
     </PageTransition>

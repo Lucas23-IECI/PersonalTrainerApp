@@ -11,6 +11,9 @@ export interface DailyCheckin {
   date: string; // YYYY-MM-DD
   weight?: number;
   sleepHours?: number;
+  sleepQuality?: 1 | 2 | 3 | 4 | 5;
+  bedtime?: string; // HH:MM
+  wakeTime?: string; // HH:MM
   energy: 1 | 2 | 3 | 4 | 5;
   soreness: 0 | 1 | 2 | 3;
   notes?: string;
@@ -201,6 +204,7 @@ export interface UserSettings {
   reminderHour: number; // 7.15 — 0-23
   reminderMinute: number; // 7.15 — 0-59
   workoutView: WorkoutViewMode;
+  sleepGoal: number; // target hours per night (default 8)
 }
 
 const SETTINGS_KEY = "mark-pt-settings";
@@ -216,6 +220,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   reminderHour: 18,
   reminderMinute: 0,
   workoutView: "today",
+  sleepGoal: 8,
 };
 
 export function getSettings(): UserSettings {

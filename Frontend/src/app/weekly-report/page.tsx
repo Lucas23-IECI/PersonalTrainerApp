@@ -9,9 +9,11 @@ import {
   getWeeklyMuscleHits,
   getTrainingStreak,
   getCheckinForDate,
+  getCheckins,
   type DayStatus,
   type WorkoutSession,
 } from "@/lib/storage";
+import { getSleepAverage, getSleepQualityAvg, calculateSleepDebt, QUALITY_EMOJIS } from "@/lib/sleep-utils";
 import { MUSCLE_LABELS } from "@/data/exercises";
 import {
   ArrowLeft,
@@ -22,6 +24,7 @@ import {
   Star,
   Clock,
   Target,
+  Moon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -382,6 +385,39 @@ export default function WeeklyReportPage() {
             </div>
           </div>
         )}
+
+        {/* Sleep Section */}
+        <div
+          className="rounded-xl p-4"
+          style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Moon size={14} style={{ color: "#5E5CE6" }} />
+            <span className="text-[0.65rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
+              Sueño esta semana
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <div className="text-xl font-black" style={{ color: getSleepAverage(7) >= 7 ? "#34C759" : "#FF9500" }}>
+                {getSleepAverage(7)}h
+              </div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Promedio</div>
+            </div>
+            <div>
+              <div className="text-xl font-black" style={{ color: calculateSleepDebt(7) > 0 ? "#FF3B30" : "#34C759" }}>
+                {calculateSleepDebt(7) > 0 ? `-${calculateSleepDebt(7)}h` : "0h"}
+              </div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Deuda</div>
+            </div>
+            <div>
+              <div className="text-xl font-black" style={{ color: "var(--text)" }}>
+                {getSleepQualityAvg(7) > 0 ? `${QUALITY_EMOJIS[Math.round(getSleepQualityAvg(7))]} ${getSleepQualityAvg(7)}` : "—"}
+              </div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Calidad</div>
+            </div>
+          </div>
+        </div>
 
         {/* Best Exercise */}
         {stats.bestExercise && (
