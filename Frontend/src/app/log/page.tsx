@@ -18,6 +18,7 @@ import {
   Pencil, Check, Star,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
 const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] as const;
@@ -58,14 +59,16 @@ export default function LogPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<WorkoutSession | null>(null);
 
-  useEffect(() => {
+  useEffect(() => { loadSessions(); }, []);
+
+  function loadSessions() {
     const all = getSessions();
     all.sort((a, b) => {
       if (a.date !== b.date) return b.date.localeCompare(a.date);
       return (b.endTime || 0) - (a.endTime || 0);
     });
     setSessions(all);
-  }, []);
+  }
 
   // 4.1 — Per-day training stats for colored calendar
   const dayStats = useMemo(() => {
@@ -282,7 +285,8 @@ export default function LogPage() {
   const selectedDateStats = selectedDate ? dayStats[selectedDate] : null;
 
   return (
-    <main className="max-w-[600px] mx-auto px-4 py-5">
+    <PullToRefresh onRefresh={loadSessions}>
+    <main className="max-w-[600px] md:max-w-[960px] mx-auto px-4 py-5">
       <h1 className="text-[1.3rem] font-black tracking-tight mb-1">{t("common.history")}</h1>
       <p className="text-[0.7rem] mb-4" style={{ color: "var(--text-secondary)" }}>
         {sessions.length} {sessions.length === 1 ? t("common.session") : t("common.sessions")} {t("log.recorded")}
@@ -766,5 +770,6 @@ export default function LogPage() {
         </div>
       ))}
     </main>
+    </PullToRefresh>
   );
 }

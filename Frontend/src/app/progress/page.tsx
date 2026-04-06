@@ -18,6 +18,7 @@ import Link from "next/link";
 import { PageTransition, TabContent, SwipeTabs } from "@/components/motion";
 import { getSleepQualityAvg, QUALITY_EMOJIS } from "@/lib/sleep-utils";
 import { t } from "@/lib/i18n";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const E1RMChart = dynamic(() => import("@/components/charts/E1RMChart"), { ssr: false });
 const MuscleVolumeChart = dynamic(() => import("@/components/charts/MuscleVolumeChart"), { ssr: false });
@@ -130,6 +131,10 @@ export default function ProgressPage() {
   ];
 
   return (
+    <PullToRefresh onRefresh={() => {
+      const ci = getCheckins(); ci.sort((a, b) => a.date.localeCompare(b.date));
+      setCheckins(ci); setSessions(getSessions()); setStreak(getTrainingStreak());
+    }}>
     <PageTransition>
     <main className="max-w-[600px] mx-auto px-4 py-5">
       <h1 className="text-[1.3rem] font-black tracking-tight mb-1">{t("progress.title")}</h1>
@@ -555,5 +560,6 @@ export default function ProgressPage() {
       </SwipeTabs>
     </main>
     </PageTransition>
+    </PullToRefresh>
   );
 }

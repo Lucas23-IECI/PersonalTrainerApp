@@ -31,6 +31,7 @@ import { getExerciseHistory } from "@/lib/progression";
 import { getFavorites, toggleFavorite } from "@/lib/exercise-favorites";
 import { getExerciseImage, hasWgerMapping } from "@/lib/wger-api";
 import { Search, ChevronDown, ChevronUp, Target, BookOpen, Trophy, Star, Settings, BarChart3, Activity } from "lucide-react";
+import PullToRefresh from "@/components/PullToRefresh";
 
 type View = "map" | "library" | "ranking";
 type SortOption = "name" | "difficulty" | "favorites";
@@ -150,6 +151,7 @@ export default function ExercisesPage() {
   const hasRecommendations = recommendations.some((r) => r.priority === "high" || r.priority === "medium");
 
   return (
+    <PullToRefresh onRefresh={loadData}>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-24">
       {/* Header */}
       <div className="mb-5">
@@ -606,6 +608,7 @@ export default function ExercisesPage() {
         onClose={() => setHistoryMuscle(null)}
       />
     </main>
+    </PullToRefresh>
   );
 }
 

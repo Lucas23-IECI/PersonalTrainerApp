@@ -130,7 +130,7 @@ export default function Dashboard() {
 
   return (
     <PageTransition>
-      <main className="max-w-[540px] mx-auto px-4 pt-4 pb-24">
+      <main className="max-w-[540px] md:max-w-[960px] mx-auto px-4 pt-4 pb-24">
         {/* ───── HEADER ───── */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
@@ -171,8 +171,8 @@ export default function Dashboard() {
         <QuickActionsChips onOpenCheckin={() => setCheckinOpen(true)} onOpenSleep={() => setSleepOpen(true)} onOpenWater={() => setWaterOpen(true)} />
 
         {/* ───── TODAY'S WORKOUT (hero card) ───── */}
-        <StaggerList>
-          <StaggerItem>
+        <StaggerList className="tablet-grid">
+          <StaggerItem className="tablet-full">
             {todayWorkout && todayWorkout.exercises.length > 0 ? (
               <div className="hero-card mb-4" style={{ background: "var(--gradient-hero)" }}>
                 <div className="flex items-center justify-between mb-1.5">
@@ -226,7 +226,7 @@ export default function Dashboard() {
           </StaggerItem>
 
           {/* ───── QUICK STATS ROW ───── */}
-          <StaggerItem>
+          <StaggerItem className="tablet-full">
             <div className="grid grid-cols-3 gap-2.5 mb-4">
               <div className="stat-block">
                 <div className="stat-value">{streak}</div>
@@ -293,7 +293,7 @@ export default function Dashboard() {
           </StaggerItem>
 
           {/* ───── WEEK HYBRID VIEW ───── */}
-          <StaggerItem>
+          <StaggerItem className="tablet-full">
             <WeekHybridView weekStatus={weekStatus} />
           </StaggerItem>
 
@@ -315,7 +315,7 @@ export default function Dashboard() {
 
           {/* ───── RECENT ACTIVITY ───── */}
           {recentSessions.length > 0 && (
-            <StaggerItem>
+            <StaggerItem className="tablet-full">
               <div className="card mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="section-label">Actividad Reciente</span>

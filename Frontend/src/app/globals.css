@@ -602,6 +602,45 @@ main {
   background: rgba(0,0,0,0.7);
 }
 
+/* ===== Tablet layout (3.10) ===== */
+@media (min-width: 768px) {
+  main {
+    max-width: 960px !important;
+  }
+  .tablet-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--density-gap);
+  }
+  .tablet-grid > .tablet-full {
+    grid-column: 1 / -1;
+  }
+  .tablet-sidebar {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--density-gap);
+  }
+  .tablet-sidebar > :first-child {
+    grid-column: 1;
+  }
+  .tablet-sidebar > :last-child {
+    grid-column: 2;
+  }
+}
+
+/* ===== Pull to refresh (3.11) ===== */
+.ptr-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: ptr-spin 0.6s linear infinite;
+}
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ===== Divider ===== */
 .divider {
   height: 1px;

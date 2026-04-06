@@ -38,6 +38,7 @@ import { SwipeTabs } from "@/components/motion";
 import CalorieRing from "@/components/CalorieRing";
 import AddFoodScreen from "@/components/AddFoodScreen";
 import { t } from "@/lib/i18n";
+import PullToRefresh from "@/components/PullToRefresh";
 
 type Tab = "tracker" | "plan" | "shopping" | "supps" | "cooking";
 
@@ -235,6 +236,7 @@ export default function NutritionPage() {
     : dateObj.toLocaleDateString("es-CL", { weekday: "short", day: "numeric", month: "short" });
 
   return (
+    <PullToRefresh onRefresh={() => setEntry(getNutritionForDate(selectedDate))}>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-0.5">
@@ -732,6 +734,7 @@ export default function NutritionPage() {
         </div>
       )}
     </main>
+    </PullToRefresh>
   );
 }
 
