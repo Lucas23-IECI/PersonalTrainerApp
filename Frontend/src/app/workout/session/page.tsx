@@ -563,6 +563,12 @@ function SessionContent() {
     saveSession(session);
     clearActiveSession();
     clearWorkoutNotification();
+
+    // Advance DUP counter for this workout day
+    import("@/lib/dup").then(({ isDUPEnabled, advanceDUPCounter }) => {
+      if (isDUPEnabled()) advanceDUPCounter(workout.id);
+    });
+
     setSavedSession(session);
     setFinished(true);
   }, [exercises, sessionStart, workout]);

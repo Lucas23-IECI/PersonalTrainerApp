@@ -11,14 +11,19 @@ import {
   Zap,
   Shield,
   Target,
+  GripVertical,
+  Repeat,
 } from "lucide-react";
 import { PHASES, getCurrentPhase, getPhaseProgress, getPhaseWeek, getPhaseTotalWeeks, isDeloadWeek, type Phase } from "@/data/phases";
 import { calculateFatigue, FATIGUE_COLORS, FATIGUE_LABELS, getFatigueHistory, type FatigueScore } from "@/lib/deload";
 import { getWeeklyMuscleData } from "@/lib/storage";
 import { getAllVolumeLandmarks, getVolumeZone, ZONE_COLORS, ZONE_LABELS, type VolumeZone } from "@/data/volume-landmarks";
 import { MUSCLE_LABELS, type MuscleGroup } from "@/data/exercises";
+import { getWeeklyPlan } from "@/data/workouts";
 import { PageTransition, StaggerList, StaggerItem } from "@/components/motion";
 import { AnimatePresence, motion } from "framer-motion";
+import WeeklyPlannerDnD from "@/components/planning/WeeklyPlannerDnD";
+import DUPPanel from "@/components/planning/DUPPanel";
 
 const PHASE_TYPE_COLORS: Record<Phase["type"], string> = {
   reactivation: "#0A84FF",
@@ -36,7 +41,7 @@ const PHASE_TYPE_LABELS: Record<Phase["type"], string> = {
   peaking: "Peaking",
 };
 
-type Tab = "timeline" | "fatigue" | "volume";
+type Tab = "timeline" | "fatigue" | "volume" | "planner" | "dup";
 
 export default function PlanningPage() {
   const [currentPhase, setCurrentPhase] = useState<Phase>(PHASES[0]);
@@ -49,9 +54,11 @@ export default function PlanningPage() {
   }, []);
 
   const tabs: { id: Tab; label: string; icon: typeof Calendar }[] = [
-    { id: "timeline", label: "Mesociclo", icon: Calendar },
+    { id: "timeline", label: "Meso", icon: Calendar },
     { id: "fatigue", label: "Fatiga", icon: Activity },
-    { id: "volume", label: "Volumen", icon: Target },
+    { id: "volume", label: "Vol.", icon: Target },
+    { id: "planner", label: "Planner", icon: GripVertical },
+    { id: "dup", label: "DUP", icon: Repeat },
   ];
 
   return (
@@ -66,7 +73,7 @@ export default function PlanningPage() {
             <div>
               <h1 className="text-lg font-bold" style={{ color: "var(--text)" }}>Planificación</h1>
               <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>
-                Mesociclo • Fatiga • Volumen
+                Mesociclo • Fatiga • Volumen • Planner • DUP
               </p>
             </div>
           </div>
@@ -105,6 +112,16 @@ export default function PlanningPage() {
             {tab === "volume" && (
               <motion.div key="volume" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
                 <VolumeLandmarksPanel currentPhase={currentPhase} />
+              </motion.div>
+            )}
+            {tab === "planner" && (
+              <motion.div key="planner" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+                <WeeklyPlannerDnD plan={getWeeklyPlan()} />
+              </motion.div>
+            )}
+            {tab === "dup" && (
+              <motion.div key="dup" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+                <DUPPanel />
               </motion.div>
             )}
           </AnimatePresence>

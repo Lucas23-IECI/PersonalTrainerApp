@@ -193,3 +193,107 @@ export function getNextWorkoutDay(): { workout: WorkoutDay; daysFromNow: number;
   }
   return undefined;
 }
+
+// =============================================
+// 5.4 — Exercise Transfer Between Days
+// =============================================
+
+const EXERCISE_TRANSFERS_KEY = "mark-pt-exercise-transfers";
+
+export interface ExerciseTransfer {
+  weekStart: string;
+  /** Maps: "fromDayId:exerciseIndex" → "toDayId" */
+  moves: Record<string, string>;
+}
+
+function getExerciseTransfers(): ExerciseTransfer | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(EXERCISE_TRANSFERS_KEY);
+    if (!raw) return null;
+    const data: ExerciseTransfer = JSON.parse(raw);
+    if (data.weekStart !== getMonday()) {
+      localStorage.removeItem(EXERCISE_TRANSFERS_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Move an exercise from one day to another for this week.
+ */
+export function transferExercise(fromDayId: string, exerciseIndex: number, toDayId: string): void {
+  const existing = getExerciseTransfers() || { weekStart: getMonday(), moves: {} };
+  const key = `${fromDayId}:${exerciseIndex}`;
+  existing.moves[key] = toDayId;
+  localStorage.setItem(EXERCISE_TRANSFERS_KEY, JSON.stringify(existing));
+}
+
+/**
+ * Remove a transfer for an exercise.
+ */
+export function undoTransfer(fromDayId: string, exerciseIndex: number): void {
+  const existing = getExerciseTransfers();
+  if (!existing) return;
+  delete existing.moves[`${fromDayId}:${exerciseIndex}`];
+  if (Object.keys(existing.moves).length === 0) {
+    localStorage.removeItem(EXERCISE_TRANSFERS_KEY);
+  } else {
+    localStorage.setItem(EXERCISE_TRANSFERS_KEY, JSON.stringify(existing));
+  }
+}
+
+export function resetExerciseTransfers(): void {
+  localStorage.removeItem(EXERCISE_TRANSFERS_KEY);
+}
+
+export function hasExerciseTransfers(): boolean {
+  return getExerciseTransfers() !== null;
+}
+
+/**
+ * Get weekly plan with exercise transfers applied.
+ * Exercises moved from one day appear in the target day.
+ */
+export function getWeeklyPlanWithTransfers(): WorkoutDay[] {
+  const plan = getWeeklyPlan();
+  const transfers = getExerciseTransfers();
+  if (!transfers || Object.keys(transfers.moves).length === 0) return plan;
+
+  // Clone plan deeply
+  const cloned = plan.map((day) => ({
+    ...day,
+    exercises: [...day.exercises],
+  }));
+
+  // Collect exercises to move (process in reverse index order to avoid shifting)
+  const toAdd: { toDayId: string; exercise: Exercise }[] = [];
+  const toRemove: { dayId: string; index: number }[] = [];
+
+  for (const [key, toDayId] of Object.entries(transfers.moves)) {
+    const [fromDayId, indexStr] = key.split(":");
+    const index = parseInt(indexStr, 10);
+    const fromDay = cloned.find((d) => d.id === fromDayId);
+    if (!fromDay || index >= fromDay.exercises.length) continue;
+    toRemove.push({ dayId: fromDayId, index });
+    toAdd.push({ toDayId, exercise: fromDay.exercises[index] });
+  }
+
+  // Remove in reverse order so indices stay valid
+  toRemove.sort((a, b) => b.index - a.index);
+  for (const { dayId, index } of toRemove) {
+    const day = cloned.find((d) => d.id === dayId);
+    if (day) day.exercises.splice(index, 1);
+  }
+
+  // Add to target days
+  for (const { toDayId, exercise } of toAdd) {
+    const day = cloned.find((d) => d.id === toDayId);
+    if (day) day.exercises.push(exercise);
+  }
+
+  return cloned;
+}

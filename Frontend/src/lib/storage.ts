@@ -350,6 +350,7 @@ const KEYS = {
   recipes: "mark-pt-recipes",
   pantry: "mark-pt-pantry",
   mealPrepList: "mark-pt-meal-prep-list",
+  goals: "mark-pt-goals",
 } as const;
 
 // === Helpers ===
@@ -992,4 +993,50 @@ export function restoreAutoBackup(): boolean {
 /** Get the date of the last auto-backup */
 export function getAutoBackupDate(): string | null {
   return localStorage.getItem(BACKUP_DATE_KEY);
+}
+
+// =============================================
+// 5.6 — Custom Goals / Countdown
+// =============================================
+
+export type GoalType = "weight" | "date" | "strength" | "custom";
+
+export interface UserGoal {
+  id: string;
+  name: string;
+  targetDate: string; // YYYY-MM-DD
+  type: GoalType;
+  icon: string; // emoji
+  color: string;
+  currentValue?: number;
+  targetValue?: number;
+  unit?: string;
+  createdAt: string;
+}
+
+export function getGoals(): UserGoal[] {
+  return load<UserGoal>(KEYS.goals);
+}
+
+export function saveGoal(goal: UserGoal): void {
+  const all = getGoals();
+  const idx = all.findIndex((g) => g.id === goal.id);
+  if (idx >= 0) {
+    all[idx] = goal;
+  } else {
+    all.push(goal);
+  }
+  save(KEYS.goals, all);
+}
+
+export function deleteGoal(id: string): void {
+  save(KEYS.goals, getGoals().filter((g) => g.id !== id));
+}
+
+export function updateGoalProgress(id: string, currentValue: number): void {
+  const all = getGoals();
+  const goal = all.find((g) => g.id === id);
+  if (!goal) return;
+  goal.currentValue = currentValue;
+  save(KEYS.goals, all);
 }
