@@ -136,6 +136,14 @@ export interface NutritionTargets {
   fiber?: number;
   sodium?: number; // mg
   sugar?: number;
+  perMeal?: Record<string, MealSlotTarget>;
+}
+
+export interface MealSlotTarget {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
 }
 
 // === Meal Templates (7.9) ===
@@ -525,6 +533,30 @@ export function getNutritionTargets(): NutritionTargets {
 
 export function saveNutritionTargets(targets: NutritionTargets) {
   localStorage.setItem(KEYS.nutritionTargets, JSON.stringify(targets));
+}
+
+const DEFAULT_MEAL_DISTRIBUTION: Record<string, number> = {
+  Desayuno: 0.25,
+  Almuerzo: 0.35,
+  Cena: 0.30,
+  Snacks: 0.10,
+};
+
+export function getDefaultMealSlotTargets(targets: NutritionTargets): Record<string, MealSlotTarget> {
+  const result: Record<string, MealSlotTarget> = {};
+  for (const [slot, pct] of Object.entries(DEFAULT_MEAL_DISTRIBUTION)) {
+    result[slot] = {
+      calories: Math.round(targets.calories * pct),
+      protein: Math.round(targets.protein * pct),
+      carbs: Math.round(targets.carbs * pct),
+      fat: Math.round(targets.fat * pct),
+    };
+  }
+  return result;
+}
+
+export function getMealSlotTargets(targets: NutritionTargets): Record<string, MealSlotTarget> {
+  return targets.perMeal || getDefaultMealSlotTargets(targets);
 }
 
 // === My Foods (custom food database) ===

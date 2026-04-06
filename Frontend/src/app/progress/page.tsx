@@ -29,6 +29,7 @@ const MuscleDistributionRadar = dynamic(() => import("@/components/charts/Muscle
 const TrainingStreakCard = dynamic(() => import("@/components/charts/TrainingStreakCard"), { ssr: false });
 const PRSystemComplete = dynamic(() => import("@/components/charts/PRSystemComplete"), { ssr: false });
 const OverloadDashboard = dynamic(() => import("@/components/charts/OverloadDashboard"), { ssr: false });
+const WeightHistoryChart = dynamic(() => import("@/components/charts/WeightHistoryChart"), { ssr: false });
 
 type Tab = "cuerpo" | "fuerza" | "volumen";
 
@@ -89,12 +90,6 @@ export default function ProgressPage() {
 
     return { thisWeek: calc(thisWeek), lastWeek: calc(lastWeek) };
   }, [sessions]);
-
-  // Weight chart data
-  const weightData = weighIns.slice(-14);
-  const minW = weightData.length > 0 ? Math.min(...weightData.map((w) => w.weight!)) - 0.5 : 0;
-  const maxW = weightData.length > 0 ? Math.max(...weightData.map((w) => w.weight!)) + 0.5 : 1;
-  const rangeW = maxW - minW || 1;
 
   // Volume data: sets per week
   const weeklyVolume = useMemo(() => {
@@ -222,50 +217,8 @@ export default function ProgressPage() {
             </div>
           </div>
 
-          {/* Weight Chart */}
-          <div className="card mb-3.5">
-            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>
-              {t("progress.weightEvolution")}
-            </div>
-            {weightData.length < 2 ? (
-              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
-                {t("progress.needAtLeast2Weights")}
-              </div>
-            ) : (
-              <div className="relative h-[140px]">
-                <div className="absolute left-0 top-0 bottom-0 w-[35px] flex flex-col justify-between text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
-                  <span>{maxW.toFixed(1)}</span>
-                  <span>{((maxW + minW) / 2).toFixed(1)}</span>
-                  <span>{minW.toFixed(1)}</span>
-                </div>
-                <div className="ml-10 h-full relative">
-                  {[0, 0.5, 1].map((p) => (
-                    <div key={p} className="absolute left-0 right-0" style={{ top: `${p * 100}%`, borderBottom: "1px solid var(--border-subtle)" }} />
-                  ))}
-                  {profileData.goalWeight >= minW && profileData.goalWeight <= maxW && (
-                    <div className="absolute left-0 right-0 border-b border-dashed border-[#34C75966]" style={{ top: `${((maxW - profileData.goalWeight) / rangeW) * 100}%` }}>
-                      <span className="absolute right-0 -top-3 text-[0.5rem] text-[#34C759]">{t("progress.goalMeta")} {profileData.goalWeight}</span>
-                    </div>
-                  )}
-                  <svg viewBox={`0 0 ${(weightData.length - 1) * 40 + 20} 140`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                    {weightData.map((d, i) => {
-                      if (i === 0) return null;
-                      const x1 = (i - 1) * 40 + 10;
-                      const y1 = ((maxW - weightData[i - 1].weight!) / rangeW) * 140;
-                      const x2 = i * 40 + 10;
-                      const y2 = ((maxW - d.weight!) / rangeW) * 140;
-                      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--accent)" strokeWidth="2" />;
-                    })}
-                    {weightData.map((d, i) => {
-                      const x = i * 40 + 10;
-                      const y = ((maxW - d.weight!) / rangeW) * 140;
-                      return <circle key={i} cx={x} cy={y} r="4" fill="var(--accent)" stroke="#fff" strokeWidth="2" />;
-                    })}
-                  </svg>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Weight History Chart (Feature 6.7) */}
+          <WeightHistoryChart />
 
           {/* Sleep History */}
           <div className="card mb-3.5">

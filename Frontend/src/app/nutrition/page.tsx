@@ -21,6 +21,8 @@ import {
   generateId,
   getNutritionTargets,
   saveNutritionTargets,
+  getMealSlotTargets,
+  getDefaultMealSlotTargets,
   addRecentFood,
   trackFoodFrequency,
   getRecipes,
@@ -32,12 +34,13 @@ import {
   type CustomMeal,
   type MealTemplate,
   type NutritionTargets,
+  type MealSlotTarget,
   type Recipe,
 } from "@/lib/storage";
 import {
   Check, Plus, ShoppingCart, Pill, ChefHat, UtensilsCrossed, Trash2,
   Droplets, Save, FolderOpen, TrendingDown, TrendingUp, Copy,
-  Minus, X, ChevronLeft, ChevronRight, Settings, BookOpen,
+  Minus, X, ChevronLeft, ChevronRight, Settings, BookOpen, Target,
 } from "lucide-react";
 import { SwipeTabs } from "@/components/motion";
 import CalorieRing from "@/components/CalorieRing";
@@ -68,6 +71,7 @@ export default function NutritionPage() {
 
   // Modals
   const [showTargetEditor, setShowTargetEditor] = useState(false);
+  const [showMealGoalsEditor, setShowMealGoalsEditor] = useState(false);
 
   // Templates
   const [templates, setTemplates] = useState<MealTemplate[]>([]);
@@ -255,14 +259,24 @@ export default function NutritionPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-0.5">
         <h1 className="text-xl font-black tracking-tight">{t("nutrition.title")}</h1>
-        <button
-          onClick={() => setShowTargetEditor(true)}
-          className="bg-transparent border-none cursor-pointer p-1.5 rounded-lg"
-          style={{ color: "var(--text-muted)" }}
-          title="Ajustar objetivos"
-        >
-          <Settings size={18} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowMealGoalsEditor(true)}
+            className="bg-transparent border-none cursor-pointer p-1.5 rounded-lg"
+            style={{ color: "var(--text-muted)" }}
+            title={t("nutrition.editMealGoals")}
+          >
+            <Target size={17} />
+          </button>
+          <button
+            onClick={() => setShowTargetEditor(true)}
+            className="bg-transparent border-none cursor-pointer p-1.5 rounded-lg"
+            style={{ color: "var(--text-muted)" }}
+            title="Ajustar objetivos"
+          >
+            <Settings size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -424,7 +438,11 @@ export default function NutritionPage() {
           {MEAL_SLOTS.map((slotName) => {
             const foods = getFoodsForSlot(slotName);
             const slotCal = foods.reduce((s, f) => s + f.calories, 0);
+            const slotPro = foods.reduce((s, f) => s + f.protein, 0);
+            const slotCarbs = foods.reduce((s, f) => s + f.carbs, 0);
+            const slotFat = foods.reduce((s, f) => s + f.fat, 0);
             const planSlot = mealPlan.find((s) => s.slot === slotName);
+            const mealGoal = getMealSlotTargets(targets)[slotName];
 
             return (
               <div key={slotName} className="card mb-2">
@@ -449,6 +467,32 @@ export default function NutritionPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Per-meal macro progress (Feature 6.8) */}
+                {mealGoal && foods.length > 0 && (
+                  <div className="flex gap-1.5 mb-1.5">
+                    {[
+                      { label: "Cal", cur: slotCal, goal: mealGoal.calories, color: "var(--accent)" },
+                      { label: "P", cur: slotPro, goal: mealGoal.protein, color: "#34C759" },
+                      { label: "C", cur: slotCarbs, goal: mealGoal.carbs, color: "#FFCC00" },
+                      { label: "F", cur: slotFat, goal: mealGoal.fat, color: "#AF52DE" },
+                    ].map((m) => {
+                      const pct = m.goal > 0 ? Math.min((m.cur / m.goal) * 100, 100) : 0;
+                      const over = m.cur > m.goal && m.goal > 0;
+                      return (
+                        <div key={m.label} className="flex-1">
+                          <div className="flex justify-between mb-0.5">
+                            <span className="text-[0.5rem] font-bold" style={{ color: over ? "#FF3B30" : "var(--text-muted)" }}>{m.label}</span>
+                            <span className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>{m.cur}/{m.goal}</span>
+                          </div>
+                          <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
+                            <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: over ? "#FF3B30" : m.color }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Food list */}
                 {foods.length > 0 && (
@@ -701,6 +745,20 @@ export default function NutritionPage() {
       {/* Targets Editor Modal */}
       {showTargetEditor && <TargetEditorModal targets={targets} onSave={handleSaveTargets} onClose={() => setShowTargetEditor(false)} />}
 
+      {/* Per-Meal Goals Editor (Feature 6.8) */}
+      {showMealGoalsEditor && (
+        <MealGoalsEditor
+          targets={targets}
+          onSave={(perMeal) => {
+            const updated = { ...targets, perMeal };
+            saveNutritionTargets(updated);
+            setTargets(updated);
+            setShowMealGoalsEditor(false);
+          }}
+          onClose={() => setShowMealGoalsEditor(false)}
+        />
+      )}
+
       {/* Recipe Builder Modal */}
       <RecipeBuilder
         open={showRecipeBuilder}
@@ -858,6 +916,150 @@ function TargetEditorModal({ targets, onSave, onClose }: { targets: NutritionTar
               parseInt(sodium, 10) || undefined,
               parseInt(sugar, 10) || undefined
             )}
+            className="flex-[2] py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm"
+            style={{ background: "var(--accent)" }}
+          >
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Per-Meal Goals Editor (Feature 6.8)
+function MealGoalsEditor({ targets, onSave, onClose }: {
+  targets: NutritionTargets;
+  onSave: (perMeal: Record<string, MealSlotTarget>) => void;
+  onClose: () => void;
+}) {
+  const current = getMealSlotTargets(targets);
+  const [slots, setSlots] = useState<Record<string, MealSlotTarget>>(() => {
+    const copy: Record<string, MealSlotTarget> = {};
+    for (const s of MEAL_SLOTS) {
+      copy[s] = { ...(current[s] || { calories: 0, protein: 0, carbs: 0, fat: 0 }) };
+    }
+    return copy;
+  });
+
+  function updateSlot(slot: string, field: keyof MealSlotTarget, value: string) {
+    setSlots((prev) => ({
+      ...prev,
+      [slot]: { ...prev[slot], [field]: parseInt(value, 10) || 0 },
+    }));
+  }
+
+  function autoDistribute() {
+    const result = getDefaultMealSlotTargets(targets);
+    setSlots(result);
+  }
+
+  // Totals
+  const totalCal = MEAL_SLOTS.reduce((s, sl) => s + (slots[sl]?.calories || 0), 0);
+  const totalPro = MEAL_SLOTS.reduce((s, sl) => s + (slots[sl]?.protein || 0), 0);
+  const totalCarbs = MEAL_SLOTS.reduce((s, sl) => s + (slots[sl]?.carbs || 0), 0);
+  const totalFat = MEAL_SLOTS.reduce((s, sl) => s + (slots[sl]?.fat || 0), 0);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60" />
+      <div
+        className="relative w-full max-w-[540px] max-h-[85vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col"
+        style={{ background: "var(--bg-card)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="flex items-center gap-2">
+            <Target size={16} style={{ color: "var(--accent)" }} />
+            <span className="text-sm font-bold" style={{ color: "var(--text)" }}>{t("nutrition.mealGoalsTitle")}</span>
+          </div>
+          <button onClick={onClose} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
+            {t("nutrition.distribution")} — {t("nutrition.ofDaily")}: {targets.calories} kcal / {targets.protein}P / {targets.carbs}C / {targets.fat}F
+          </p>
+
+          <button
+            onClick={autoDistribute}
+            className="w-full mb-4 py-2 rounded-xl border-none cursor-pointer text-[0.7rem] font-bold"
+            style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
+          >
+            🔄 {t("nutrition.autoDistribute")} (25/35/30/10%)
+          </button>
+
+          {MEAL_SLOTS.map((slot) => {
+            const goal = slots[slot] || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+            const pctCal = targets.calories > 0 ? Math.round((goal.calories / targets.calories) * 100) : 0;
+            return (
+              <div key={slot} className="mb-4 p-3 rounded-xl" style={{ background: "var(--bg-elevated)" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">{SLOT_ICONS[slot] || "🍽️"}</span>
+                    <span className="text-[0.8rem] font-bold" style={{ color: "var(--text)" }}>{slot}</span>
+                  </div>
+                  <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+                    {pctCal}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {([
+                    { key: "calories" as const, label: "Cal", unit: "kcal", color: "var(--accent)" },
+                    { key: "protein" as const, label: "Prot", unit: "g", color: "#34C759" },
+                    { key: "carbs" as const, label: "Carbs", unit: "g", color: "#FFCC00" },
+                    { key: "fat" as const, label: "Fat", unit: "g", color: "#AF52DE" },
+                  ]).map((f) => (
+                    <div key={f.key}>
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: f.color }} />
+                        <span className="text-[0.55rem]" style={{ color: "var(--text-muted)" }}>{f.label}</span>
+                      </div>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={goal[f.key] || ""}
+                        onChange={(e) => updateSlot(slot, f.key, e.target.value)}
+                        className="w-full text-center text-[0.75rem] font-bold rounded-lg py-1.5 border"
+                        style={{ background: "var(--bg-card)", color: "var(--text)", borderColor: "var(--border)" }}
+                        placeholder="0"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Totals summary */}
+          <div className="p-3 rounded-xl mb-2" style={{ background: "var(--bg-elevated)", borderLeft: `3px solid ${totalCal > targets.calories ? "#FF3B30" : "#34C759"}` }}>
+            <div className="text-[0.6rem] font-bold mb-1" style={{ color: "var(--text-muted)" }}>Total vs Diario</div>
+            <div className="grid grid-cols-4 gap-2 text-center text-[0.65rem]">
+              {[
+                { label: "Cal", sum: totalCal, daily: targets.calories },
+                { label: "P", sum: totalPro, daily: targets.protein },
+                { label: "C", sum: totalCarbs, daily: targets.carbs },
+                { label: "F", sum: totalFat, daily: targets.fat },
+              ].map((m) => (
+                <div key={m.label}>
+                  <span className="font-bold" style={{ color: m.sum === m.daily ? "#34C759" : m.sum > m.daily ? "#FF3B30" : "var(--text)" }}>
+                    {m.sum}
+                  </span>
+                  <span style={{ color: "var(--text-muted)" }}> / {m.daily}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 p-4" style={{ borderTop: "1px solid var(--border)" }}>
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border cursor-pointer text-sm font-semibold" style={{ background: "transparent", borderColor: "var(--border)", color: "var(--text-muted)" }}>
+            Cancelar
+          </button>
+          <button
+            onClick={() => onSave(slots)}
             className="flex-[2] py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm"
             style={{ background: "var(--accent)" }}
           >
