@@ -476,6 +476,41 @@ export function deleteSession(id: string) {
   save(KEYS.sessions, getSessions().filter((s) => s.id !== id));
 }
 
+/** Quick-mark a workout day as done (or undo). No exercises logged — just the completion flag. */
+export function quickMarkDone(workoutId: string, workoutName: string): boolean {
+  const date = today();
+  // Check if there's already a quick-mark for this day
+  const existing = getSessions().find(
+    (s) => s.date === date && s.workoutId === workoutId && s.exercises.length === 0
+  );
+  if (existing) {
+    // Undo — remove the quick-mark
+    deleteSession(existing.id);
+    return false;
+  }
+  // Create minimal completed session
+  const now = Date.now();
+  saveSession({
+    id: generateId(),
+    date,
+    workoutId,
+    workoutName,
+    exercises: [],
+    completed: true,
+    startTime: now,
+    endTime: now,
+  });
+  return true;
+}
+
+/** Check if a workout day was quick-marked today */
+export function isQuickMarkedToday(workoutId: string): boolean {
+  const date = today();
+  return getSessions().some(
+    (s) => s.date === date && s.workoutId === workoutId && s.completed
+  );
+}
+
 // === Active Session (in-progress workout) ===
 
 export function saveActiveSession(data: ActiveSessionData) {

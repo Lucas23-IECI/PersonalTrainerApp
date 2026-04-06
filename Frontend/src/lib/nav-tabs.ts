@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   CheckSquare,
   Scan,
+  MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { getSettings } from "./storage";
@@ -61,17 +62,24 @@ export const ALL_TABS: NavTab[] = [
 
 export const DEFAULT_TAB_HREFS = ["/", "/workout", "/exercises", "/nutrition", "/log", "/profile"];
 
-/** Get the user's currently selected nav tabs */
+/** Fixed "Más" tab — always shown as last tab */
+export const MORE_TAB: NavTab = { href: "/more", label: "Más", icon: MoreHorizontal };
+
+/** Get the user's currently selected nav tabs (+ fixed Más tab at end) */
 export function getNavTabs(): NavTab[] {
   const settings = getSettings();
   const selected = settings.customTabs || DEFAULT_TAB_HREFS;
   const tabs: NavTab[] = [];
   for (const href of selected) {
+    if (href === "/more") continue; // don't duplicate
     const tab = ALL_TABS.find((t) => t.href === href);
     if (tab) tabs.push(tab);
   }
-  if (tabs.length < 3) return ALL_TABS.filter((t) => DEFAULT_TAB_HREFS.includes(t.href));
-  return tabs;
+  if (tabs.length < 3) {
+    const defaults = ALL_TABS.filter((t) => DEFAULT_TAB_HREFS.includes(t.href));
+    return [...defaults, MORE_TAB];
+  }
+  return [...tabs, MORE_TAB];
 }
 
 /** Get just the routes in order for swipe navigation */

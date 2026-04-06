@@ -1,7 +1,9 @@
 "use client";
 
-import { Play, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { Play, Clock, ChevronDown, ChevronUp, Check } from "lucide-react";
 import type { WorkoutDay } from "@/data/workouts";
+import { quickMarkDone, isQuickMarkedToday } from "@/lib/storage";
 
 interface DayCardProps {
   workout: WorkoutDay;
@@ -14,16 +16,40 @@ interface DayCardProps {
 
 export default function DayCard({ workout: w, isToday, isExpanded, onToggle, onStart, compact }: DayCardProps) {
   const isRest = w.type === "rest" || w.type === "optional";
+  const [done, setDone] = useState(() => isQuickMarkedToday(w.id));
+
+  function handleToggleDone(e: React.MouseEvent) {
+    e.stopPropagation();
+    const result = quickMarkDone(w.id, w.name);
+    setDone(result);
+  }
 
   if (compact) {
     return (
       <div
         className="card py-2 px-3 cursor-pointer"
-        style={{ borderColor: isToday ? w.color + "60" : undefined }}
+        style={{
+          borderColor: done ? "#22c55e60" : isToday ? w.color + "60" : undefined,
+          opacity: done ? 0.7 : 1,
+        }}
         onClick={onToggle}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            {/* Check toggle */}
+            {!isRest && (
+              <button
+                onClick={handleToggleDone}
+                className="shrink-0 flex items-center justify-center rounded-full border-2 transition-all"
+                style={{
+                  width: 22, height: 22,
+                  borderColor: done ? "#22c55e" : "var(--text-muted)",
+                  background: done ? "#22c55e" : "transparent",
+                }}
+              >
+                {done && <Check size={12} color="#fff" strokeWidth={3} />}
+              </button>
+            )}
             {isToday && (
               <span
                 className="text-[0.5rem] font-bold px-1.5 py-0.5 rounded-full text-white"
@@ -33,7 +59,7 @@ export default function DayCard({ workout: w, isToday, isExpanded, onToggle, onS
               </span>
             )}
             <span className="text-[0.62rem] font-medium" style={{ color: "var(--text-muted)" }}>{w.day}</span>
-            <span className="text-[0.78rem] font-bold" style={{ color: w.color }}>
+            <span className={`text-[0.78rem] font-bold ${done ? "line-through" : ""}`} style={{ color: done ? "var(--text-muted)" : w.color }}>
               {w.name}
             </span>
           </div>
@@ -52,12 +78,29 @@ export default function DayCard({ workout: w, isToday, isExpanded, onToggle, onS
   return (
     <div
       className="card"
-      style={{ borderColor: isToday ? w.color + "60" : undefined }}
+      style={{
+        borderColor: done ? "#22c55e60" : isToday ? w.color + "60" : undefined,
+        opacity: done ? 0.75 : 1,
+      }}
     >
       {/* Header */}
       <div onClick={onToggle} className="flex justify-between items-start cursor-pointer">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
+            {/* Check toggle */}
+            {!isRest && (
+              <button
+                onClick={handleToggleDone}
+                className="shrink-0 flex items-center justify-center rounded-full border-2 transition-all"
+                style={{
+                  width: 24, height: 24,
+                  borderColor: done ? "#22c55e" : "var(--text-muted)",
+                  background: done ? "#22c55e" : "transparent",
+                }}
+              >
+                {done && <Check size={13} color="#fff" strokeWidth={3} />}
+              </button>
+            )}
             {isToday && (
               <span
                 className="text-[0.55rem] font-bold px-2 py-0.5 rounded-full text-white"
@@ -68,7 +111,7 @@ export default function DayCard({ workout: w, isToday, isExpanded, onToggle, onS
             )}
             <span className="text-[0.65rem] font-medium" style={{ color: "var(--text-muted)" }}>{w.day}</span>
           </div>
-          <div className="text-[0.9rem] font-bold mb-1" style={{ color: w.color }}>
+          <div className={`text-[0.9rem] font-bold mb-1 ${done ? "line-through" : ""}`} style={{ color: done ? "var(--text-muted)" : w.color }}>
             {w.name}
           </div>
           {w.exercises.length > 0 && (

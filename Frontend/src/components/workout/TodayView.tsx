@@ -3,9 +3,10 @@
 import { useState } from "react";
 import type { WorkoutDay } from "@/data/workouts";
 import { saveWeekSwap, hasWeekOverrides, resetWeekOverrides } from "@/data/workouts";
+import { quickMarkDone, isQuickMarkedToday } from "@/lib/storage";
 import DayCard from "./DayCard";
 import WorkoutTips from "./WorkoutTips";
-import { Clock, Dumbbell, Flame, GripVertical, RotateCcw } from "lucide-react";
+import { Clock, Dumbbell, Flame, GripVertical, RotateCcw, Check } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -156,6 +157,12 @@ function HeroCard({ workout: w, onStart }: { workout: WorkoutDay; onStart: (id: 
   const isRest = w.type === "rest" || w.type === "optional";
   const previewExercises = w.exercises.slice(0, 4);
   const remaining = w.exercises.length - previewExercises.length;
+  const [done, setDone] = useState(() => isQuickMarkedToday(w.id));
+
+  function handleToggleDone() {
+    const result = quickMarkDone(w.id, w.name);
+    setDone(result);
+  }
 
   if (isRest && w.exercises.length === 0) {
     return (
@@ -238,12 +245,31 @@ function HeroCard({ workout: w, onStart }: { workout: WorkoutDay; onStart: (id: 
       )}
 
       {w.type !== "football" && (
-        <button
-          onClick={() => onStart(w.id)}
-          className="btn btn-primary w-full text-[0.88rem] font-bold"
-        >
-          💪 Empezar Entrenamiento
-        </button>
+        done ? (
+          <button
+            onClick={handleToggleDone}
+            className="w-full py-3 rounded-xl text-[0.88rem] font-bold border-none cursor-pointer flex items-center justify-center gap-2 transition-all"
+            style={{ background: "#22c55e20", color: "#22c55e" }}
+          >
+            <Check size={18} strokeWidth={3} /> Completado — Desmarcar
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={handleToggleDone}
+              className="flex-1 py-3 rounded-xl text-[0.82rem] font-bold border-2 bg-transparent cursor-pointer flex items-center justify-center gap-2 transition-all"
+              style={{ borderColor: "#22c55e", color: "#22c55e" }}
+            >
+              <Check size={16} /> Marcar Hecho
+            </button>
+            <button
+              onClick={() => onStart(w.id)}
+              className="btn btn-primary flex-1 text-[0.82rem] font-bold"
+            >
+              💪 Entrenar
+            </button>
+          </div>
+        )
       )}
     </div>
   );

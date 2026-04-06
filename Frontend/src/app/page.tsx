@@ -34,6 +34,15 @@ import {
   Search,
   CheckSquare,
   Scan,
+  MoreHorizontal,
+  Brain,
+  HeartPulse,
+  Timer,
+  StretchHorizontal,
+  Camera,
+  Activity,
+  Calculator,
+  CalendarRange,
 } from "lucide-react";
 import { PageTransition, StaggerList, StaggerItem } from "@/components/motion";
 import { t } from "@/lib/i18n";
@@ -445,6 +454,46 @@ export default function Dashboard() {
                 <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
               </div>
             </Link>
+          </StaggerItem>
+
+          {/* ───── FEATURE SHORTCUTS GRID ───── */}
+          <StaggerItem>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2.5">
+                <h3 className="text-[0.8rem] font-bold" style={{ color: "var(--text)" }}>Explorar Secciones</h3>
+                <Link href="/more" className="text-[0.68rem] font-semibold no-underline flex items-center gap-1" style={{ color: "var(--accent)" }}>
+                  Ver todo <MoreHorizontal size={13} />
+                </Link>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { href: "/health", icon: Activity, label: "Salud", color: "#EF4444" },
+                  { href: "/achievements", icon: Trophy, label: "Logros", color: "#F59E0B" },
+                  { href: "/planning", icon: CalendarRange, label: "Planning", color: "#6366F1" },
+                  { href: "/coach", icon: Brain, label: "Coach IA", color: "#A855F7" },
+                  { href: "/cardio", icon: HeartPulse, label: "Cardio", color: "#EC4899" },
+                  { href: "/stretching", icon: StretchHorizontal, label: "Stretch", color: "#14B8A6" },
+                  { href: "/photos", icon: Camera, label: "Fotos", color: "#EC4899" },
+                  { href: "/calculators", icon: Calculator, label: "Calc", color: "#F97316" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="card flex flex-col items-center py-2.5 px-1 no-underline hover:scale-[1.03] active:scale-95 transition-transform"
+                  >
+                    <div
+                      className="flex items-center justify-center w-9 h-9 rounded-xl mb-1.5"
+                      style={{ background: item.color + "15" }}
+                    >
+                      <item.icon size={18} style={{ color: item.color }} />
+                    </div>
+                    <span className="text-[0.6rem] font-semibold" style={{ color: "var(--text-secondary)" }}>
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </StaggerItem>
         </StaggerList>
 
