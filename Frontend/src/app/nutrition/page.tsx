@@ -23,24 +23,30 @@ import {
   saveNutritionTargets,
   addRecentFood,
   trackFoodFrequency,
+  getRecipes,
+  saveRecipe,
+  deleteRecipe,
+  calculateRecipeMacros,
   type NutritionEntry,
   type SelectedMeal,
   type CustomMeal,
   type MealTemplate,
   type NutritionTargets,
+  type Recipe,
 } from "@/lib/storage";
 import {
   Check, Plus, ShoppingCart, Pill, ChefHat, UtensilsCrossed, Trash2,
   Droplets, Save, FolderOpen, TrendingDown, TrendingUp, Copy,
-  Minus, X, ChevronLeft, ChevronRight, Settings,
+  Minus, X, ChevronLeft, ChevronRight, Settings, BookOpen,
 } from "lucide-react";
 import { SwipeTabs } from "@/components/motion";
 import CalorieRing from "@/components/CalorieRing";
 import AddFoodScreen from "@/components/AddFoodScreen";
 import { t } from "@/lib/i18n";
 import PullToRefresh from "@/components/PullToRefresh";
+import RecipeBuilder, { RecipeList } from "@/components/RecipeBuilder";
 
-type Tab = "tracker" | "plan" | "shopping" | "supps" | "cooking";
+type Tab = "tracker" | "plan" | "recipes" | "shopping" | "supps" | "cooking";
 
 const GLASS_ML = 250;
 const MEAL_SLOTS = ["Desayuno", "Almuerzo", "Cena", "Snacks"];
@@ -69,6 +75,10 @@ export default function NutritionPage() {
   const [templateName, setTemplateName] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
 
+  // Recipes
+  const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+
   useEffect(() => {
     setEntry(getNutritionForDate(selectedDate));
     setCheckedItems(getShoppingChecked());
@@ -93,15 +103,15 @@ export default function NutritionPage() {
     return date === today();
   }
 
-  function getFoodsForSlot(slot: string): { type: "plan" | "custom"; index: number; name: string; calories: number; protein: number; carbs: number; fat: number }[] {
+  function getFoodsForSlot(slot: string): { type: "plan" | "custom"; index: number; name: string; calories: number; protein: number; carbs: number; fat: number; photoUrl?: string }[] {
     if (!entry) return [];
     const planFoods = entry.meals
       .filter((m) => m.slot === slot)
-      .map((m, i) => ({ type: "plan" as const, index: i, name: m.name, calories: m.calories, protein: m.protein, carbs: m.carbs, fat: m.fat }));
+      .map((m, i) => ({ type: "plan" as const, index: i, name: m.name, calories: m.calories, protein: m.protein, carbs: m.carbs, fat: m.fat, photoUrl: m.photoUrl }));
     const customFoods = entry.customMeals
       .map((m, i) => ({ ...m, originalIndex: i }))
       .filter((m) => m.slot === slot)
-      .map((m) => ({ type: "custom" as const, index: m.originalIndex, name: m.name, calories: m.calories, protein: m.protein, carbs: m.carbs, fat: m.fat }));
+      .map((m) => ({ type: "custom" as const, index: m.originalIndex, name: m.name, calories: m.calories, protein: m.protein, carbs: m.carbs, fat: m.fat, photoUrl: m.photoUrl }));
     return [...planFoods, ...customFoods];
   }
 
@@ -121,12 +131,12 @@ export default function NutritionPage() {
     updateEntry({ ...current, meals: newMeals });
   }
 
-  function addFoodToSlot(slot: string, name: string, calories: number, protein: number, carbs: number, fat: number) {
+  function addFoodToSlot(slot: string, name: string, calories: number, protein: number, carbs: number, fat: number, fiber?: number, sodium?: number, sugar?: number, photoUrl?: string) {
     const current = entry || { date: selectedDate, meals: [], customMeals: [], waterMl: 0 };
-    const custom: CustomMeal = { name, calories, protein, carbs, fat, slot };
+    const custom: CustomMeal = { name, calories, protein, carbs, fat, fiber, sodium, sugar, slot, photoUrl };
     updateEntry({ ...current, customMeals: [...current.customMeals, custom] });
     addRecentFood(custom);
-    trackFoodFrequency(name, calories, protein, carbs, fat);
+    trackFoodFrequency(name, calories, protein, carbs, fat, fiber, sodium, sugar);
   }
 
   function openAddFood(slot: string) {
@@ -134,8 +144,8 @@ export default function NutritionPage() {
     setShowAddFood(true);
   }
 
-  function handleAddFromScreen(name: string, calories: number, protein: number, carbs: number, fat: number) {
-    addFoodToSlot(addFoodSlot, name, calories, protein, carbs, fat);
+  function handleAddFromScreen(name: string, calories: number, protein: number, carbs: number, fat: number, fiber?: number, sodium?: number, sugar?: number, photoUrl?: string) {
+    addFoodToSlot(addFoodSlot, name, calories, protein, carbs, fat, fiber, sodium, sugar, photoUrl);
   }
 
   function removePlanMeal(slot: string, name: string) {
@@ -205,8 +215,8 @@ export default function NutritionPage() {
     setShoppingChecked(updated);
   }
 
-  function handleSaveTargets(cal: number, pro: number, carbs: number, fat: number, water: number) {
-    const t: NutritionTargets = { calories: cal, protein: pro, carbs, fat, water };
+  function handleSaveTargets(cal: number, pro: number, carbs: number, fat: number, water: number, fiber?: number, sodium?: number, sugar?: number) {
+    const t: NutritionTargets = { calories: cal, protein: pro, carbs, fat, water, fiber, sodium, sugar };
     saveNutritionTargets(t);
     setTargets(t);
     setShowTargetEditor(false);
@@ -217,6 +227,9 @@ export default function NutritionPage() {
   const totalPro = (entry?.meals.reduce((s, m) => s + m.protein, 0) || 0) + (entry?.customMeals.reduce((s, m) => s + m.protein, 0) || 0);
   const totalCarbs = (entry?.meals.reduce((s, m) => s + m.carbs, 0) || 0) + (entry?.customMeals.reduce((s, m) => s + m.carbs, 0) || 0);
   const totalFat = (entry?.meals.reduce((s, m) => s + m.fat, 0) || 0) + (entry?.customMeals.reduce((s, m) => s + m.fat, 0) || 0);
+  const totalFiber = (entry?.meals.reduce((s, m) => s + (m.fiber || 0), 0) || 0) + (entry?.customMeals.reduce((s, m) => s + (m.fiber || 0), 0) || 0);
+  const totalSodium = (entry?.meals.reduce((s, m) => s + (m.sodium || 0), 0) || 0) + (entry?.customMeals.reduce((s, m) => s + (m.sodium || 0), 0) || 0);
+  const totalSugar = (entry?.meals.reduce((s, m) => s + (m.sugar || 0), 0) || 0) + (entry?.customMeals.reduce((s, m) => s + (m.sugar || 0), 0) || 0);
   const waterMl = entry?.waterMl || 0;
   const remainingCal = targets.calories - totalCal;
   const weeklyData = getWeeklyCalories(targets.calories);
@@ -225,6 +238,7 @@ export default function NutritionPage() {
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "tracker", label: t("nutrition.daily"), icon: <UtensilsCrossed size={14} /> },
     { id: "plan", label: t("nutrition.plan"), icon: <ChefHat size={14} /> },
+    { id: "recipes", label: "Recetas", icon: <BookOpen size={14} /> },
     { id: "shopping", label: t("nutrition.shopping"), icon: <ShoppingCart size={14} /> },
     { id: "supps", label: t("nutrition.supplements"), icon: <Pill size={14} /> },
     { id: "cooking", label: t("nutrition.cooking"), icon: <ChefHat size={14} /> },
@@ -267,7 +281,7 @@ export default function NutritionPage() {
         ))}
       </div>
 
-      <SwipeTabs tabs={["tracker", "plan", "shopping", "supps", "cooking"] as const} current={tab} onChange={(t) => setTab(t as Tab)}>
+      <SwipeTabs tabs={["tracker", "plan", "recipes", "shopping", "supps", "cooking"] as const} current={tab} onChange={(t) => setTab(t as Tab)}>
       {/* ========== TRACKER (MFP-style Food Diary) ========== */}
       {tab === "tracker" && (
         <div>
@@ -314,6 +328,12 @@ export default function NutritionPage() {
               proteinTarget={targets.protein}
               carbsTarget={targets.carbs}
               fatTarget={targets.fat}
+              fiber={totalFiber}
+              sodium={totalSodium}
+              sugar={totalSugar}
+              fiberTarget={targets.fiber}
+              sodiumTarget={targets.sodium}
+              sugarTarget={targets.sugar}
             />
           </div>
 
@@ -435,6 +455,9 @@ export default function NutritionPage() {
                   <div className="flex flex-col gap-1 mb-1.5">
                     {foods.map((food, fi) => (
                       <div key={fi} className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
+                        {food.photoUrl && (
+                          <img src={food.photoUrl} alt="" className="w-8 h-8 rounded-md object-cover flex-shrink-0" />
+                        )}
                         <div className="flex-1 min-w-0">
                           <div className="text-[0.73rem] font-medium truncate" style={{ color: "var(--text)" }}>{food.name}</div>
                           <div className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>
@@ -579,6 +602,29 @@ export default function NutritionPage() {
         </div>
       )}
 
+      {/* RECIPES */}
+      {tab === "recipes" && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[0.85rem] font-bold" style={{ color: "var(--text)" }}>Mis Recetas</div>
+            <button
+              onClick={() => { setEditingRecipe(null); setShowRecipeBuilder(true); }}
+              className="flex items-center gap-1 py-1.5 px-3 rounded-lg border-none cursor-pointer text-[0.7rem] font-bold text-white"
+              style={{ background: "var(--accent)" }}
+            >
+              <Plus size={14} /> Nueva
+            </button>
+          </div>
+          <RecipeList
+            onUse={(recipe) => {
+              const macros = calculateRecipeMacros(recipe.ingredients, recipe.servings);
+              addFoodToSlot("Snacks", `\u{1F373} ${recipe.name}`, macros.calories, macros.protein, macros.carbs, macros.fat, macros.fiber, macros.sodium, macros.sugar);
+            }}
+            onEdit={(r) => { setEditingRecipe(r); setShowRecipeBuilder(true); }}
+          />
+        </div>
+      )}
+
       {/* SHOPPING */}
       {tab === "shopping" && (
         <div className="card">
@@ -654,6 +700,18 @@ export default function NutritionPage() {
 
       {/* Targets Editor Modal */}
       {showTargetEditor && <TargetEditorModal targets={targets} onSave={handleSaveTargets} onClose={() => setShowTargetEditor(false)} />}
+
+      {/* Recipe Builder Modal */}
+      <RecipeBuilder
+        open={showRecipeBuilder}
+        onClose={() => { setShowRecipeBuilder(false); setEditingRecipe(null); }}
+        editRecipe={editingRecipe}
+        onUseRecipe={(recipe) => {
+          const macros = calculateRecipeMacros(recipe.ingredients, recipe.servings);
+          addFoodToSlot("Snacks", `\u{1F373} ${recipe.name}`, macros.calories, macros.protein, macros.carbs, macros.fat, macros.fiber, macros.sodium, macros.sugar);
+          setShowRecipeBuilder(false);
+        }}
+      />
 
       {/* Save Template Dialog */}
       {showSaveTemplate && (
@@ -739,12 +797,15 @@ export default function NutritionPage() {
 }
 
 // Target Editor Modal
-function TargetEditorModal({ targets, onSave, onClose }: { targets: NutritionTargets; onSave: (cal: number, pro: number, carbs: number, fat: number, water: number) => void; onClose: () => void }) {
+function TargetEditorModal({ targets, onSave, onClose }: { targets: NutritionTargets; onSave: (cal: number, pro: number, carbs: number, fat: number, water: number, fiber?: number, sodium?: number, sugar?: number) => void; onClose: () => void }) {
   const [cal, setCal] = useState(String(targets.calories));
   const [pro, setPro] = useState(String(targets.protein));
   const [carbs, setCarbs] = useState(String(targets.carbs));
   const [fat, setFat] = useState(String(targets.fat));
   const [water, setWater] = useState(String(targets.water));
+  const [fiber, setFiber] = useState(String(targets.fiber || ""));
+  const [sodium, setSodium] = useState(String(targets.sodium || ""));
+  const [sugar, setSugar] = useState(String(targets.sugar || ""));
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center" onClick={onClose}>
@@ -765,6 +826,9 @@ function TargetEditorModal({ targets, onSave, onClose }: { targets: NutritionTar
             { label: "Proteína (g)", val: pro, set: setPro, color: "#34C759" },
             { label: "Carbohidratos (g)", val: carbs, set: setCarbs, color: "#FFCC00" },
             { label: "Grasa (g)", val: fat, set: setFat, color: "#AF52DE" },
+            { label: "Fibra (g)", val: fiber, set: setFiber, color: "#8B5E3C" },
+            { label: "Sodio (mg)", val: sodium, set: setSodium, color: "#FF6B35" },
+            { label: "Azúcar (g)", val: sugar, set: setSugar, color: "#FF2D55" },
             { label: "Agua (litros)", val: water, set: setWater, color: "#007AFF" },
           ].map((f) => (
             <div key={f.label} className="flex items-center gap-3">
@@ -789,7 +853,10 @@ function TargetEditorModal({ targets, onSave, onClose }: { targets: NutritionTar
               parseInt(pro, 10) || 170,
               parseInt(carbs, 10) || 230,
               parseInt(fat, 10) || 77,
-              parseFloat(water) || 3.0
+              parseFloat(water) || 3.0,
+              parseInt(fiber, 10) || undefined,
+              parseInt(sodium, 10) || undefined,
+              parseInt(sugar, 10) || undefined
             )}
             className="flex-[2] py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm"
             style={{ background: "var(--accent)" }}

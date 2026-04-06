@@ -6,6 +6,7 @@ import {
   Camera, Heart, Trash2, Edit3, Zap,
 } from "lucide-react";
 import { searchFoods, calcMacros, type FoodItem } from "@/lib/openfoodfacts";
+import { searchChileanFoods } from "@/data/chilean-foods";
 import {
   getRecentFoods, getFrequentFoods, getMyFoods, saveMyFood, deleteMyFood,
   getFoodFavorites, addFoodFavorite, removeFoodFavorite, generateId,
@@ -20,7 +21,7 @@ interface AddFoodScreenProps {
   open: boolean;
   slot: string;
   onClose: () => void;
-  onAdd: (name: string, calories: number, protein: number, carbs: number, fat: number) => void;
+  onAdd: (name: string, calories: number, protein: number, carbs: number, fat: number, fiber?: number, sodium?: number, sugar?: number, photoUrl?: string) => void;
 }
 
 export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScreenProps) {
@@ -41,6 +42,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
   const [myFoods, setMyFoods] = useState<MyFood[]>([]);
   const [favorites, setFavorites] = useState<FoodFavorite[]>([]);
   const [myFoodFilter, setMyFoodFilter] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -56,6 +58,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
       setShowCreateFood(false);
       setEditingFood(null);
       setMyFoodFilter("");
+      setPhotoUrl(null);
       refreshData();
     }
   }, [open]);
@@ -70,8 +73,18 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
   const doSearch = useCallback(async (q: string) => {
     if (q.length < 2) { setResults([]); return; }
     setLoading(true);
-    const items = await searchFoods(q);
-    setResults(items);
+    // Local Chilean foods first (instant)
+    const localFoods = searchChileanFoods(q, 15).map((f): FoodItem => ({
+      code: f.id,
+      name: f.name,
+      brand: "🇨🇱 Local",
+      per100g: f.per100g,
+      servingSize: f.servingSize,
+      servingGrams: f.servingGrams,
+    }));
+    // Then API search
+    const apiItems = await searchFoods(q);
+    setResults([...localFoods, ...apiItems]);
     setLoading(false);
   }, []);
 
@@ -88,17 +101,38 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
     const label = selectedFood.brand
       ? `${selectedFood.name} (${selectedFood.brand}) — ${g}g`
       : `${selectedFood.name} — ${g}g`;
-    onAdd(label, macros.calories, macros.protein, macros.carbs, macros.fat);
+    onAdd(label, macros.calories, macros.protein, macros.carbs, macros.fat, macros.fiber, macros.sodium, macros.sugar, photoUrl || undefined);
     onClose();
   }
 
+  function handlePhotoCapture(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX = 200;
+        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setPhotoUrl(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
   function handleAddRecent(food: CustomMeal) {
-    onAdd(food.name, food.calories, food.protein, food.carbs, food.fat);
+    onAdd(food.name, food.calories, food.protein, food.carbs, food.fat, food.fiber, food.sodium, food.sugar);
     onClose();
   }
 
   function handleAddFrequent(food: FoodFrequency) {
-    onAdd(food.name, food.calories, food.protein, food.carbs, food.fat);
+    onAdd(food.name, food.calories, food.protein, food.carbs, food.fat, food.fiber, food.sodium, food.sugar);
     onClose();
   }
 
@@ -106,7 +140,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
     const label = food.brand
       ? `${food.name} (${food.brand}) — ${food.servingSize}`
       : `${food.name} — ${food.servingSize}`;
-    onAdd(label, food.calories, food.protein, food.carbs, food.fat);
+    onAdd(label, food.calories, food.protein, food.carbs, food.fat, food.fiber, food.sodium, food.sugar);
     onClose();
   }
 
@@ -319,6 +353,18 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
                     </div>
                   );
                 })()}
+
+                {/* Photo capture */}
+                <div className="flex items-center gap-2 mb-3">
+                  <label className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg cursor-pointer text-[0.65rem] font-semibold"
+                    style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>
+                    <Camera size={14} /> {t("food.addPhoto") || "Foto"}
+                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoCapture} />
+                  </label>
+                  {photoUrl && (
+                    <img src={photoUrl} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                  )}
+                </div>
 
                 <button
                   onClick={handleAddFromSearch}

@@ -35,6 +35,8 @@ export interface FoodItem {
     carbs: number;
     fat: number;
     fiber: number;
+    sodium: number; // mg
+    sugar: number;
   };
   servingSize?: string;
   servingGrams?: number;
@@ -54,6 +56,8 @@ function parseProduct(p: any): FoodItem | null {
       carbs: Math.round((n.carbohydrates_100g || 0) * 10) / 10,
       fat: Math.round((n.fat_100g || 0) * 10) / 10,
       fiber: Math.round((n.fiber_100g || 0) * 10) / 10,
+      sodium: Math.round(((n.sodium_100g || 0) * 1000) * 10) / 10, // convert g to mg
+      sugar: Math.round((n.sugars_100g || 0) * 10) / 10,
     },
     servingSize: p.serving_size,
     servingGrams: p.serving_quantity,
@@ -102,5 +106,8 @@ export function calcMacros(food: FoodItem, grams: number) {
     protein: Math.round(food.per100g.protein * factor * 10) / 10,
     carbs: Math.round(food.per100g.carbs * factor * 10) / 10,
     fat: Math.round(food.per100g.fat * factor * 10) / 10,
+    fiber: Math.round(food.per100g.fiber * factor * 10) / 10,
+    sodium: Math.round(food.per100g.sodium * factor),
+    sugar: Math.round(food.per100g.sugar * factor * 10) / 10,
   };
 }

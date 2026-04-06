@@ -68,6 +68,10 @@ export interface SelectedMeal {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
+  sodium?: number; // mg
+  sugar?: number;
+  photoUrl?: string;
 }
 
 export interface CustomMeal {
@@ -76,7 +80,11 @@ export interface CustomMeal {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
+  sodium?: number;
+  sugar?: number;
   slot?: string; // meal slot (Desayuno, Almuerzo, etc.)
+  photoUrl?: string;
 }
 
 export interface FoodFavorite {
@@ -86,6 +94,9 @@ export interface FoodFavorite {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
+  sodium?: number;
+  sugar?: number;
 }
 
 export interface MyFood {
@@ -98,6 +109,9 @@ export interface MyFood {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
+  sodium?: number;
+  sugar?: number;
 }
 
 export interface FoodFrequency {
@@ -108,6 +122,9 @@ export interface FoodFrequency {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
+  sodium?: number;
+  sugar?: number;
 }
 
 export interface NutritionTargets {
@@ -116,6 +133,9 @@ export interface NutritionTargets {
   carbs: number;
   fat: number;
   water: number; // liters
+  fiber?: number;
+  sodium?: number; // mg
+  sugar?: number;
 }
 
 // === Meal Templates (7.9) ===
@@ -128,6 +148,49 @@ export interface MealTemplate {
   totalCalories: number;
   totalProtein: number;
   createdAt: string;
+}
+
+// === Recipes (6.4) ===
+
+export interface RecipeIngredient {
+  name: string;
+  grams: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber?: number;
+  sodium?: number;
+  sugar?: number;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  servings: number;
+  ingredients: RecipeIngredient[];
+  instructions?: string;
+  prepTime?: number; // minutes
+  tags?: string[];
+  createdAt: string;
+}
+
+// === Pantry / Meal Prep (6.3) ===
+
+export interface PantryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string; // g, ml, unidades
+  category?: string;
+}
+
+export interface ShoppingItem {
+  name: string;
+  quantity: number;
+  unit: string;
+  category?: string;
+  checked: boolean;
 }
 
 // === Keys ===
@@ -284,6 +347,9 @@ const KEYS = {
   nutritionTargets: "mark-pt-nutrition-targets",
   myFoods: "mark-pt-my-foods",
   foodFrequency: "mark-pt-food-frequency",
+  recipes: "mark-pt-recipes",
+  pantry: "mark-pt-pantry",
+  mealPrepList: "mark-pt-meal-prep-list",
 } as const;
 
 // === Helpers ===
@@ -483,14 +549,14 @@ export function getFoodFrequencies(): FoodFrequency[] {
   return load<FoodFrequency>(KEYS.foodFrequency);
 }
 
-export function trackFoodFrequency(name: string, calories: number, protein: number, carbs: number, fat: number) {
+export function trackFoodFrequency(name: string, calories: number, protein: number, carbs: number, fat: number, fiber?: number, sodium?: number, sugar?: number) {
   const all = getFoodFrequencies();
   const existing = all.find((f) => f.name === name);
   if (existing) {
     existing.count += 1;
     existing.lastUsed = today();
   } else {
-    all.push({ name, count: 1, lastUsed: today(), calories, protein, carbs, fat });
+    all.push({ name, count: 1, lastUsed: today(), calories, protein, carbs, fat, fiber, sodium, sugar });
   }
   save(KEYS.foodFrequency, all);
 }
@@ -499,6 +565,76 @@ export function getFrequentFoods(limit = 20): FoodFrequency[] {
   return getFoodFrequencies()
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
+}
+
+// === Recipes (6.4) ===
+
+export function getRecipes(): Recipe[] {
+  return load<Recipe>(KEYS.recipes);
+}
+
+export function saveRecipe(recipe: Recipe) {
+  const all = getRecipes().filter((r) => r.id !== recipe.id);
+  all.push(recipe);
+  all.sort((a, b) => a.name.localeCompare(b.name));
+  save(KEYS.recipes, all);
+}
+
+export function deleteRecipe(id: string) {
+  save(KEYS.recipes, getRecipes().filter((r) => r.id !== id));
+}
+
+export function calculateRecipeMacros(ingredients: RecipeIngredient[], servings: number) {
+  const total = ingredients.reduce(
+    (acc, ing) => ({
+      calories: acc.calories + ing.calories,
+      protein: acc.protein + ing.protein,
+      carbs: acc.carbs + ing.carbs,
+      fat: acc.fat + ing.fat,
+      fiber: acc.fiber + (ing.fiber || 0),
+      sodium: acc.sodium + (ing.sodium || 0),
+      sugar: acc.sugar + (ing.sugar || 0),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sodium: 0, sugar: 0 },
+  );
+  const s = Math.max(servings, 1);
+  return {
+    calories: Math.round(total.calories / s),
+    protein: Math.round(total.protein / s * 10) / 10,
+    carbs: Math.round(total.carbs / s * 10) / 10,
+    fat: Math.round(total.fat / s * 10) / 10,
+    fiber: Math.round(total.fiber / s * 10) / 10,
+    sodium: Math.round(total.sodium / s),
+    sugar: Math.round(total.sugar / s * 10) / 10,
+  };
+}
+
+// === Pantry / Meal Prep (6.3) ===
+
+export function getPantryItems(): PantryItem[] {
+  return load<PantryItem>(KEYS.pantry);
+}
+
+export function savePantryItem(item: PantryItem) {
+  const all = getPantryItems().filter((p) => p.id !== item.id);
+  all.push(item);
+  save(KEYS.pantry, all);
+}
+
+export function deletePantryItem(id: string) {
+  save(KEYS.pantry, getPantryItems().filter((p) => p.id !== id));
+}
+
+export function getMealPrepList(): ShoppingItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(KEYS.mealPrepList);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveMealPrepList(items: ShoppingItem[]) {
+  localStorage.setItem(KEYS.mealPrepList, JSON.stringify(items));
 }
 
 // === Aggregation ===
