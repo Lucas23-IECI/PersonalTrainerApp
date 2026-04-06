@@ -15,6 +15,10 @@ import {
   Activity,
   CalendarRange,
   Brain,
+  Gauge,
+  BarChart3,
+  Sparkles,
+  ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
 import { getSettings } from "./storage";
@@ -43,6 +47,10 @@ export const ALL_TABS: NavTab[] = [
   { href: "/cardio", label: "Cardio", icon: HeartPulse },
   { href: "/planning", label: "Planificación", icon: CalendarRange },
   { href: "/coach", label: "Coach IA", icon: Brain },
+  { href: "/performance", label: "Performance", icon: Gauge },
+  { href: "/forecast", label: "Predicciones", icon: BarChart3 },
+  { href: "/insights", label: "Insights", icon: Sparkles },
+  { href: "/phase-review", label: "Revisión Fase", icon: ClipboardCheck },
 ];
 
 export const DEFAULT_TAB_HREFS = ["/", "/workout", "/exercises", "/nutrition", "/log", "/profile"];

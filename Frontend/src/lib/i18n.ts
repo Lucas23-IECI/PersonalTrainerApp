@@ -754,6 +754,63 @@ const translations: Record<string, Record<Lang, string>> = {
   "coach.welcome": { es: "¡Hola! Soy tu Coach IA 🧠", en: "Hi! I'm your AI Coach 🧠" },
   "coach.welcomeHint": { es: "Preguntame sobre entrenamiento, nutrición, recuperación o tus stats", en: "Ask me about training, nutrition, recovery, or your stats" },
   "coach.placeholder": { es: "Preguntá algo...", en: "Ask something..." },
+
+  // ── Performance Score (8.1) ──
+  "perf.title": { es: "Performance", en: "Performance" },
+  "perf.subtitle": { es: "Tu puntuación de rendimiento", en: "Your performance score" },
+  "perf.improving": { es: "Mejorando", en: "Improving" },
+  "perf.declining": { es: "Declinando", en: "Declining" },
+  "perf.stable": { es: "Estable", en: "Stable" },
+  "perf.streak": { es: "Racha", en: "Streak" },
+  "perf.sessions": { es: "Sesiones", en: "Sessions" },
+  "perf.period": { es: "Período", en: "Period" },
+  "perf.breakdown": { es: "Desglose", en: "Breakdown" },
+  "perf.nextLevel": { es: "Próximo nivel", en: "Next level" },
+  "perf.comparison": { es: "Comparación", en: "Comparison" },
+  "perf.previous": { es: "Anterior", en: "Previous" },
+  "perf.current": { es: "Actual", en: "Current" },
+
+  // ── Predictive Analytics (8.2) ──
+  "forecast.title": { es: "Predicciones", en: "Forecasts" },
+  "forecast.subtitle": { es: "Tus proyecciones de fuerza", en: "Your strength projections" },
+  "forecast.overallTrend": { es: "Tendencia general", en: "Overall trend" },
+  "forecast.improving": { es: "Mejorando", en: "Improving" },
+  "forecast.declining": { es: "Declinando", en: "Declining" },
+  "forecast.stableOverall": { es: "Estable", en: "Stable" },
+  "forecast.weeklyVol": { es: "Vol. semanal", en: "Weekly vol." },
+  "forecast.milestones": { es: "Milestones", en: "Milestones" },
+  "forecast.exercises": { es: "Ejercicios", en: "Exercises" },
+  "forecast.noData": { es: "Necesitás más sesiones para ver predicciones", en: "Need more sessions for forecasts" },
+  "forecast.onTrack": { es: "En camino", en: "On track" },
+  "forecast.ahead": { es: "Adelantado", en: "Ahead" },
+  "forecast.behind": { es: "Atrasado", en: "Behind" },
+  "forecast.stagnant": { es: "Estancado", en: "Stagnant" },
+
+  // ── Session Intelligence (8.3) ──
+  "insights.title": { es: "Insights", en: "Insights" },
+  "insights.subtitle": { es: "Análisis inteligente de sesiones", en: "Smart session analysis" },
+  "insights.noSessions": { es: "Sin sesiones completadas", en: "No completed sessions" },
+  "insights.sets": { es: "Sets", en: "Sets" },
+  "insights.volume": { es: "Volumen", en: "Volume" },
+  "insights.duration": { es: "Duración", en: "Duration" },
+  "insights.insightsTitle": { es: "Insights", en: "Insights" },
+  "insights.noInsights": { es: "Sesión estándar", en: "Standard session" },
+  "insights.noInsightsDetail": { es: "Sin alertas ni PRs — todo normal", en: "No alerts or PRs — all normal" },
+  "insights.patterns": { es: "Patrones por día", en: "Day patterns" },
+  "insights.bestDay": { es: "Mejor día", en: "Best day" },
+
+  // ── Phase Retrospective (8.4) ──
+  "phaseReview.title": { es: "Revisión de Fase", en: "Phase Review" },
+  "phaseReview.subtitle": { es: "Análisis de tu mesociclo", en: "Your mesocycle analysis" },
+  "phaseReview.sessions": { es: "Sesiones", en: "Sessions" },
+  "phaseReview.perWeek": { es: "x/semana", en: "x/week" },
+  "phaseReview.rpeTrend": { es: "Tendencia RPE", en: "RPE trend" },
+  "phaseReview.fatigue": { es: "Fatiga", en: "Fatigue" },
+  "phaseReview.weeklyBreakdown": { es: "Semana a semana", en: "Week by week" },
+  "phaseReview.bestWeek": { es: "Mejor semana", en: "Best week" },
+  "phaseReview.worstWeek": { es: "Semana más floja", en: "Weakest week" },
+  "phaseReview.muscleBreakdown": { es: "Músculos", en: "Muscles" },
+  "phaseReview.recommendations": { es: "Recomendaciones", en: "Recommendations" },
 };
 
 /** Get a translated string by key */

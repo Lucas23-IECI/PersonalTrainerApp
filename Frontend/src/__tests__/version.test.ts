@@ -7,8 +7,8 @@ describe('version', () => {
   });
 
   it('APP_VERSION matches package.json', () => {
-    // Should be 3.1.0
-    expect(APP_VERSION).toBe('3.1.0');
+    // Should be 3.2.0
+    expect(APP_VERSION).toBe('3.2.0');
   });
 
   describe('checkForUpdate', () => {
