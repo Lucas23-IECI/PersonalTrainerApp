@@ -41,6 +41,7 @@ import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBad
 import { vibrateTimerComplete, vibrateMedium, vibrateHeavy, vibrateSuccess, vibrateLight } from "@/lib/haptics";
 import { exerciseLibrary, type LibraryExercise, type ExerciseCategory } from "@/data/exercises";
 import WarmupGenerator from "@/components/WarmupGenerator";
+import { checkDeload, type DeloadCheck } from "@/lib/deload";
 
 // 4.3 — Smart rest times: compound vs accessory, RPE-adjusted
 const REST_BY_CATEGORY: Record<ExerciseCategory, number> = {
@@ -116,6 +117,8 @@ function SessionContent() {
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [replaceExerciseIdx, setReplaceExerciseIdx] = useState<number | null>(null);
   const [warmupDismissed, setWarmupDismissed] = useState(false);
+  const [deloadDismissed, setDeloadDismissed] = useState(false);
+  const deloadCheck = useMemo(() => checkDeload(), []);
 
   // Collect target muscles for warmup generator
   const targetMuscles = useMemo(() => {
@@ -381,6 +384,14 @@ function SessionContent() {
         return;
       }
 
+      if (set.setType === 'cluster') {
+        // Cluster sets: 20s micro-pause between mini-sets within a cluster
+        setRestTotal(20);
+        setRestSeconds(20);
+        setRestActive(true);
+        return;
+      }
+
       // 4.3 Smart rest: adjust by compound/accessory + RPE
       const smartRest = getSmartRest(ex.exerciseRef.exerciseId, ex.exerciseRef.rest, ex.isCompound, set.rpe);
       setRestTotal(smartRest);
@@ -589,6 +600,29 @@ function SessionContent() {
         {/* 4.1 — Warmup Generator */}
         {!warmupDismissed && targetMuscles.length > 0 && (
           <WarmupGenerator targetMuscles={targetMuscles} onClose={() => setWarmupDismissed(true)} />
+        )}
+        {/* 4.7 — Deload Alert */}
+        {deloadCheck.shouldDeload && !deloadDismissed && (
+          <div className="mb-4 rounded-xl overflow-hidden" style={{ background: "var(--bg-card)", borderLeft: "3px solid #FF9500" }}>
+            <div className="px-4 py-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[0.8rem] font-bold" style={{ color: "#FF9500" }}>⚠️ Semana de Descarga</span>
+                <button onClick={() => setDeloadDismissed(true)} className="text-[0.65rem] bg-transparent border-none cursor-pointer" style={{ color: "var(--text-muted)" }}>
+                  Ignorar
+                </button>
+              </div>
+              <p className="text-[0.7rem] leading-relaxed mb-2" style={{ color: "var(--text-secondary)" }}>
+                {deloadCheck.reason}
+              </p>
+              <div className="flex gap-3 text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                <span>RPE promedio: <strong style={{ color: "#FF9500" }}>{deloadCheck.avgRpe}</strong></span>
+                <span>Sesiones altas: <strong style={{ color: "#FF9500" }}>{deloadCheck.consecutiveHighSessions}</strong></span>
+              </div>
+              <p className="text-[0.62rem] mt-2 leading-snug" style={{ color: "var(--text-muted)" }}>
+                💡 Reducí el peso al 60%, quitá 1 serie por ejercicio, y mantené RPE 6-7 esta semana.
+              </p>
+            </div>
+          </div>
         )}
         <div className="card mb-5">
           {workout.exercises.map((ex, i) => (
@@ -865,11 +899,16 @@ function SessionContent() {
                       </select>
 
                       {/* Complete Check */}
-                      <div className="flex justify-center gap-0.5">
+                      <div className="flex justify-center gap-0.5 items-center">
+                        {set.tempo && (
+                          <span className="text-[0.45rem] font-bold px-1 rounded" style={{ color: 'var(--accent)', background: 'color-mix(in srgb, var(--accent) 12%, transparent)' }}>
+                            {set.tempo}
+                          </span>
+                        )}
                         <button
                           onClick={() => setExpandedSetNote(isNoteOpen ? null : swipeKey)}
                           className="bg-transparent border-none cursor-pointer p-0"
-                          style={{ color: set.note ? 'var(--accent)' : 'var(--text-muted)', opacity: set.note ? 1 : 0.4 }}
+                          style={{ color: set.note || set.tempo ? 'var(--accent)' : 'var(--text-muted)', opacity: set.note || set.tempo ? 1 : 0.4 }}
                         >
                           <MessageSquare size={12} />
                         </button>
@@ -884,15 +923,33 @@ function SessionContent() {
                     </div>
                     {/* Per-set note input */}
                     {isNoteOpen && (
-                      <input
-                        type="text"
-                        placeholder="Nota del set..."
-                        value={set.note || ''}
-                        onChange={(e) => updateSetNote(exIdx, setIdx, e.target.value)}
-                        className="w-full text-[0.7rem] py-1.5 px-3 bg-transparent border-none outline-none"
-                        style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)' }}
-                        autoFocus
-                      />
+                      <div style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                        <input
+                          type="text"
+                          placeholder="Nota del set..."
+                          value={set.note || ''}
+                          onChange={(e) => updateSetNote(exIdx, setIdx, e.target.value)}
+                          className="w-full text-[0.7rem] py-1.5 px-3 bg-transparent border-none outline-none"
+                          style={{ color: 'var(--text-secondary)' }}
+                          autoFocus
+                        />
+                        {/* 4.8 Tempo input */}
+                        <div className="flex items-center gap-2 px-3 pb-1.5">
+                          <span className="text-[0.6rem] font-semibold" style={{ color: 'var(--text-muted)' }}>Tempo:</span>
+                          <input
+                            type="text"
+                            placeholder="3-1-2-0"
+                            value={set.tempo || ''}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9\-]/g, '');
+                              updateSet(exIdx, setIdx, "tempo", val || undefined);
+                            }}
+                            className="text-[0.7rem] py-0.5 px-2 rounded bg-transparent border-none outline-none w-20 text-center"
+                            style={{ color: set.tempo ? 'var(--accent)' : 'var(--text-muted)', background: 'var(--bg-elevated)' }}
+                          />
+                          <span className="text-[0.5rem]" style={{ color: 'var(--text-muted)' }}>ecc-pausa-con-pausa</span>
+                        </div>
+                      </div>
                     )}
                     </div>
                   );

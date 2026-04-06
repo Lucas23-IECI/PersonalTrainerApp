@@ -16,9 +16,10 @@ const CONFIG: Record<SetType, { label: string; color: string }> = {
   amrap:     { label: 'A',  color: '#30D158' },
   restpause: { label: 'RP', color: '#FF6482' },
   myoreps:   { label: 'M',  color: '#64D2FF' },
+  cluster:   { label: 'CL', color: '#BF5AF2' },
 };
 
-const CYCLE_ORDER: SetType[] = ['normal', 'warmup', 'dropset', 'failure', 'amrap', 'restpause', 'myoreps'];
+const CYCLE_ORDER: SetType[] = ['normal', 'warmup', 'dropset', 'failure', 'amrap', 'restpause', 'myoreps', 'cluster'];
 
 export default function SetTypeBadge({ type, index, onCycle }: SetTypeBadgeProps) {
   const cfg = CONFIG[type];

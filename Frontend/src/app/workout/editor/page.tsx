@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentPhase } from "@/data/phases";
 import {
@@ -11,6 +11,7 @@ import {
   type ProgramDay,
   type ProgramExercise,
 } from "@/data/programs";
+import { SUPERSET_COLORS, SUPERSET_TAGS } from "@/components/workout/session/types";
 import {
   ChevronLeft,
   Save,
@@ -20,6 +21,7 @@ import {
   GripVertical,
   ChevronDown,
   ChevronUp,
+  Link2,
 } from "lucide-react";
 
 export default function WorkoutEditorPage() {
@@ -185,7 +187,11 @@ export default function WorkoutEditorPage() {
                   const isEditing = editingEx?.dayId === day.id && editingEx?.exIdx === i;
 
                   return (
-                    <div key={i} className="py-2" style={{ borderBottom: i < day.exercises.length - 1 ? "1px solid var(--border-subtle)" : "none" }}>
+                    <div key={i} className="py-2" style={{
+                      borderBottom: i < day.exercises.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                      borderLeft: ex.superset ? `3px solid ${SUPERSET_COLORS[ex.superset] || '#FF9500'}` : undefined,
+                      paddingLeft: ex.superset ? "8px" : undefined,
+                    }}>
                       {/* Exercise row */}
                       <div className="flex items-center gap-2">
                         <div className="flex flex-col gap-0.5">
@@ -200,7 +206,14 @@ export default function WorkoutEditorPage() {
                           className="flex-1 cursor-pointer"
                           onClick={() => setEditingEx(isEditing ? null : { dayId: day.id, exIdx: i })}
                         >
-                          <div className="text-[0.78rem] font-semibold" style={{ color: "var(--text)" }}>{ex.name}</div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[0.78rem] font-semibold" style={{ color: "var(--text)" }}>{ex.name}</span>
+                            {ex.superset && (
+                              <span className="text-[0.5rem] font-bold px-1 py-0.5 rounded" style={{ background: SUPERSET_COLORS[ex.superset] || '#FF9500', color: '#fff' }}>
+                                SS-{ex.superset}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[0.62rem]" style={{ color: "var(--text-muted)" }}>{ex.sets}×{ex.reps} · {ex.rest} · RPE {ex.rpe}</div>
                         </div>
                         <button
@@ -276,6 +289,37 @@ export default function WorkoutEditorPage() {
                               checked={ex.isCompound}
                               onChange={(e) => updateExercise(day.id, i, { isCompound: e.target.checked })}
                             />
+                          </div>
+                          {/* Superset selector */}
+                          <div className="col-span-2">
+                            <label className="block text-[0.55rem] uppercase mb-1" style={{ color: "var(--text-secondary)" }}>
+                              <Link2 size={10} className="inline mr-1" />Superset
+                            </label>
+                            <div className="flex gap-1.5 flex-wrap">
+                              {SUPERSET_TAGS.map((tag) => (
+                                <button
+                                  key={tag}
+                                  onClick={() => updateExercise(day.id, i, { superset: ex.superset === tag ? undefined : tag })}
+                                  className="w-7 h-6 rounded text-[0.65rem] font-bold border-none cursor-pointer transition-all"
+                                  style={{
+                                    background: ex.superset === tag ? SUPERSET_COLORS[tag] : `${SUPERSET_COLORS[tag]}20`,
+                                    color: ex.superset === tag ? '#fff' : SUPERSET_COLORS[tag],
+                                    outline: ex.superset === tag ? `2px solid ${SUPERSET_COLORS[tag]}` : 'none',
+                                  }}
+                                >
+                                  {tag}
+                                </button>
+                              ))}
+                              {ex.superset && (
+                                <button
+                                  onClick={() => updateExercise(day.id, i, { superset: undefined })}
+                                  className="h-6 px-2 rounded text-[0.6rem] border-none cursor-pointer"
+                                  style={{ background: 'var(--bg-card)', color: 'var(--text-muted)' }}
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       )}

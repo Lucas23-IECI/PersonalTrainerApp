@@ -19,7 +19,7 @@ export interface DailyCheckin {
   notes?: string;
 }
 
-export type SetType = 'normal' | 'warmup' | 'dropset' | 'failure' | 'amrap' | 'restpause' | 'myoreps';
+export type SetType = 'normal' | 'warmup' | 'dropset' | 'failure' | 'amrap' | 'restpause' | 'myoreps' | 'cluster';
 
 export interface LoggedSet {
   reps: number;
@@ -27,6 +27,7 @@ export interface LoggedSet {
   rpe?: number;
   rir?: number;
   setType?: SetType;
+  tempo?: string; // e.g. "3-1-2-0" (eccentric-pause-concentric-pause)
 }
 
 export interface LoggedExercise {
