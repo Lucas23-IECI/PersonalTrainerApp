@@ -743,6 +743,17 @@ const translations: Record<string, Record<Lang, string>> = {
   "stress.extreme": { es: "Extremo", en: "Extreme" },
   "stress.avg": { es: "Estrés prom", en: "Avg stress" },
   "stress.correlation": { es: "Estrés vs Rendimiento", en: "Stress vs Performance" },
+
+  // ── Coach Chat (7.6) ──
+  "coach.title": { es: "Coach IA", en: "AI Coach" },
+  "coach.subtitle": { es: "Tu asistente de entrenamiento", en: "Your training assistant" },
+  "coach.recovery": { es: "Recuperación", en: "Recovery" },
+  "coach.balance": { es: "Balance", en: "Balance" },
+  "coach.alerts": { es: "Alertas", en: "Alerts" },
+  "coach.strengths": { es: "Fortalezas", en: "Strengths" },
+  "coach.welcome": { es: "¡Hola! Soy tu Coach IA 🧠", en: "Hi! I'm your AI Coach 🧠" },
+  "coach.welcomeHint": { es: "Preguntame sobre entrenamiento, nutrición, recuperación o tus stats", en: "Ask me about training, nutrition, recovery, or your stats" },
+  "coach.placeholder": { es: "Preguntá algo...", en: "Ask something..." },
 };
 
 /** Get a translated string by key */
