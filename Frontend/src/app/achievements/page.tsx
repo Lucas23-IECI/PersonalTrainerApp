@@ -14,6 +14,7 @@ import {
 import { ArrowLeft, Trophy, Lock } from "lucide-react";
 import Link from "next/link";
 import { PageTransition, StaggerList, StaggerItem, CelebrationPop } from "@/components/motion";
+import { t } from "@/lib/i18n";
 
 export default function AchievementsPage() {
   const [unlocked, setUnlocked] = useState<UnlockedBadge[]>([]);
@@ -69,7 +70,7 @@ export default function AchievementsPage() {
           <ArrowLeft size={24} />
         </Link>
         <h1 className="text-lg font-bold" style={{ color: "var(--text)" }}>
-          Logros
+          {t("achievements.title")}
         </h1>
         <span
           className="ml-auto text-sm font-medium"
@@ -84,7 +85,7 @@ export default function AchievementsPage() {
         <div className="flex items-center gap-3 mb-1">
           <Trophy size={20} style={{ color: "#FFD700" }} />
           <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>
-            {stats.percentage}% completado
+            {stats.percentage}{t("achievements.percentComplete")}
           </span>
         </div>
         <div
@@ -112,7 +113,7 @@ export default function AchievementsPage() {
             }}
           >
             <span className="text-xs font-semibold" style={{ color: "#FFD700" }}>
-              🎉 ¡Nuevos logros desbloqueados!
+              {t("achievements.newUnlocked")}
             </span>
             {newBadges.map((b) => (
               <span key={b.id} className="text-sm" style={{ color: "var(--text)" }}>
@@ -128,7 +129,7 @@ export default function AchievementsPage() {
         <div className="flex gap-2">
           {categories.map((cat) => {
             const active = filter === cat;
-            const label = cat === "all" ? "Todos" : CATEGORY_LABELS[cat];
+            const label = cat === "all" ? t("achievements.allFilter") : CATEGORY_LABELS[cat];
             return (
               <button
                 key={cat}

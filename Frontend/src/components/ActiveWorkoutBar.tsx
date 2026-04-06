@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { getActiveSession, clearActiveSession, type ActiveSessionData } from '@/lib/storage';
 import { clearWorkoutNotification } from '@/lib/native';
 import { ChevronRight, Trash2 } from 'lucide-react';
+import { t } from '@/lib/i18n';
 
 export default function ActiveWorkoutBar() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function ActiveWorkoutBar() {
               </span>
             </div>
             <div className="text-[0.68rem] truncate" style={{ color: 'var(--text-muted)' }}>
-              {exName} · {completedSets} sets completados
+              {exName} · {completedSets} {t("workout.setsCompleted")}
             </div>
           </button>
 
@@ -109,12 +110,12 @@ export default function ActiveWorkoutBar() {
       {confirmDiscard && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }}>
           <div className="card mx-6 p-5 text-center" style={{ maxWidth: 320 }}>
-            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text)' }}>Descartar entrenamiento?</h3>
+            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text)' }}>{t("workout.discardWorkout")}</h3>
             <p className="text-[0.78rem] mb-4" style={{ color: 'var(--text-muted)' }}>
-              Se va a perder todo el progreso de <strong>{session.workoutName}</strong>.
+              {t("workout.willLoseProgress")} <strong>{session.workoutName}</strong>.
             </p>
             <div className="flex gap-2">
-              <button onClick={() => setConfirmDiscard(false)} className="btn btn-ghost flex-1">Cancelar</button>
+              <button onClick={() => setConfirmDiscard(false)} className="btn btn-ghost flex-1">{t("common.cancel")}</button>
               <button
                 onClick={() => {
                   clearActiveSession();
@@ -124,7 +125,7 @@ export default function ActiveWorkoutBar() {
                 }}
                 className="btn btn-danger flex-1"
               >
-                Descartar
+                {t("common.discard")}
               </button>
             </div>
           </div>

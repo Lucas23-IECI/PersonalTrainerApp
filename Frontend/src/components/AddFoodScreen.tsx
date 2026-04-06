@@ -12,6 +12,7 @@ import {
   type CustomMeal, type FoodFrequency, type MyFood, type FoodFavorite,
 } from "@/lib/storage";
 import BarcodeScanner from "@/components/BarcodeScanner";
+import { t } from "@/lib/i18n";
 
 type FoodTab = "recientes" | "frecuentes" | "buscar" | "mis-alimentos";
 
@@ -130,10 +131,10 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
   if (!open) return null;
 
   const tabs: { id: FoodTab; label: string; icon: React.ReactNode }[] = [
-    { id: "recientes", label: "Recientes", icon: <Clock size={13} /> },
-    { id: "frecuentes", label: "Frecuentes", icon: <TrendingUp size={13} /> },
-    { id: "buscar", label: "Buscar", icon: <Search size={13} /> },
-    { id: "mis-alimentos", label: "Mis Alimentos", icon: <Heart size={13} /> },
+    { id: "recientes", label: t("food.recent"), icon: <Clock size={13} /> },
+    { id: "frecuentes", label: t("food.frequent"), icon: <TrendingUp size={13} /> },
+    { id: "buscar", label: t("common.search"), icon: <Search size={13} /> },
+    { id: "mis-alimentos", label: t("food.myFoods"), icon: <Heart size={13} /> },
   ];
 
   const filteredMyFoods = myFoodFilter
@@ -148,7 +149,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
           <ChevronLeft size={22} />
         </button>
         <div className="flex-1">
-          <div className="text-sm font-bold" style={{ color: "var(--text)" }}>Agregar a {slot}</div>
+          <div className="text-sm font-bold" style={{ color: "var(--text)" }}>{t("food.addTo")}{slot}</div>
         </div>
         <button
           onClick={() => setShowQuickAdd(true)}
@@ -156,7 +157,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
           style={{ background: "#FF9500" }}
         >
           <Zap size={11} className="inline mr-0.5" style={{ verticalAlign: "-1px" }} />
-          Rápido
+          {t("food.quick")}
         </button>
         <button
           onClick={() => { setShowBarcode(true); }}
@@ -190,7 +191,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
         {tab === "recientes" && (
           <div className="px-3 py-2">
             {recents.length === 0 ? (
-              <EmptyState text="Todavía no tenés alimentos recientes. Buscá algo para empezar." />
+              <EmptyState text={t("food.noRecentFoods")} />
             ) : (
               recents.map((food, i) => (
                 <FoodRow
@@ -210,13 +211,13 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
         {tab === "frecuentes" && (
           <div className="px-3 py-2">
             {frequents.length === 0 ? (
-              <EmptyState text="Los alimentos que más usás aparecerán acá." />
+              <EmptyState text={t("food.frequentHint")} />
             ) : (
               frequents.map((food, i) => (
                 <FoodRow
                   key={i}
                   name={food.name}
-                  detail={`${food.calories} kcal · ${food.count}x usado`}
+                  detail={`${food.calories} kcal · ${food.count}${t("food.timesUsed")}`}
                   isFavorite={isFav(food.name)}
                   onToggleFav={() => toggleFav(food.name, food.calories, food.protein, food.carbs, food.fat)}
                   onAdd={() => handleAddFrequent(food)}
@@ -235,7 +236,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
               <input
                 ref={inputRef}
                 type="search"
-                placeholder="Buscar alimento o marca..."
+                placeholder={t("food.searchFood")}
                 value={query}
                 onChange={(e) => handleQueryChange(e.target.value)}
                 className="flex-1 bg-transparent border-none outline-none text-sm"
@@ -270,7 +271,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
 
                 {/* Serving selector */}
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>Cantidad:</span>
+                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>{t("food.amount")}</span>
                   <input
                     type="number"
                     inputMode="numeric"
@@ -286,7 +287,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
                       className="text-[0.65rem] px-2.5 py-1.5 rounded-lg border-none cursor-pointer"
                       style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
                     >
-                      1 porción ({selectedFood.servingSize})
+                      {t("food.oneServing")}{selectedFood.servingSize})
                     </button>
                   )}
                   {/* Quick gram buttons */}
@@ -325,7 +326,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
                   style={{ background: "#34C759" }}
                 >
                   <Plus size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} />
-                  Agregar a {slot}
+                  {t("food.addTo")}{slot}
                 </button>
               </div>
             )}
@@ -334,11 +335,11 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
             <div className="px-3 py-2">
               {loading && (
                 <div className="flex items-center justify-center py-10" style={{ color: "var(--text-muted)" }}>
-                  <Loader2 size={20} className="animate-spin mr-2" /> Buscando...
+                  <Loader2 size={20} className="animate-spin mr-2" /> {t("common.searching")}
                 </div>
               )}
               {!loading && query.length >= 2 && results.length === 0 && (
-                <EmptyState text="No se encontraron resultados. Probá con otro nombre." />
+                <EmptyState text={t("food.noResults")} />
               )}
               {!loading && results.map((item) => (
                 <button
@@ -365,7 +366,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
                 </button>
               ))}
               {!loading && !query && (
-                <EmptyState text="Buscá un alimento por nombre o marca. Usamos Open Food Facts con miles de productos." />
+                <EmptyState text={t("food.searchFoodHint")} />
               )}
             </div>
           </div>
@@ -379,7 +380,7 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
                 <Search size={14} style={{ color: "var(--text-muted)" }} />
                 <input
                   type="text"
-                  placeholder="Filtrar mis alimentos..."
+                  placeholder={t("food.filterMyFoods")}
                   value={myFoodFilter}
                   onChange={(e) => setMyFoodFilter(e.target.value)}
                   className="flex-1 bg-transparent border-none outline-none text-[0.75rem]"
@@ -391,12 +392,12 @@ export default function AddFoodScreen({ open, slot, onClose, onAdd }: AddFoodScr
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg border-none cursor-pointer text-[0.7rem] font-bold text-white"
                 style={{ background: "#34C759" }}
               >
-                <Plus size={14} /> Crear
+                <Plus size={14} /> {t("common.create")}
               </button>
             </div>
 
             {filteredMyFoods.length === 0 ? (
-              <EmptyState text={myFoodFilter ? "No se encontraron alimentos." : "Creá tus propios alimentos personalizados. Aparecen acá para agregar rápido."} />
+              <EmptyState text={myFoodFilter ? t("food.noFoodsFound") : t("food.createFoodHint")} />
             ) : (
               filteredMyFoods.map((food) => (
                 <div key={food.id} className="flex items-center gap-2.5 p-2.5 rounded-xl mb-1.5" style={{ background: "var(--bg-card)" }}>
@@ -529,39 +530,39 @@ function QuickAddModal({ slot, onAdd, onClose }: {
         <div className="flex items-center justify-between mb-3">
           <div className="text-sm font-bold" style={{ color: "var(--text)" }}>
             <Zap size={14} className="inline mr-1" style={{ color: "#FF9500", verticalAlign: "-2px" }} />
-            Agregar Rápido a {slot}
+            {t("food.quickAddTo")}{slot}
           </div>
           <button onClick={onClose} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
             <X size={16} />
           </button>
         </div>
         <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
-          Solo ingresá las calorías. Los macros son opcionales.
+          {t("food.quickAddHint")}
         </p>
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
-            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "var(--accent)" }}>Calorías *</label>
+            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "var(--accent)" }}>{t("food.calories")}</label>
             <input type="number" inputMode="numeric" value={cal} onChange={(e) => setCal(e.target.value)} autoFocus
               className="w-full text-center text-lg font-bold rounded-xl py-2.5 border"
               style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
             />
           </div>
           <div>
-            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "#34C759" }}>Proteína (g)</label>
+            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "#34C759" }}>{t("food.protein")}</label>
             <input type="number" inputMode="numeric" value={pro} onChange={(e) => setPro(e.target.value)}
               className="w-full text-center text-lg font-bold rounded-xl py-2.5 border"
               style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
             />
           </div>
           <div>
-            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "#FFCC00" }}>Carbos (g)</label>
+            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "#FFCC00" }}>{t("food.carbs")}</label>
             <input type="number" inputMode="numeric" value={carbs} onChange={(e) => setCarbs(e.target.value)}
               className="w-full text-center text-lg font-bold rounded-xl py-2.5 border"
               style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
             />
           </div>
           <div>
-            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "#AF52DE" }}>Grasa (g)</label>
+            <label className="block text-[0.6rem] mb-0.5 font-bold" style={{ color: "#AF52DE" }}>{t("food.fat")}</label>
             <input type="number" inputMode="numeric" value={fat} onChange={(e) => setFat(e.target.value)}
               className="w-full text-center text-lg font-bold rounded-xl py-2.5 border"
               style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
@@ -572,7 +573,7 @@ function QuickAddModal({ slot, onAdd, onClose }: {
           onClick={() => {
             if (!cal) return;
             onAdd(
-              `Comida rápida — ${cal} kcal`,
+              `${t("food.quickFoodLabel")} — ${cal} kcal`,
               parseInt(cal, 10),
               parseInt(pro, 10) || 0,
               parseInt(carbs, 10) || 0,
@@ -583,7 +584,7 @@ function QuickAddModal({ slot, onAdd, onClose }: {
           className="w-full py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm disabled:opacity-40"
           style={{ background: "#FF9500" }}
         >
-          <Zap size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} /> Agregar {cal ? `${cal} kcal` : ""}
+          <Zap size={14} className="inline mr-1" style={{ verticalAlign: "-2px" }} /> {t("food.addBtn")} {cal ? `${cal} kcal` : ""}
         </button>
       </div>
     </div>
@@ -611,7 +612,7 @@ function CreateFoodModal({ existing, onSave, onClose }: {
       <div className="relative w-[90%] max-w-[420px] rounded-2xl p-5 max-h-[85vh] overflow-y-auto" style={{ background: "var(--bg-card)" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-3">
           <div className="text-sm font-bold" style={{ color: "var(--text)" }}>
-            {existing ? "Editar Alimento" : "Crear Alimento"}
+            {existing ? t("food.editFood") : t("food.createFood")}
           </div>
           <button onClick={onClose} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
             <X size={16} />
@@ -620,29 +621,29 @@ function CreateFoodModal({ existing, onSave, onClose }: {
 
         <div className="flex flex-col gap-2.5 mb-4">
           <div>
-            <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>Nombre *</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Arroz cocido"
+            <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>{t("food.nameRequired")}</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("food.exampleName")}
               className="w-full text-sm rounded-lg py-2.5 px-3 border" autoFocus
               style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
             />
           </div>
           <div>
-            <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>Marca (opcional)</label>
-            <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Ej: Lucchetti"
+            <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>{t("food.brand")}</label>
+            <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder={t("food.exampleBrand")}
               className="w-full text-sm rounded-lg py-2.5 px-3 border"
               style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>Porción</label>
+              <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>{t("food.serving")}</label>
               <input type="text" value={serving} onChange={(e) => setServing(e.target.value)} placeholder="100g"
                 className="w-full text-sm rounded-lg py-2.5 px-3 border"
                 style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
               />
             </div>
             <div>
-              <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>Gramos</label>
+              <label className="block text-[0.6rem] mb-0.5 font-semibold" style={{ color: "var(--text-muted)" }}>{t("food.gramsLabel")}</label>
               <input type="number" inputMode="numeric" value={servingGrams} onChange={(e) => setServingGrams(e.target.value)}
                 className="w-full text-sm rounded-lg py-2.5 px-3 border"
                 style={{ background: "var(--bg-elevated)", color: "var(--text)", borderColor: "var(--border)" }}
@@ -651,10 +652,10 @@ function CreateFoodModal({ existing, onSave, onClose }: {
           </div>
           <div className="grid grid-cols-4 gap-1.5">
             {[
-              { label: "kcal *", val: cal, set: setCal, color: "var(--accent)" },
-              { label: "Prot (g)", val: pro, set: setPro, color: "#34C759" },
-              { label: "Carbs (g)", val: carbs, set: setCarbs, color: "#FFCC00" },
-              { label: "Fat (g)", val: fat, set: setFat, color: "#AF52DE" },
+              { label: t("food.kcalLabel"), val: cal, set: setCal, color: "var(--accent)" },
+              { label: t("food.protLabel"), val: pro, set: setPro, color: "#34C759" },
+              { label: t("food.carbsLabel"), val: carbs, set: setCarbs, color: "#FFCC00" },
+              { label: t("food.fatLabel"), val: fat, set: setFat, color: "#AF52DE" },
             ].map((f) => (
               <div key={f.label}>
                 <label className="block text-[0.55rem] mb-0.5 font-bold" style={{ color: f.color }}>{f.label}</label>
@@ -670,7 +671,7 @@ function CreateFoodModal({ existing, onSave, onClose }: {
         <div className="flex gap-2">
           <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border cursor-pointer text-sm font-semibold"
             style={{ background: "transparent", borderColor: "var(--border)", color: "var(--text-muted)" }}>
-            Cancelar
+            {t("common.cancel")}
           </button>
           <button
             onClick={() => {
@@ -691,7 +692,7 @@ function CreateFoodModal({ existing, onSave, onClose }: {
             className="flex-[2] py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm disabled:opacity-40"
             style={{ background: "#34C759" }}
           >
-            {existing ? "Guardar Cambios" : "Crear Alimento"}
+            {existing ? t("food.saveChanges") : t("food.createFood")}
           </button>
         </div>
       </div>

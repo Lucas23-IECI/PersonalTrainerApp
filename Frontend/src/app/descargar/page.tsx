@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Download, Smartphone, Shield, ArrowLeft, RefreshCw, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION, checkForUpdate } from "@/lib/version";
+import { t } from "@/lib/i18n";
 
 const APK_URL =
   "https://github.com/Lucas23-IECI/PersonalTrainerApp/releases/latest/download/mark-pt.apk";
@@ -53,7 +54,7 @@ export default function DescargarPage() {
         style={{ color: "var(--text-secondary)" }}
       >
         <ArrowLeft size={16} />
-        Volver
+        {t("download.back")}
       </Link>
 
       {/* Icon */}
@@ -65,13 +66,13 @@ export default function DescargarPage() {
       </div>
 
       <h1 className="text-2xl font-bold mb-2" style={{ color: "var(--text)" }}>
-        MARK PT para Android
+        {t("download.androidTitle")}
       </h1>
       <p className="text-center mb-1 max-w-sm" style={{ color: "var(--text-secondary)" }}>
-        Descargá la app nativa e instalala directamente en tu celular.
+        {t("download.description")}
       </p>
       <p className="text-xs mb-6" style={{ color: "var(--text-muted)" }}>
-        Versión instalada: <span className="font-semibold" style={{ color: "var(--accent)" }}>v{APP_VERSION}</span>
+        {t("download.installedVersion")}<span className="font-semibold" style={{ color: "var(--accent)" }}>v{APP_VERSION}</span>
       </p>
 
       {/* Update banner */}
@@ -85,7 +86,7 @@ export default function DescargarPage() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[0.85rem] font-bold" style={{ color: "#30D158" }}>
-              Nueva versión disponible
+              {t("download.newVersionAvailable")}
             </div>
             <div className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>
               v{updateInfo.latestVersion}
@@ -96,7 +97,7 @@ export default function DescargarPage() {
             className="text-[0.78rem] font-bold px-4 py-2 rounded-xl border-none cursor-pointer shrink-0 transition-transform active:scale-95"
             style={{ background: "#30D158", color: "#fff" }}
           >
-            Actualizar
+            {t("download.updateBtn")}
           </button>
         </div>
       )}
@@ -108,7 +109,7 @@ export default function DescargarPage() {
         >
           <CheckCircle size={18} style={{ color: "#30D158" }} />
           <span className="text-[0.78rem]" style={{ color: "var(--text-secondary)" }}>
-            Tenés la última versión
+            {t("download.upToDate")}
           </span>
           <button
             onClick={handleCheckUpdate}
@@ -116,7 +117,7 @@ export default function DescargarPage() {
             className="ml-auto text-[0.68rem] font-semibold bg-transparent border-none cursor-pointer p-0"
             style={{ color: "var(--accent)", opacity: checking ? 0.5 : 1 }}
           >
-            {checking ? "Verificando..." : "Verificar"}
+            {checking ? t("download.checking") : t("download.check")}
           </button>
         </div>
       )}
@@ -128,7 +129,7 @@ export default function DescargarPage() {
         >
           <RefreshCw size={14} className="animate-spin" style={{ color: "var(--text-muted)" }} />
           <span className="text-[0.75rem]" style={{ color: "var(--text-muted)" }}>
-            Buscando actualizaciones...
+            {t("download.checkingForUpdates")}
           </span>
         </div>
       )}
@@ -146,7 +147,7 @@ export default function DescargarPage() {
         }}
       >
         <Download size={24} />
-        {updateInfo.hasUpdate ? "Descargar Actualización" : "Descargar APK"}
+        {updateInfo.hasUpdate ? t("download.downloadUpdate") : t("download.downloadAPK")}
       </button>
 
       <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
@@ -156,26 +157,25 @@ export default function DescargarPage() {
       {/* Instructions */}
       <div className="card mt-10 max-w-sm w-full" style={{ background: "var(--bg-card)" }}>
         <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--text)" }}>
-          {updateInfo.hasUpdate ? "Cómo actualizar" : "Cómo instalar"}
+          {updateInfo.hasUpdate ? t("download.howToUpdate") : t("download.howToInstall")}
         </h2>
         <ol className="list-decimal list-inside space-y-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-          <li>Tocá &quot;{updateInfo.hasUpdate ? "Descargar Actualización" : "Descargar APK"}&quot;</li>
-          <li>Abrí el archivo descargado</li>
+          <li>Tocá &quot;{updateInfo.hasUpdate ? t("download.downloadUpdate") : t("download.downloadAPK")}&quot;</li>
+          <li>{t("download.openFile")}</li>
           {updateInfo.hasUpdate ? (
-            <li>Tocá &quot;Instalar&quot; (se actualiza sobre la versión anterior)</li>
+            <li>{t("download.installOverPrevious")}</li>
           ) : (
             <li>
-              Si te pide permiso, habilitá &quot;Instalar apps de fuentes
-              desconocidas&quot;
+              {t("download.enableUnknownSources")}
             </li>
           )}
-          <li>Tocá &quot;Instalar&quot; y listo</li>
+          <li>{t("download.tapInstallDone")}</li>
         </ol>
       </div>
 
       <div className="flex items-center gap-2 mt-6" style={{ color: "var(--text-muted)" }}>
         <Shield size={14} />
-        <span className="text-xs">Se verifica automáticamente con cada nueva versión en GitHub</span>
+        <span className="text-xs">{t("download.autoChecks")}</span>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Download, RefreshCw, Share, X } from 'lucide-react';
+import { t } from '@/lib/i18n';
 
 const UPDATE_FLAG = 'mark-pt-update-available';
 
@@ -116,9 +117,9 @@ export default function PWAManager() {
     return (
       <div className="pwa-banner pwa-update animate-fade-in">
         <RefreshCw size={18} />
-        <span>Nueva versión disponible</span>
+        <span>{t("pwa.newVersionAvailable")}</span>
         <button onClick={handleUpdate} className="pwa-btn">
-          Actualizar
+          {t("common.update")}
         </button>
       </div>
     );
@@ -129,8 +130,8 @@ export default function PWAManager() {
     return (
       <div className="pwa-banner pwa-install animate-fade-in">
         <Download size={18} />
-        <span>Instalá MARK PT</span>
-        <button onClick={handleInstall} className="pwa-btn">Instalar</button>
+        <span>{t("pwa.installMarkPT")}</span>
+        <button onClick={handleInstall} className="pwa-btn">{t("common.install")}</button>
         <button onClick={dismiss} className="pwa-close" aria-label="Cerrar"><X size={16} /></button>
       </div>
     );
@@ -141,7 +142,7 @@ export default function PWAManager() {
     return (
       <div className="pwa-banner pwa-install animate-fade-in">
         <Share size={18} />
-        <span>Tocá <strong>Compartir</strong> → <strong>Agregar a Inicio</strong></span>
+        <span>{t("pwa.iosInstruction")}</span>
         <button onClick={dismiss} className="pwa-close" aria-label="Cerrar"><X size={16} /></button>
       </div>
     );

@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Camera, X, Loader2 } from "lucide-react";
 import { lookupBarcode, type FoodItem } from "@/lib/openfoodfacts";
+import { t } from "@/lib/i18n";
 
 interface Props {
   open: boolean;
@@ -28,7 +29,7 @@ export default function BarcodeScanner({ open, onClose, onFound }: Props) {
       setCode("");
       onClose();
     } else {
-      setError("Producto no encontrado. Verificá el código.");
+      setError(t("barcode.notFound"));
     }
   }
 
@@ -45,7 +46,7 @@ export default function BarcodeScanner({ open, onClose, onFound }: Props) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Camera size={18} style={{ color: "var(--accent)" }} />
-            <span className="text-sm font-bold" style={{ color: "var(--text)" }}>Escanear Código de Barras</span>
+            <span className="text-sm font-bold" style={{ color: "var(--text)" }}>{t("barcode.scanTitle")}</span>
           </div>
           <button onClick={onClose} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
             <X size={18} />
@@ -53,7 +54,7 @@ export default function BarcodeScanner({ open, onClose, onFound }: Props) {
         </div>
 
         <p className="text-[0.7rem] mb-3" style={{ color: "var(--text-muted)" }}>
-          Ingresá el código de barras del producto para buscarlo en Open Food Facts.
+          {t("barcode.instructions")}
         </p>
 
         <input
@@ -80,9 +81,9 @@ export default function BarcodeScanner({ open, onClose, onFound }: Props) {
           style={{ background: "var(--accent)" }}
         >
           {loading ? (
-            <><Loader2 size={14} className="inline animate-spin mr-1" style={{ verticalAlign: "-2px" }} /> Buscando...</>
+            <><Loader2 size={14} className="inline animate-spin mr-1" style={{ verticalAlign: "-2px" }} /> {t("common.searching")}</>
           ) : (
-            "Buscar Producto"
+            t("barcode.searchProduct")
           )}
         </button>
       </div>

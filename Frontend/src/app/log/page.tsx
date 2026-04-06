@@ -17,9 +17,10 @@ import {
   ChevronRight, Search, X, RefreshCw, SlidersHorizontal, Flame,
   Pencil, Check, Star,
 } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
-const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] as const;
 
 // 4.3 — Simplified muscle group filters
 const FILTER_MUSCLE_GROUPS = [
@@ -144,7 +145,7 @@ export default function LogPage() {
   }
 
   function handleDelete(id: string) {
-    if (!confirm("¿Eliminar esta sesión?")) return;
+    if (!confirm(t("log.deleteSession"))) return;
     deleteSession(id);
     setSessions((prev) => prev.filter((s) => s.id !== id));
     if (expanded === id) setExpanded(null);
@@ -154,7 +155,7 @@ export default function LogPage() {
   function handleRepeat(session: WorkoutSession) {
     const active = getActiveSession();
     if (active) {
-      if (!confirm("Ya hay una sesión activa. ¿Descartarla y repetir esta?")) return;
+      if (!confirm(t("log.activeSessionWarning"))) return;
     }
 
     const exercises = session.exercises
@@ -242,8 +243,8 @@ export default function LogPage() {
     todayD.setHours(0, 0, 0, 0);
     date.setHours(0, 0, 0, 0);
     const diff = Math.round((todayD.getTime() - date.getTime()) / 86400000);
-    if (diff === 0) return "Hoy";
-    if (diff === 1) return "Ayer";
+    if (diff === 0) return t("common.today");
+    if (diff === 1) return t("common.yesterday");
     const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     if (diff < 7) return `${days[date.getDay()]} (hace ${diff} días)`;
     return `${days[date.getDay()]} ${day}/${m}`;
@@ -282,16 +283,16 @@ export default function LogPage() {
 
   return (
     <main className="max-w-[600px] mx-auto px-4 py-5">
-      <h1 className="text-[1.3rem] font-black tracking-tight mb-1">Historial</h1>
+      <h1 className="text-[1.3rem] font-black tracking-tight mb-1">{t("common.history")}</h1>
       <p className="text-[0.7rem] mb-4" style={{ color: "var(--text-secondary)" }}>
-        {sessions.length} {sessions.length === 1 ? "sesión" : "sesiones"} registradas
+        {sessions.length} {sessions.length === 1 ? t("common.session") : t("common.sessions")} {t("log.recorded")}
       </p>
 
       {/* 4.1 — Enhanced Calendar with intensity dots */}
       <div className="card mb-4">
         <div className="flex justify-between items-center mb-3">
           <button onClick={prevMonth} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}><ChevronLeft size={18} /></button>
-          <span className="text-sm font-bold">{MONTH_NAMES[calMonth]} {calYear}</span>
+          <span className="text-sm font-bold">{t(`months.${calMonth}`)} {calYear}</span>
           <button onClick={nextMonth} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}><ChevronRight size={18} /></button>
         </div>
 
@@ -336,7 +337,7 @@ export default function LogPage() {
             <span style={{ color: "var(--text-muted)" }}>{formatDate(selectedDate)}</span>
             <div className="flex gap-3" style={{ color: "var(--text-muted)" }}>
               <span className="flex items-center gap-1"><Flame size={10} className="text-orange-500" />{selectedDateStats.count} {selectedDateStats.count === 1 ? "sesión" : "sesiones"}</span>
-              <span>{selectedDateStats.sets} sets</span>
+              <span>{selectedDateStats.sets} {t("common.sets").toLowerCase()}</span>
               {selectedDateStats.volume > 0 && <span>{(selectedDateStats.volume / 1000).toFixed(1)}k kg</span>}
             </div>
           </div>
@@ -344,9 +345,9 @@ export default function LogPage() {
 
         {/* 4.1 — Intensity legend */}
         <div className="flex items-center justify-center gap-3 mt-3 text-[0.55rem]" style={{ color: "var(--text-muted)" }}>
-          <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C75960" }} /> Ligero</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C759" }} /> Medio</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full" style={{ background: "#30D158" }} /> Intenso</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C75960" }} /> {t("intensity.light")}</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#34C759" }} /> {t("intensity.medium")}</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full" style={{ background: "#30D158" }} /> {t("intensity.intense")}</span>
         </div>
       </div>
 
@@ -357,7 +358,7 @@ export default function LogPage() {
           className="flex items-center gap-1 text-[0.7rem] px-2.5 py-1.5 rounded-lg cursor-pointer border-none transition-colors"
           style={{ background: filterExercise ? "#34C75920" : "var(--bg-card)", color: filterExercise ? "#34C759" : "var(--text-muted)" }}
         >
-          <Search size={12} /> Ejercicio
+          <Search size={12} /> {t("common.exercise")}
         </button>
         {/* 4.3 — Advanced filter toggle */}
         <button
@@ -368,7 +369,7 @@ export default function LogPage() {
             color: (filterDateFrom || filterDateTo || filterMuscleGroup) ? "var(--accent)" : "var(--text-muted)",
           }}
         >
-          <SlidersHorizontal size={12} /> Avanzado
+          <SlidersHorizontal size={12} /> {t("filter.advanced")}
         </button>
         {selectedDate && (
           <span className="flex items-center gap-1 text-[0.65rem] px-2 py-1 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
@@ -384,7 +385,7 @@ export default function LogPage() {
         )}
         {hasActiveFilters && (
           <button onClick={clearAllFilters} className="text-[0.65rem] bg-transparent border-none cursor-pointer underline ml-auto" style={{ color: "var(--text-muted)" }}>
-            Limpiar
+            {t("common.clear")}
           </button>
         )}
       </div>
@@ -396,7 +397,7 @@ export default function LogPage() {
             type="text"
             value={filterExercise}
             onChange={(e) => setFilterExercise(e.target.value)}
-            placeholder="Buscar ejercicio..."
+            placeholder={t("log.searchExercise")}
             className="w-full text-sm py-2 px-3 rounded-lg mb-2"
             style={{ background: "var(--bg-elevated)" }}
           />
@@ -420,11 +421,11 @@ export default function LogPage() {
       {/* 4.3 — Advanced filter panel */}
       {showAdvanced && (
         <div className="card mb-4 space-y-3">
-          <div className="text-[0.75rem] font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Filtros Avanzados</div>
+          <div className="text-[0.75rem] font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("log.advancedFilters")}</div>
 
           {/* Date range */}
           <div>
-            <div className="text-[0.65rem] mb-1.5" style={{ color: "var(--text-muted)" }}>Rango de fechas</div>
+            <div className="text-[0.65rem] mb-1.5" style={{ color: "var(--text-muted)" }}>{t("log.dateRange")}</div>
             <div className="flex gap-2">
               <input
                 type="date"
@@ -445,7 +446,7 @@ export default function LogPage() {
 
           {/* Muscle group chips */}
           <div>
-            <div className="text-[0.65rem] mb-1.5" style={{ color: "var(--text-muted)" }}>Grupo muscular</div>
+            <div className="text-[0.65rem] mb-1.5" style={{ color: "var(--text-muted)" }}>{t("log.muscleGroup")}</div>
             <div className="flex flex-wrap gap-1.5">
               {FILTER_MUSCLE_GROUPS.map((g) => (
                 <button
@@ -468,7 +469,7 @@ export default function LogPage() {
       {/* Results count when filtered */}
       {hasActiveFilters && (
         <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
-          {filtered.length} {filtered.length === 1 ? "sesión" : "sesiones"} encontradas
+          {filtered.length} {filtered.length === 1 ? t("common.session") : t("common.sessions")} {t("common.found")}
         </p>
       )}
 
@@ -476,8 +477,8 @@ export default function LogPage() {
       {filtered.length === 0 && (
         <div className="text-center py-10" style={{ color: "var(--text-muted)" }}>
           <Dumbbell size={32} className="mx-auto mb-2.5 opacity-30" />
-          <div className="text-[0.85rem]">{hasActiveFilters ? "Sin resultados" : "No hay sesiones registradas"}</div>
-          <div className="text-[0.7rem] mt-1">{hasActiveFilters ? "Probá otros filtros" : "Completá un entrenamiento para verlo acá"}</div>
+          <div className="text-[0.85rem]">{hasActiveFilters ? t("log.noResults") : t("log.noSessionsRecorded")}</div>
+          <div className="text-[0.7rem] mt-1">{hasActiveFilters ? t("log.tryOtherFilters") : t("log.completeWorkoutToSee")}</div>
         </div>
       )}
 
@@ -585,15 +586,15 @@ export default function LogPage() {
                     {/* 4.2 — Metrics summary bar */}
                     <div className="grid grid-cols-4 gap-2 mb-3 text-center py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }}>
                       <div>
-                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Duración</div>
+                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("common.duration")}</div>
                         <div className="text-[0.85rem] font-bold">{s.startTime && s.endTime ? formatDuration(s.startTime, s.endTime) : "—"}</div>
                       </div>
                       <div>
-                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Sets</div>
+                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("common.sets")}</div>
                         <div className="text-[0.85rem] font-bold">{totalSets}</div>
                       </div>
                       <div>
-                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Volumen</div>
+                        <div className="text-[0.55rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("common.volume")}</div>
                         <div className="text-[0.85rem] font-bold">{totalVolume > 0 ? `${(totalVolume / 1000).toFixed(1)}k` : "—"}</div>
                       </div>
                       <div>
@@ -619,7 +620,7 @@ export default function LogPage() {
                         <textarea
                           value={editData.sessionNotes || ""}
                           onChange={(e) => updateEditNotes(e.target.value)}
-                          placeholder="Notas de la sesión..."
+                          placeholder={t("session.notes")}
                           className="w-full text-[0.72rem] py-1.5 px-2.5 rounded-lg resize-none border-none outline-none"
                           style={{ background: "var(--bg-elevated)", color: "var(--text)", minHeight: "40px" }}
                           rows={2}
@@ -682,7 +683,7 @@ export default function LogPage() {
                             <thead>
                               <tr className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                                 <th className="text-left py-1 w-12">Set</th>
-                                <th className="text-left py-1">Peso</th>
+                                <th className="text-left py-1">{t("common.weight")}</th>
                                 <th className="text-left py-1">Reps</th>
                                 <th className="text-right py-1 w-14">RPE</th>
                               </tr>

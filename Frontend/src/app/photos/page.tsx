@@ -10,6 +10,7 @@ import {
   type ProgressPhoto,
 } from "@/lib/storage";
 import { Camera, Trash2, ChevronLeft, ChevronRight, Plus, X, Image as ImageIcon } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 type Pose = "front" | "side" | "back";
 const POSES: { id: Pose; label: string; icon: string }[] = [
@@ -51,7 +52,7 @@ export default function PhotosPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      alert("Imagen muy grande (máx 5MB)");
+      alert(t("photos.errors.fileTooLarge"));
       return;
     }
     const reader = new FileReader();
@@ -98,7 +99,7 @@ export default function PhotosPage() {
   }
 
   function handleDelete(id: string) {
-    if (!confirm("¿Eliminar esta foto?")) return;
+    if (!confirm(t("common.delete") + "?")) return;
     deleteProgressPhoto(id);
     setPhotos((prev) => prev.filter((p) => p.id !== id));
     if (lightbox?.id === id) setLightbox(null);
@@ -129,21 +130,21 @@ export default function PhotosPage() {
     <main className="max-w-[600px] mx-auto px-4 py-5">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h1 className="text-[1.3rem] font-black tracking-tight mb-1">Fotos de Progreso</h1>
-          <p className="text-[0.7rem]" style={{ color: "var(--text-secondary)" }}>{photos.length} fotos · {dates.length} sesiones</p>
+          <h1 className="text-[1.3rem] font-black tracking-tight mb-1">{t("photos.title")}</h1>
+          <p className="text-[0.7rem]" style={{ color: "var(--text-secondary)" }}>{photos.length} {t("photos.photos")} · {dates.length} {t("common.sessions")}</p>
         </div>
         <button
           onClick={() => setShowUpload(!showUpload)}
           className="btn btn-primary text-sm py-2 px-3"
         >
-          <Plus size={16} /> Foto
+          <Plus size={16} /> {t("common.photo")}
         </button>
       </div>
 
       {/* Upload panel */}
       {showUpload && (
         <div className="card mb-4 animate-fade-in">
-          <div className="text-[0.65rem] uppercase tracking-widest font-bold mb-3" style={{ color: "var(--text-secondary)" }}>Nueva foto</div>
+          <div className="text-[0.65rem] uppercase tracking-widest font-bold mb-3" style={{ color: "var(--text-secondary)" }}>{t("photos.newPhoto")}</div>
 
           {/* Pose selector */}
           <div className="flex gap-2 mb-4">
@@ -159,7 +160,7 @@ export default function PhotosPage() {
                 }}
               >
                 <span className="text-xl">{p.icon}</span>
-                <span className="text-[0.65rem] font-bold">{p.label}</span>
+                <span className="text-[0.65rem] font-bold">{t(`photos.poses.${p.id}`)}</span>
               </button>
             ))}
           </div>
@@ -172,8 +173,8 @@ export default function PhotosPage() {
               style={{ background: "var(--bg-elevated)", border: "2px dashed var(--border)" }}
             >
               <Camera size={32} style={{ color: "var(--text-muted)" }} />
-              <span className="text-sm" style={{ color: "var(--text-muted)" }}>Tocar para subir foto</span>
-              <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>JPG, PNG · máx 5MB</span>
+              <span className="text-sm" style={{ color: "var(--text-muted)" }}>{t("photos.tapToUpload")}</span>
+              <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("photos.supportedFormats")}</span>
             </div>
           ) : (
             <div className="relative mb-3">
@@ -193,17 +194,17 @@ export default function PhotosPage() {
           {/* Optional fields */}
           <div className="grid grid-cols-2 gap-2 mt-3">
             <div>
-              <label className="block text-[0.55rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Peso (kg)</label>
+              <label className="block text-[0.55rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>{t("common.weightKg")}</label>
               <input type="number" step={0.1} value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="80" className="w-full text-center text-sm py-2 rounded-lg" style={{ background: "var(--bg-elevated)" }} />
             </div>
             <div>
-              <label className="block text-[0.55rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Notas</label>
+              <label className="block text-[0.55rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>{t("common.notes")}</label>
               <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Semana 4..." className="w-full text-sm py-2 px-2 rounded-lg" style={{ background: "var(--bg-elevated)" }} />
             </div>
           </div>
 
           <button onClick={handleSave} disabled={!preview} className="btn btn-primary w-full mt-3 py-2.5" style={{ opacity: preview ? 1 : 0.4 }}>
-            Guardar foto
+            {t("photos.savePhoto")}
           </button>
         </div>
       )}
@@ -220,7 +221,7 @@ export default function PhotosPage() {
               color: filterPose === p ? "#fff" : "var(--text-muted)",
             }}
           >
-            {p === "all" ? "Todas" : POSES.find((ps) => ps.id === p)?.label}
+            {p === "all" ? t("common.all") : t(`photos.poses.${p}`)}
           </button>
         ))}
         <button
@@ -231,14 +232,14 @@ export default function PhotosPage() {
             color: compareMode ? "#FF9500" : "var(--text-muted)",
           }}
         >
-          {compareMode ? "Cancelar" : "Comparar"}
+          {compareMode ? t("common.cancel") : t("photos.compare")}
         </button>
       </div>
 
       {/* Compare view */}
       {compareMode && (compareA || compareB) && (
         <div className="card mb-4 animate-fade-in">
-          <div className="text-[0.6rem] uppercase tracking-widest font-bold mb-2" style={{ color: "var(--text-muted)" }}>Comparación</div>
+          <div className="text-[0.6rem] uppercase tracking-widest font-bold mb-2" style={{ color: "var(--text-muted)" }}>{t("photos.comparison")}</div>
           <div className="grid grid-cols-2 gap-2">
             <div className="text-center">
               {compareA ? (
@@ -249,7 +250,7 @@ export default function PhotosPage() {
                 </>
               ) : (
                 <div className="flex items-center justify-center rounded-xl" style={{ aspectRatio: "3/4", background: "var(--bg-elevated)" }}>
-                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>Elegí foto 1</span>
+                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>{t("photos.choosePhoto1")}</span>
                 </div>
               )}
             </div>
@@ -262,14 +263,14 @@ export default function PhotosPage() {
                 </>
               ) : (
                 <div className="flex items-center justify-center rounded-xl" style={{ aspectRatio: "3/4", background: "var(--bg-elevated)" }}>
-                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>Elegí foto 2</span>
+                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>{t("photos.choosePhoto2")}</span>
                 </div>
               )}
             </div>
           </div>
           {compareA && compareB && compareA.weight && compareB.weight && (
             <div className="text-center mt-2 text-[0.7rem]">
-              <span style={{ color: "var(--text-muted)" }}>Diferencia: </span>
+              <span style={{ color: "var(--text-muted)" }}>{t("photos.difference")}</span>
               <span className={`font-bold ${compareB.weight - compareA.weight < 0 ? "text-[#34C759]" : "text-[#FF3B30]"}`}>
                 {compareB.weight - compareA.weight > 0 ? "+" : ""}{(compareB.weight - compareA.weight).toFixed(1)}kg
               </span>
@@ -282,8 +283,8 @@ export default function PhotosPage() {
       {photos.length === 0 && !showUpload && (
         <div className="text-center py-16" style={{ color: "var(--text-muted)" }}>
           <ImageIcon size={40} className="mx-auto mb-3 opacity-30" />
-          <div className="text-[0.9rem] font-semibold mb-1">Sin fotos todavía</div>
-          <div className="text-[0.7rem]">Sacá fotos regularmente para ver tu progreso</div>
+          <div className="text-[0.9rem] font-semibold mb-1">{t("photos.noPhotosYet")}</div>
+          <div className="text-[0.7rem]">{t("photos.takePhotosTip")}</div>
         </div>
       )}
 
@@ -342,10 +343,10 @@ export default function PhotosPage() {
             </div>
             <div className="flex gap-2 mt-4 justify-center">
               <button onClick={() => setLightbox(null)} className="btn btn-ghost text-white border-white/20 text-sm">
-                Cerrar
+                {t("common.close")}
               </button>
               <button onClick={() => { handleDelete(lightbox.id); }} className="btn btn-danger text-sm">
-                <Trash2 size={14} /> Eliminar
+                <Trash2 size={14} /> {t("common.delete")}
               </button>
             </div>
           </div>

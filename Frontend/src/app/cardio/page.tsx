@@ -13,6 +13,7 @@ import {
   type CardioTemplate, type CardioType, type CardioSession,
   saveCardioSession, getCardioSessions,
 } from "@/data/cardio-templates";
+import { t } from "@/lib/i18n";
 
 type View = "menu" | "guided" | "free-log" | "history";
 
@@ -166,10 +167,10 @@ export default function CardioPage() {
             <Link href="/" style={{ color: "var(--accent)" }}><ArrowLeft size={22} /></Link>
             <div>
               <h1 className="text-[1.1rem] font-black tracking-tight flex items-center gap-2">
-                <Flame size={18} style={{ color: "#FF3B30" }} /> Cardio
+                <Flame size={18} style={{ color: "#FF3B30" }} /> {t("cardio.title")}
               </h1>
               <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
-                HIIT · Intervalos · Steady State · Sprint
+                {t("cardio.subtitle")}
               </p>
             </div>
             <button
@@ -177,7 +178,7 @@ export default function CardioPage() {
               className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-[0.7rem] font-bold border-none cursor-pointer"
               style={{ background: "var(--card-bg)", color: "var(--text-main)" }}
             >
-              <History size={14} /> Historial
+              <History size={14} /> {t("cardio.history")}
             </button>
           </div>
 
@@ -191,15 +192,15 @@ export default function CardioPage() {
               <Plus size={20} className="text-white" />
             </div>
             <div className="flex-1 text-left">
-              <span className="text-[0.85rem] font-bold block">Registrar Cardio Libre</span>
+              <span className="text-[0.85rem] font-bold block">{t("cardio.logFreeCardio")}</span>
               <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
-                Logueá duración, distancia, FC manualmente
+                {t("cardio.logFreeCardioTip")}
               </span>
             </div>
           </button>
 
           {/* Guided templates */}
-          <h2 className="text-[0.8rem] font-bold mb-3">⚡ Entrenamientos Guiados</h2>
+          <h2 className="text-[0.8rem] font-bold mb-3">{t("cardio.guidedWorkouts")}</h2>
           <div className="space-y-2">
             {CARDIO_TEMPLATES.map((t) => (
               <button
@@ -241,12 +242,12 @@ export default function CardioPage() {
             <button onClick={() => setView("menu")} className="bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--accent)" }}>
               <ArrowLeft size={22} />
             </button>
-            <h1 className="text-[1.1rem] font-black tracking-tight">Registrar Cardio</h1>
+            <h1 className="text-[1.1rem] font-black tracking-tight">{t("cardio.logCardio")}</h1>
           </div>
 
           <div className="card p-4 mb-4">
             {/* Type */}
-            <label className="text-[0.7rem] font-bold block mb-2">Tipo</label>
+            <label className="text-[0.7rem] font-bold block mb-2">{t("common.type")}</label>
             <div className="flex gap-2 mb-4 flex-wrap">
               {(["steady", "hiit", "intervals", "sprint"] as const).map((t) => (
                 <button
@@ -264,7 +265,7 @@ export default function CardioPage() {
             </div>
 
             {/* Duration */}
-            <label className="text-[0.7rem] font-bold block mb-2">Duración (min)</label>
+            <label className="text-[0.7rem] font-bold block mb-2">{t("common.durationMin")}</label>
             <div className="flex items-center gap-3 mb-4">
               {[15, 20, 30, 45, 60].map((d) => (
                 <button
@@ -283,7 +284,7 @@ export default function CardioPage() {
 
             {/* Distance */}
             <label className="text-[0.7rem] font-bold block mb-1.5">
-              <MapPin size={12} className="inline mr-1" />Distancia (km, opcional)
+              <MapPin size={12} className="inline mr-1" />{t("cardio.distance")}
             </label>
             <input
               type="number"
@@ -297,7 +298,7 @@ export default function CardioPage() {
 
             {/* Heart rate */}
             <label className="text-[0.7rem] font-bold block mb-1.5">
-              <Heart size={12} className="inline mr-1" />FC promedio (bpm, opcional)
+              <Heart size={12} className="inline mr-1" />{t("cardio.avgHeartRate")}
             </label>
             <input
               type="number"
@@ -309,18 +310,18 @@ export default function CardioPage() {
             />
 
             {/* Notes */}
-            <label className="text-[0.7rem] font-bold block mb-1.5">Notas (opcional)</label>
+            <label className="text-[0.7rem] font-bold block mb-1.5">{t("cardio.notes")}</label>
             <textarea
               value={freeNotes}
               onChange={(e) => setFreeNotes(e.target.value)}
-              placeholder="¿Cómo te sentiste?"
+              placeholder={t("cardio.howDidYouFeel")}
               rows={2}
               className="w-full px-3 py-2 rounded-lg text-[0.8rem] mb-4 border-none resize-none"
               style={{ background: "var(--card-bg)", color: "var(--text-main)" }}
             />
 
             {/* Rating */}
-            <label className="text-[0.7rem] font-bold block mb-1.5">Valoración</label>
+            <label className="text-[0.7rem] font-bold block mb-1.5">{t("common.rating")}</label>
             <div className="flex gap-1 mb-2">
               {[1, 2, 3, 4, 5].map((s) => (
                 <button
@@ -340,7 +341,7 @@ export default function CardioPage() {
             className="w-full py-3.5 rounded-2xl text-[0.9rem] font-black border-none cursor-pointer"
             style={{ background: freeSaved ? "#30D158" : "var(--accent)", color: "#fff" }}
           >
-            {freeSaved ? "✅ Guardado" : "Guardar Cardio"}
+            {freeSaved ? t("cardio.saved") : t("cardio.saveCardio")}
           </button>
         </main>
       </PageTransition>
@@ -359,16 +360,16 @@ export default function CardioPage() {
               <ArrowLeft size={22} />
             </button>
             <h1 className="text-[1.1rem] font-black tracking-tight flex items-center gap-2">
-              <History size={18} /> Historial Cardio
+              <History size={18} /> {t("cardio.history")}
             </h1>
           </div>
 
           {history.length === 0 ? (
             <div className="card p-8 text-center">
               <Flame size={32} style={{ color: "var(--text-muted)", marginBottom: 8 }} />
-              <p className="text-[0.8rem] font-bold mb-1">Sin sesiones</p>
+              <p className="text-[0.8rem] font-bold mb-1">{t("cardio.noSessions")}</p>
               <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>
-                Completá un cardio para ver el historial
+                {t("cardio.completeToSeeHistory")}
               </p>
             </div>
           ) : (
@@ -416,17 +417,17 @@ export default function CardioPage() {
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
         <div className="text-center">
           <div className="text-5xl mb-4">🔥</div>
-          <h1 className="text-2xl font-black mb-2">¡Cardio Completado!</h1>
+          <h1 className="text-2xl font-black mb-2">{t("cardio.completed")}</h1>
           <p className="text-[0.85rem] mb-1" style={{ color: "var(--text-muted)" }}>{template.name}</p>
           <p className="text-[0.75rem] mb-8" style={{ color: "var(--text-muted)" }}>
-            {fmt(totalElapsed)} total · {template.intervals.length} intervalos
+            {fmt(totalElapsed)} total · {template.intervals.length} {t("cardio.intervals")}
           </p>
           <div className="flex gap-3 justify-center">
             <button onClick={resetGuided} className="px-6 py-3 rounded-xl text-[0.85rem] font-bold border-none cursor-pointer" style={{ background: "var(--card-bg)", color: "var(--text-main)" }}>
-              Volver
+              {t("common.back")}
             </button>
             <button onClick={() => startGuided(template)} className="px-6 py-3 rounded-xl text-[0.85rem] font-bold border-none cursor-pointer" style={{ background: template.color, color: "#fff" }}>
-              Repetir
+              {t("common.repeat")}
             </button>
           </div>
         </div>
@@ -472,7 +473,7 @@ export default function CardioPage() {
         </div>
 
         <div className="text-[0.7rem] mb-8" style={{ color: "var(--text-muted)" }}>
-          Tiempo total: {fmt(totalElapsed)}
+          {t("timer.totalTime")}: {fmt(totalElapsed)}
         </div>
 
         {/* Controls */}
@@ -506,7 +507,7 @@ export default function CardioPage() {
       {!isRunning && !done && (
         <div className="absolute top-12 left-0 right-0 text-center">
           <span className="inline-block px-4 py-1.5 rounded-full text-[0.75rem] font-bold animate-pulse" style={{ background: "rgba(255,149,0,0.15)", color: "#FF9500" }}>
-            ⏸ PAUSADO
+            {t("timer.paused")}
           </span>
         </div>
       )}

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import WorkoutShareCard from "@/components/workout/WorkoutShareCard";
 import { formatDuration } from "./types";
+import { t } from "@/lib/i18n";
 
 interface Props {
   session: WorkoutSession;
@@ -106,7 +107,7 @@ export default function SessionSummary({ session, workoutName }: Props) {
       <div ref={summaryRef} className="pb-4" style={{ background: "var(--bg)" }}>
         <div className="text-5xl mb-3">💪</div>
         <h1 className="text-2xl font-black mb-1" style={{ color: "var(--text)" }}>
-          Sesión Completada!
+          {t("session.completed")}
         </h1>
         <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>
           {workoutName}
@@ -138,7 +139,7 @@ export default function SessionSummary({ session, workoutName }: Props) {
           value={sessionNotes}
           onChange={(e) => setSessionNotes(e.target.value)}
           onBlur={() => updateSessionMeta(sessionRating, sessionNotes)}
-          placeholder="Notas de la sesión (opcional)..."
+          placeholder={t("session.notes")}
           className="w-full text-[0.78rem] py-2 px-3 rounded-lg mb-5 resize-none border-none outline-none"
           style={{ background: "var(--bg-elevated)", color: "var(--text)", minHeight: "56px" }}
           rows={2}
@@ -147,22 +148,22 @@ export default function SessionSummary({ session, workoutName }: Props) {
         <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="card py-4 text-center">
             <div className="text-2xl font-black" style={{ color: "var(--text)" }}>{duration}</div>
-            <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>Duración</div>
+            <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("common.duration")}</div>
           </div>
           <div className="card py-4 text-center">
             <div className="text-2xl font-black" style={{ color: "#34C759" }}>{fSets}</div>
-            <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>Sets</div>
+            <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("common.sets")}</div>
           </div>
           <div className="card py-4 text-center">
             <div className="text-2xl font-black" style={{ color: "var(--accent)" }}>{fVolume.toLocaleString()}</div>
-            <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>kg Vol</div>
+            <div className="text-[0.6rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("session.volumeKg")}</div>
           </div>
         </div>
 
         {musclesWorked.length > 0 && (
           <div className="card py-3 px-4 mb-4 text-left">
             <div className="text-[0.6rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
-              Músculos Trabajados
+              {t("session.musclesWorked")}
             </div>
             <div className="flex flex-wrap gap-1.5">
               {musclesWorked.map((m) => (
@@ -181,7 +182,7 @@ export default function SessionSummary({ session, workoutName }: Props) {
         {exercisesWithNotes.length > 0 && (
           <div className="card py-3 px-4 mb-4 text-left">
             <div className="text-[0.6rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
-              Notas
+              {t("common.notes")}
             </div>
             {exercisesWithNotes.map((e, i) => (
               <div key={i} className="text-[0.72rem] mb-1" style={{ color: "var(--text-secondary)" }}>

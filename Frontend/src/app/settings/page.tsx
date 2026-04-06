@@ -244,8 +244,8 @@ export default function SettingsPage() {
 
       {/* SLEEP GOAL */}
       <div className="card mb-3">
-        <div className="text-[0.75rem] font-bold mb-2">Meta de Sueño</div>
-        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>Horas de sueño objetivo por noche.</p>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.sleepGoal")}</div>
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("settings.sleepGoalDesc")}</p>
         <div className="flex items-center gap-3">
           <input
             type="range"
@@ -363,8 +363,8 @@ export default function SettingsPage() {
 
       {/* DAILY REMINDER — 7.15 */}
       <div className="card mb-3">
-        <div className="text-[0.75rem] font-bold mb-2">Recordatorio Diario</div>
-        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>Recibí una notificación diaria para no olvidar tu entrenamiento.</p>
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.dailyReminder")}</div>
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("settings.dailyReminderDesc")}</p>
         <button
           onClick={async () => {
             const next = !reminderOn;
@@ -381,7 +381,7 @@ export default function SettingsPage() {
         >
           <span className="flex items-center gap-2">
             {reminderOn ? <Bell size={16} /> : <BellOff size={16} />}
-            Recordatorio
+            {t("settings.reminder")}
           </span>
           <span
             className="w-10 h-5 rounded-full relative transition-colors inline-block"
@@ -512,7 +512,7 @@ export default function SettingsPage() {
       <div className="card mb-3">
         <div className="text-[0.75rem] font-bold mb-2">{t("settings.androidApp")}</div>
         <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>
-          Descargá la app nativa para tu celular Android.
+          {t("settings.androidDesc")}
         </p>
         <button
           onClick={() => window.open("https://github.com/Lucas23-IECI/PersonalTrainerApp/releases/latest/download/mark-pt.apk", "_system")}

@@ -31,18 +31,19 @@ import {
   Zap,
   BarChart3,
 } from "lucide-react";
+import { t } from "@/lib/i18n";
 
-const CIRCUM_FIELDS: { key: keyof BodyMeasurement; label: string }[] = [
-  { key: "chest", label: "Pecho" },
-  { key: "waist", label: "Cintura" },
-  { key: "hip", label: "Cadera" },
-  { key: "armR", label: "Brazo D" },
-  { key: "armL", label: "Brazo I" },
-  { key: "thighR", label: "Muslo D" },
-  { key: "thighL", label: "Muslo I" },
-  { key: "calfR", label: "Pant. D" },
-  { key: "calfL", label: "Pant. I" },
-  { key: "neck", label: "Cuello" },
+const CIRCUM_FIELDS: { key: keyof BodyMeasurement; labelKey: string }[] = [
+  { key: "chest", labelKey: "measurements.chest" },
+  { key: "waist", labelKey: "measurements.waist" },
+  { key: "hip", labelKey: "measurements.hip" },
+  { key: "armR", labelKey: "measurements.armRight" },
+  { key: "armL", labelKey: "measurements.armLeft" },
+  { key: "thighR", labelKey: "measurements.thighRight" },
+  { key: "thighL", labelKey: "measurements.thighLeft" },
+  { key: "calfR", labelKey: "measurements.calfRight" },
+  { key: "calfL", labelKey: "measurements.calfLeft" },
+  { key: "neck", labelKey: "measurements.neck" },
 ];
 
 type Tab = "info" | "medidas" | "graficos";
@@ -109,7 +110,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <h1 className="text-lg font-extrabold leading-tight">{prof.name.split(" ")[0]}</h1>
-            <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{prof.height}cm · {currentWeight}kg · {prof.age} años</p>
+            <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{prof.height}cm · {currentWeight}kg · {prof.age} {t("profile.years")}</p>
           </div>
         </div>
       </div>
@@ -119,32 +120,32 @@ export default function ProfilePage() {
         <div className="card py-3 text-center">
           <Weight size={16} className="mx-auto mb-1" style={{ color: "var(--accent)" }} />
           <div className="text-lg font-black">{currentWeight}</div>
-          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>kg actual</div>
+          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("profile.currentWeight")}</div>
         </div>
         <div className="card py-3 text-center">
           <Target size={16} className="mx-auto text-[#34C759] mb-1" />
           <div className="text-lg font-black">{prof.goalWeight}</div>
-          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>kg meta</div>
+          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("profile.goalWeight")}</div>
         </div>
         <div className="card py-3 text-center">
           <TrendingDown size={16} className="mx-auto text-[#FF9500] mb-1" />
           <div className="text-lg font-black">{weightLost > 0 ? `-${weightLost.toFixed(1)}` : weightLost.toFixed(1)}</div>
-          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>kg cambio</div>
+          <div className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("profile.weightChange")}</div>
         </div>
       </div>
 
       {/* GOAL PROGRESS BAR */}
       <div className="card mb-4">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Progreso a Meta</span>
+          <span className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("profile.goalProgress")}</span>
           <span className="text-sm font-bold" style={{ color: "var(--accent)" }}>{goalProgress}%</span>
         </div>
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${goalProgress}%`, background: goalProgress >= 80 ? "#34C759" : "var(--accent)" }} />
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>{prof.weight}kg inicio</span>
-          <span className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>{prof.goalWeight}kg meta</span>
+          <span className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>{prof.weight}{t("profile.startWeight")}</span>
+          <span className="text-[0.58rem]" style={{ color: "var(--text-muted)" }}>{prof.goalWeight}{t("profile.goalWeight")}</span>
         </div>
       </div>
 
@@ -154,8 +155,8 @@ export default function ProfilePage() {
           <Camera size={18} className="text-white" />
         </div>
         <div className="flex-1">
-          <span className="font-bold text-sm">Fotos de Progreso</span>
-          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Comparar tu transformación visual</p>
+          <span className="font-bold text-sm">{t("profile.progressPhotos")}</span>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("profile.progressPhotosTip")}</p>
         </div>
         <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
@@ -166,8 +167,8 @@ export default function ProfilePage() {
           <Trophy size={18} className="text-white" />
         </div>
         <div className="flex-1">
-          <span className="font-bold text-sm">Logros y Badges</span>
-          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Tu colección de medallas</p>
+          <span className="font-bold text-sm">{t("profile.achievements")}</span>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("profile.achievementsTip")}</p>
         </div>
         <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
@@ -178,8 +179,8 @@ export default function ProfilePage() {
           <CalendarDays size={18} className="text-white" />
         </div>
         <div className="flex-1">
-          <span className="font-bold text-sm">Resumen del Año</span>
-          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Tu año en entrenamiento estilo Wrapped</p>
+          <span className="font-bold text-sm">{t("profile.yearReview")}</span>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("profile.yearReviewTip")}</p>
         </div>
         <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
@@ -190,8 +191,8 @@ export default function ProfilePage() {
           <Calculator size={18} className="text-white" />
         </div>
         <div className="flex-1">
-          <span className="font-bold text-sm">Calculadoras</span>
-          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>1RM, TDEE, Macros, Wilks</p>
+          <span className="font-bold text-sm">{t("profile.calculators")}</span>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("profile.calculatorsTip")}</p>
         </div>
         <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
@@ -202,8 +203,8 @@ export default function ProfilePage() {
           <Cloud size={18} className="text-white" />
         </div>
         <div className="flex-1">
-          <span className="font-bold text-sm">Cloud Sync</span>
-          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Backup y restauración de datos</p>
+          <span className="font-bold text-sm">{t("profile.cloudSync")}</span>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("profile.cloudSyncTip")}</p>
         </div>
         <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
@@ -214,8 +215,8 @@ export default function ProfilePage() {
           <BarChart3 size={18} className="text-white" />
         </div>
         <div className="flex-1">
-          <span className="font-bold text-sm">Quick Stats</span>
-          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Widgets rápidos de estadísticas</p>
+          <span className="font-bold text-sm">{t("profile.quickStats")}</span>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("profile.quickStatsTip")}</p>
         </div>
         <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
@@ -226,8 +227,8 @@ export default function ProfilePage() {
           <Zap size={18} className="text-white" />
         </div>
         <div className="flex-1">
-          <span className="font-bold text-sm">Acciones Rápidas</span>
-          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Atajos a funciones principales</p>
+          <span className="font-bold text-sm">{t("profile.quickActions")}</span>
+          <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("profile.quickActionsTip")}</p>
         </div>
         <ChevronLeft size={16} className="rotate-180" style={{ color: "var(--text-muted)" }} />
       </Link>
@@ -235,23 +236,23 @@ export default function ProfilePage() {
       {/* TABS */}
       <div className="flex gap-1 mb-4 p-1 rounded-xl" style={{ background: "var(--bg-elevated)" }}>
         {([
-          { id: "info" as Tab, label: "Perfil" },
-          { id: "medidas" as Tab, label: "Medidas" },
-          { id: "graficos" as Tab, label: "Gráficos" },
-        ]).map((t) => (
+          { id: "info" as Tab, label: t("profile.info") },
+          { id: "medidas" as Tab, label: t("profile.measurements") },
+          { id: "graficos" as Tab, label: t("profile.charts") },
+        ]).map((tb) => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tb.id}
+            onClick={() => setTab(tb.id)}
             className="flex-1 py-2 rounded-lg text-[0.72rem] font-semibold transition-all"
             style={{
-              background: tab === t.id ? "var(--bg-card)" : "transparent",
-              color: tab === t.id ? "var(--accent)" : "var(--text-muted)",
-              boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+              background: tab === tb.id ? "var(--bg-card)" : "transparent",
+              color: tab === tb.id ? "var(--accent)" : "var(--text-muted)",
+              boxShadow: tab === tb.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
               cursor: "pointer",
               border: "none",
             }}
           >
-            {t.label}
+            {tb.label}
           </button>
         ))}
       </div>
@@ -260,27 +261,27 @@ export default function ProfilePage() {
       {tab === "info" && (
         <div className="space-y-3">
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Datos Personales</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.personalData")}</div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Nombre" value={prof.name} onChange={(v) => setProf({ ...prof, name: v })} />
-              <Field label="Edad" value={String(prof.age)} onChange={(v) => setProf({ ...prof, age: Number(v) || 0 })} type="number" />
-              <Field label="Altura (cm)" value={String(prof.height)} onChange={(v) => setProf({ ...prof, height: Number(v) || 0 })} type="number" />
-              <Field label="Peso (kg)" value={String(prof.weight)} onChange={(v) => setProf({ ...prof, weight: Number(v) || 0 })} type="number" />
+              <Field label={t("profile.name")} value={prof.name} onChange={(v) => setProf({ ...prof, name: v })} />
+              <Field label={t("profile.age")} value={String(prof.age)} onChange={(v) => setProf({ ...prof, age: Number(v) || 0 })} type="number" />
+              <Field label={t("profile.heightCm")} value={String(prof.height)} onChange={(v) => setProf({ ...prof, height: Number(v) || 0 })} type="number" />
+              <Field label={t("profile.weightField")} value={String(prof.weight)} onChange={(v) => setProf({ ...prof, weight: Number(v) || 0 })} type="number" />
             </div>
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Objetivos</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.goals")}</div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Peso Meta (kg)" value={String(prof.goalWeight)} onChange={(v) => setProf({ ...prof, goalWeight: Number(v) || 0 })} type="number" />
-              <Field label="Grasa Meta (%)" value={String(prof.goalBodyFat)} onChange={(v) => setProf({ ...prof, goalBodyFat: Number(v) || 0 })} type="number" />
-              <Field label="Grasa Actual (%)" value={String(prof.bodyFatEstimate)} onChange={(v) => setProf({ ...prof, bodyFatEstimate: Number(v) || 0 })} type="number" />
-              <Field label="Calorías Diarias" value={String(prof.targetCalories)} onChange={(v) => setProf({ ...prof, targetCalories: Number(v) || 0 })} type="number" />
+              <Field label={t("profile.goalWeightKg")} value={String(prof.goalWeight)} onChange={(v) => setProf({ ...prof, goalWeight: Number(v) || 0 })} type="number" />
+              <Field label={t("profile.goalBodyFat")} value={String(prof.goalBodyFat)} onChange={(v) => setProf({ ...prof, goalBodyFat: Number(v) || 0 })} type="number" />
+              <Field label={t("profile.currentBodyFat")} value={String(prof.bodyFatEstimate)} onChange={(v) => setProf({ ...prof, bodyFatEstimate: Number(v) || 0 })} type="number" />
+              <Field label={t("profile.dailyCalories")} value={String(prof.targetCalories)} onChange={(v) => setProf({ ...prof, targetCalories: Number(v) || 0 })} type="number" />
             </div>
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Metabolismo</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.metabolism")}</div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="BMR" value={String(prof.bmr)} onChange={(v) => setProf({ ...prof, bmr: Number(v) || 0 })} type="number" />
               <Field label="TDEE" value={String(prof.tdee)} onChange={(v) => setProf({ ...prof, tdee: Number(v) || 0 })} type="number" />
@@ -288,7 +289,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Fechas Importantes</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.importantDates")}</div>
             <div className="grid grid-cols-1 gap-3">
               <div className="flex justify-between items-center">
                 <div>
@@ -310,7 +311,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>Fuerza Histórica</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>{t("profile.historicStrength")}</div>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { label: "Squat", value: historicLifts.squat },
@@ -327,7 +328,7 @@ export default function ProfilePage() {
 
           <button onClick={handleSaveProfile} className="btn btn-primary w-full flex items-center justify-center gap-2">
             <Save size={16} />
-            {saved ? "✓ Guardado" : "Guardar Cambios"}
+            {saved ? t("profile.saved") : t("profile.saveChanges")}
           </button>
         </div>
       )}
@@ -339,20 +340,20 @@ export default function ProfilePage() {
           {latest && (
             <div className="card">
               <div className="flex justify-between items-center mb-3">
-                <div className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Última Medición</div>
+                <div className="text-[0.65rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("profile.lastMeasurement")}</div>
                 <div className="flex items-center gap-1 text-[0.62rem]" style={{ color: "var(--text-muted)" }}>
                   <Calendar size={12} />
                   {latest.date}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                {CIRCUM_FIELDS.map(({ key, label }) => {
+                {CIRCUM_FIELDS.map(({ key, labelKey }) => {
                   const val = latest[key] as number | undefined;
                   const initVal = initial ? (initial[key] as number | undefined) : undefined;
                   const diff = val && initVal ? val - initVal : 0;
                   return val ? (
                     <div key={key} className="flex justify-between items-center py-1" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                      <span className="text-[0.72rem]" style={{ color: "var(--text-secondary)" }}>{label}</span>
+                      <span className="text-[0.72rem]" style={{ color: "var(--text-secondary)" }}>{t(labelKey)}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-[0.82rem] font-bold">{val}cm</span>
                         {diff !== 0 && (
@@ -375,7 +376,7 @@ export default function ProfilePage() {
               className="btn btn-primary w-full flex items-center justify-center gap-2"
             >
               <Plus size={16} />
-              Nueva Medición
+              {t("profile.newMeasurement")}
             </button>
           )}
 
@@ -385,31 +386,31 @@ export default function ProfilePage() {
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
                   <Ruler size={16} style={{ color: "var(--accent)" }} />
-                  <span className="text-sm font-bold">Nueva Medición</span>
+                  <span className="text-sm font-bold">{t("profile.newMeasurement")}</span>
                 </div>
                 <button onClick={() => setShowMeasForm(false)} style={{ color: "var(--text-muted)", cursor: "pointer", background: "none", border: "none" }}>
                   <X size={18} />
                 </button>
               </div>
               <div className="mb-3">
-                <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Fecha</label>
+                <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>{t("profile.date")}</label>
                 <input type="date" value={measForm.date} onChange={(e) => setMeasForm({ ...measForm, date: e.target.value })} className="w-full" />
               </div>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                  <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Peso (kg)</label>
+                  <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>{t("profile.weightKg")}</label>
                   <input type="number" step={0.1} value={measForm.weight ?? ""} onChange={(e) => setMeasForm({ ...measForm, weight: e.target.value ? Number(e.target.value) : undefined })} className="w-full" />
                 </div>
                 <div>
-                  <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>Grasa (%)</label>
+                  <label className="block text-[0.62rem] uppercase mb-1" style={{ color: "var(--text-muted)" }}>{t("profile.fatPercent")}</label>
                   <input type="number" step={0.1} value={measForm.bodyFat ?? ""} onChange={(e) => setMeasForm({ ...measForm, bodyFat: e.target.value ? Number(e.target.value) : undefined })} className="w-full" />
                 </div>
               </div>
-              <div className="text-[0.62rem] uppercase mb-2" style={{ color: "var(--text-muted)" }}>Circunferencias (cm)</div>
+              <div className="text-[0.62rem] uppercase mb-2" style={{ color: "var(--text-muted)" }}>{t("profile.circumferences")}</div>
               <div className="grid grid-cols-2 gap-2 mb-4">
-                {CIRCUM_FIELDS.map(({ key, label }) => (
+                {CIRCUM_FIELDS.map(({ key, labelKey }) => (
                   <div key={key}>
-                    <label className="block text-[0.58rem] mb-0.5" style={{ color: "var(--text-muted)" }}>{label}</label>
+                    <label className="block text-[0.58rem] mb-0.5" style={{ color: "var(--text-muted)" }}>{t(labelKey)}</label>
                     <input
                       type="number"
                       step={0.5}
@@ -420,14 +421,14 @@ export default function ProfilePage() {
                   </div>
                 ))}
               </div>
-              <button onClick={handleSaveMeasurement} className="btn btn-primary w-full">Guardar Medición</button>
+              <button onClick={handleSaveMeasurement} className="btn btn-primary w-full">{t("profile.saveMeasurement")}</button>
             </div>
           )}
 
           {/* Measurement history list */}
           {measurements.length > 0 && (
             <div className="card">
-              <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Historial ({measurements.length})</div>
+              <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.history")} ({measurements.length})</div>
               <div className="space-y-2">
                 {[...measurements].reverse().map((m) => (
                   <div key={m.date} className="flex items-center justify-between py-2" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
@@ -436,7 +437,7 @@ export default function ProfilePage() {
                       <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
                         {m.weight && `${m.weight}kg`}
                         {m.bodyFat && ` · ${m.bodyFat}%`}
-                        {m.waist && ` · cintura ${m.waist}cm`}
+                        {m.waist && ` · ${t("profile.waistLabel")} ${m.waist}cm`}
                       </div>
                     </div>
                     {m.weight && (
@@ -451,8 +452,8 @@ export default function ProfilePage() {
           {measurements.length === 0 && !showMeasForm && (
             <div className="card text-center py-6">
               <Ruler size={28} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
-              <p className="text-[0.78rem]" style={{ color: "var(--text-muted)" }}>Aún no hay mediciones</p>
-              <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>Registrá tu primera medición para ver tu progreso</p>
+              <p className="text-[0.78rem]" style={{ color: "var(--text-muted)" }}>{t("profile.noMeasurements")}</p>
+              <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{t("profile.recordFirstMeasurement")}</p>
             </div>
           )}
         </div>
@@ -463,7 +464,7 @@ export default function ProfilePage() {
         <div className="space-y-3">
           {/* Weight chart */}
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Peso en el Tiempo</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.weightOverTime")}</div>
             {weightHistory.length >= 2 ? (
               <MiniChart
                 data={weightHistory.map((w) => w.weight)}
@@ -472,71 +473,71 @@ export default function ProfilePage() {
                 goalLine={prof.goalWeight}
               />
             ) : (
-              <EmptyChart text="Necesitás al menos 2 registros de peso" />
+              <EmptyChart text={t("profile.needAtLeast2Weights")} />
             )}
           </div>
 
           {/* Waist chart */}
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Cintura</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.waist")}</div>
             {(() => {
               const waistData = measurements.filter((m) => m.waist).map((m) => ({ val: m.waist!, label: m.date.slice(5) }));
               return waistData.length >= 2 ? (
                 <MiniChart data={waistData.map((d) => d.val)} labels={waistData.map((d) => d.label)} color="#FF9500" />
               ) : (
-                <EmptyChart text="Necesitás al menos 2 mediciones de cintura" />
+                <EmptyChart text={t("profile.needAtLeast2Waists")} />
               );
             })()}
           </div>
 
           {/* Body Fat chart */}
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>% Grasa Corporal</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.bodyFatPercent")}</div>
             {(() => {
               const bfData = measurements.filter((m) => m.bodyFat).map((m) => ({ val: m.bodyFat!, label: m.date.slice(5) }));
               return bfData.length >= 2 ? (
                 <MiniChart data={bfData.map((d) => d.val)} labels={bfData.map((d) => d.label)} color="#FF3B30" goalLine={prof.goalBodyFat} />
               ) : (
-                <EmptyChart text="Necesitás al menos 2 mediciones de grasa corporal" />
+                <EmptyChart text={t("profile.needAtLeast2BodyFats")} />
               );
             })()}
           </div>
 
           {/* Arms chart */}
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Brazos</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.arms")}</div>
             {(() => {
               const armData = measurements.filter((m) => m.armR).map((m) => ({ val: m.armR!, label: m.date.slice(5) }));
               return armData.length >= 2 ? (
                 <MiniChart data={armData.map((d) => d.val)} labels={armData.map((d) => d.label)} color="#34C759" />
               ) : (
-                <EmptyChart text="Necesitás al menos 2 mediciones de brazos" />
+                <EmptyChart text={t("profile.needAtLeast2Arms")} />
               );
             })()}
           </div>
 
           {/* 4.8 — Chest chart */}
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Pecho</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.chest")}</div>
             {(() => {
               const chestData = measurements.filter((m) => m.chest).map((m) => ({ val: m.chest!, label: m.date.slice(5) }));
               return chestData.length >= 2 ? (
                 <MiniChart data={chestData.map((d) => d.val)} labels={chestData.map((d) => d.label)} color="#AF52DE" />
               ) : (
-                <EmptyChart text="Necesitás al menos 2 mediciones de pecho" />
+                <EmptyChart text={t("profile.needAtLeast2Chest")} />
               );
             })()}
           </div>
 
           {/* 4.8 — Thigh chart */}
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Muslos</div>
+            <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.thighs")}</div>
             {(() => {
               const thighData = measurements.filter((m) => m.thighR).map((m) => ({ val: m.thighR!, label: m.date.slice(5) }));
               return thighData.length >= 2 ? (
                 <MiniChart data={thighData.map((d) => d.val)} labels={thighData.map((d) => d.label)} color="#FF9500" />
               ) : (
-                <EmptyChart text="Necesitás al menos 2 mediciones de muslos" />
+                <EmptyChart text={t("profile.needAtLeast2Thighs")} />
               );
             })()}
           </div>
@@ -544,20 +545,20 @@ export default function ProfilePage() {
           {/* 4.8 — First vs Latest comparison */}
           {initial && latest && measurements.length >= 2 && (
             <div className="card">
-              <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Progreso Total</div>
+              <div className="text-[0.65rem] uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>{t("profile.totalProgress")}</div>
               <div className="flex justify-between text-[0.55rem] mb-2" style={{ color: "var(--text-muted)" }}>
                 <span>{initial.date}</span>
                 <span>{latest.date}</span>
               </div>
               <div className="space-y-2">
-                {CIRCUM_FIELDS.map(({ key, label }) => {
+                {CIRCUM_FIELDS.map(({ key, labelKey }) => {
                   const first = initial[key] as number | undefined;
                   const last = latest[key] as number | undefined;
                   if (!first || !last) return null;
                   const diff = last - first;
                   return (
                     <div key={key} className="flex items-center gap-2">
-                      <span className="text-[0.65rem] w-16 shrink-0" style={{ color: "var(--text-muted)" }}>{label}</span>
+                      <span className="text-[0.65rem] w-16 shrink-0" style={{ color: "var(--text-muted)" }}>{t(labelKey)}</span>
                       <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
                         <div className="h-full rounded-full" style={{
                           width: `${Math.min(100, Math.max(10, (last / Math.max(first, last)) * 100))}%`,

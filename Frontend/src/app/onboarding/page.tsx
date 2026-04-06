@@ -4,26 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveProfile } from "@/lib/storage";
 import { profileDefaults } from "@/data/profile";
+import { t } from "@/lib/i18n";
 import { Dumbbell, ChevronRight, ChevronLeft, User, Ruler, Target, Calendar, Award, Check } from "lucide-react";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 const EXPERIENCE_OPTIONS = [
-  { value: "beginner", label: "Principiante", desc: "Menos de 6 meses entrenando" },
-  { value: "intermediate", label: "Intermedio", desc: "6 meses a 2 años" },
-  { value: "advanced", label: "Avanzado", desc: "Más de 2 años de experiencia" },
+  { value: "beginner", labelKey: "onboarding.beginner", descKey: "onboarding.beginnerDesc" },
+  { value: "intermediate", labelKey: "onboarding.intermediate", descKey: "onboarding.intermediateDesc" },
+  { value: "advanced", labelKey: "onboarding.advanced", descKey: "onboarding.advancedDesc" },
 ];
 
 const GOAL_OPTIONS = [
-  { value: "cut", label: "Perder Grasa", desc: "Déficit calórico + fuerza", emoji: "🔥" },
-  { value: "recomp", label: "Recomposición", desc: "Ganar músculo y perder grasa", emoji: "⚡" },
-  { value: "bulk", label: "Ganar Músculo", desc: "Superávit calórico + hipertrofia", emoji: "💪" },
+  { value: "cut", labelKey: "goals.cut", descKey: "goals.cutDesc", emoji: "🔥" },
+  { value: "recomp", labelKey: "goals.recomp", descKey: "goals.recompDesc", emoji: "⚡" },
+  { value: "bulk", labelKey: "goals.bulk", descKey: "goals.bulkDesc", emoji: "💪" },
 ];
 
 const EQUIPMENT_OPTIONS = [
-  { value: "full-gym", label: "Gym Completo", desc: "Barras, máquinas, poleas" },
-  { value: "home-gym", label: "Home Gym", desc: "Mancuernas, banco, barra" },
-  { value: "minimal", label: "Mínimo", desc: "Peso corporal + bandas" },
+  { value: "full-gym", labelKey: "onboarding.fullGym", descKey: "onboarding.fullGymDesc" },
+  { value: "home-gym", labelKey: "onboarding.homeGym", descKey: "onboarding.homeGymDesc" },
+  { value: "minimal", labelKey: "onboarding.minimal", descKey: "onboarding.minimalDesc" },
 ];
 
 export default function OnboardingPage() {
@@ -42,7 +43,7 @@ export default function OnboardingPage() {
 
   function next() {
     setError("");
-    if (step === 1 && name.trim().length < 2) { setError("Ingresá tu nombre"); return; }
+    if (step === 1 && name.trim().length < 2) { setError(t("onboarding.nameRequired")); return; }
     if (step === 1) {
       const n = name.trim();
       const isLucas = n.toLowerCase().includes("lucas") && (n.toLowerCase().includes("méndez") || n.toLowerCase().includes("mendez"));
@@ -53,7 +54,7 @@ export default function OnboardingPage() {
         return;
       }
     }
-    if (step === 2 && (!age || !height || !weight)) { setError("Completá todos los campos"); return; }
+    if (step === 2 && (!age || !height || !weight)) { setError(t("onboarding.completeAllFields")); return; }
     if (step < 7) setStep((step + 1) as Step);
   }
 
@@ -110,10 +111,10 @@ export default function OnboardingPage() {
           <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: "linear-gradient(90deg, #30D158, var(--accent))" }} />
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Paso {step} de 7</span>
+          <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("onboarding.step")} {step} {t("onboarding.of")} 7</span>
           {step > 1 && (
             <button onClick={prev} className="text-[0.6rem] flex items-center gap-0.5 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--accent)" }}>
-              <ChevronLeft size={12} /> Atrás
+              <ChevronLeft size={12} /> {t("onboarding.back")}
             </button>
           )}
         </div>
@@ -127,13 +128,13 @@ export default function OnboardingPage() {
               <Dumbbell size={32} />
             </div>
             <h1 className="text-2xl font-black mb-1 text-center">MARK PT</h1>
-            <p className="text-sm mb-8 text-center" style={{ color: "var(--text-muted)" }}>Tu entrenador personal</p>
+            <p className="text-sm mb-8 text-center" style={{ color: "var(--text-muted)" }}>{t("onboarding.personalTrainer")}</p>
             <input
               type="text"
               value={name}
               onChange={(e) => { setName(e.target.value); setError(""); }}
               onKeyDown={(e) => e.key === "Enter" && next()}
-              placeholder="Tu nombre completo"
+              placeholder={t("onboarding.yourName")}
               className="w-full text-center text-lg py-3.5 px-4 rounded-xl"
               style={{ background: "var(--bg-card)" }}
               autoFocus
@@ -147,8 +148,8 @@ export default function OnboardingPage() {
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--accent)", color: "#fff" }}>
               <Ruler size={24} />
             </div>
-            <h2 className="text-xl font-black mb-1 text-center">Datos Físicos</h2>
-            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>Para calcular tu TDEE y calorías</p>
+            <h2 className="text-xl font-black mb-1 text-center">{t("onboarding.physicalData")}</h2>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>{t("onboarding.physicalDataDesc")}</p>
 
             <div className="flex gap-2 mb-4">
               {(["male", "female"] as const).map((g) => (
@@ -161,22 +162,22 @@ export default function OnboardingPage() {
                     color: gender === g ? "#fff" : "var(--text-muted)",
                   }}
                 >
-                  {g === "male" ? "♂️ Masculino" : "♀️ Femenino"}
+                  {g === "male" ? `♂️ ${t("onboarding.male")}` : `♀️ ${t("onboarding.female")}`}
                 </button>
               ))}
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>Edad</label>
+                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>{t("onboarding.ageLbl")}</label>
                 <input type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="22" className="w-full py-3 px-4 rounded-xl text-center" style={{ background: "var(--bg-card)" }} />
               </div>
               <div>
-                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>Altura (cm)</label>
+                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>{t("onboarding.heightCm")}</label>
                 <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} placeholder="177" className="w-full py-3 px-4 rounded-xl text-center" style={{ background: "var(--bg-card)" }} />
               </div>
               <div>
-                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>Peso actual (kg)</label>
+                <label className="text-[0.65rem] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>{t("onboarding.currentWeight")}</label>
                 <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="80" className="w-full py-3 px-4 rounded-xl text-center" style={{ background: "var(--bg-card)" }} />
               </div>
             </div>
@@ -189,8 +190,8 @@ export default function OnboardingPage() {
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "#FF9500", color: "#fff" }}>
               <Award size={24} />
             </div>
-            <h2 className="text-xl font-black mb-1 text-center">Tu Experiencia</h2>
-            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>Esto nos ayuda a personalizar tus rutinas</p>
+            <h2 className="text-xl font-black mb-1 text-center">{t("onboarding.experience")}</h2>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>{t("onboarding.experienceDesc")}</p>
 
             <div className="space-y-2">
               {EXPERIENCE_OPTIONS.map((opt) => (
@@ -203,8 +204,8 @@ export default function OnboardingPage() {
                     borderColor: experience === opt.value ? "var(--accent)" : "transparent",
                   }}
                 >
-                  <span className="font-bold text-sm block">{opt.label}</span>
-                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{opt.desc}</span>
+                  <span className="font-bold text-sm block">{t(opt.labelKey)}</span>
+                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{t(opt.descKey)}</span>
                 </button>
               ))}
             </div>
@@ -217,8 +218,8 @@ export default function OnboardingPage() {
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "#30D158", color: "#fff" }}>
               <Target size={24} />
             </div>
-            <h2 className="text-xl font-black mb-1 text-center">Tu Objetivo</h2>
-            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>¿Qué querés lograr?</p>
+            <h2 className="text-xl font-black mb-1 text-center">{t("onboarding.goal")}</h2>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>{t("onboarding.goalQ")}</p>
 
             <div className="space-y-2">
               {GOAL_OPTIONS.map((opt) => (
@@ -231,8 +232,8 @@ export default function OnboardingPage() {
                     borderColor: goal === opt.value ? "var(--accent)" : "transparent",
                   }}
                 >
-                  <span className="font-bold text-sm block">{opt.emoji} {opt.label}</span>
-                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{opt.desc}</span>
+                  <span className="font-bold text-sm block">{opt.emoji} {t(opt.labelKey)}</span>
+                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{t(opt.descKey)}</span>
                 </button>
               ))}
             </div>
@@ -245,8 +246,8 @@ export default function OnboardingPage() {
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--accent)", color: "#fff" }}>
               <Calendar size={24} />
             </div>
-            <h2 className="text-xl font-black mb-1 text-center">Días por Semana</h2>
-            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>¿Cuántos días podés entrenar?</p>
+            <h2 className="text-xl font-black mb-1 text-center">{t("onboarding.daysPerWeek")}</h2>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>{t("onboarding.daysPerWeekQ")}</p>
 
             <div className="flex gap-2 justify-center mb-4">
               {[3, 4, 5, 6].map((d) => (
@@ -265,10 +266,10 @@ export default function OnboardingPage() {
               ))}
             </div>
             <p className="text-center text-sm" style={{ color: "var(--text-muted)" }}>
-              {daysPerWeek === 3 && "Full Body recomendado"}
-              {daysPerWeek === 4 && "Upper/Lower Split ideal"}
-              {daysPerWeek === 5 && "Push/Pull/Legs perfecto"}
-              {daysPerWeek === 6 && "PPL × 2 — alta frecuencia"}
+              {daysPerWeek === 3 && t("onboarding.fullBodyRecommended")}
+              {daysPerWeek === 4 && t("onboarding.upperLowerRecommended")}
+              {daysPerWeek === 5 && t("onboarding.pplRecommended")}
+              {daysPerWeek === 6 && t("onboarding.ppl2Recommended")}
             </p>
           </div>
         )}
@@ -279,8 +280,8 @@ export default function OnboardingPage() {
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "#AF52DE", color: "#fff" }}>
               <Dumbbell size={24} />
             </div>
-            <h2 className="text-xl font-black mb-1 text-center">Equipamiento</h2>
-            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>¿Con qué contás para entrenar?</p>
+            <h2 className="text-xl font-black mb-1 text-center">{t("onboarding.equipment")}</h2>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>{t("onboarding.equipmentQ")}</p>
 
             <div className="space-y-2">
               {EQUIPMENT_OPTIONS.map((opt) => (
@@ -293,8 +294,8 @@ export default function OnboardingPage() {
                     borderColor: equipment === opt.value ? "var(--accent)" : "transparent",
                   }}
                 >
-                  <span className="font-bold text-sm block">{opt.label}</span>
-                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{opt.desc}</span>
+                  <span className="font-bold text-sm block">{t(opt.labelKey)}</span>
+                  <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{t(opt.descKey)}</span>
                 </button>
               ))}
             </div>
@@ -307,33 +308,33 @@ export default function OnboardingPage() {
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #30D158, var(--accent))", color: "#fff" }}>
               <Check size={24} />
             </div>
-            <h2 className="text-xl font-black mb-1 text-center">¡Todo Listo!</h2>
-            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>Confirmá tus datos para empezar</p>
+            <h2 className="text-xl font-black mb-1 text-center">{t("onboarding.allSet")}</h2>
+            <p className="text-sm mb-6 text-center" style={{ color: "var(--text-muted)" }}>{t("onboarding.confirmToStart")}</p>
 
             <div className="card p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Nombre</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("onboarding.summaryName")}</span>
                 <span className="text-sm font-bold">{name}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Datos</span>
-                <span className="text-sm font-bold">{gender === "male" ? "♂️" : "♀️"} {age} años · {height}cm · {weight}kg</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("onboarding.summaryData")}</span>
+                <span className="text-sm font-bold">{gender === "male" ? "♂️" : "♀️"} {age} {t("profile.years")} · {height}cm · {weight}kg</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Experiencia</span>
-                <span className="text-sm font-bold">{EXPERIENCE_OPTIONS.find((e) => e.value === experience)?.label}</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("onboarding.summaryExperience")}</span>
+                <span className="text-sm font-bold">{t(EXPERIENCE_OPTIONS.find((e) => e.value === experience)?.labelKey ?? "")}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Objetivo</span>
-                <span className="text-sm font-bold">{GOAL_OPTIONS.find((g) => g.value === goal)?.label}</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("onboarding.summaryGoal")}</span>
+                <span className="text-sm font-bold">{t(GOAL_OPTIONS.find((g) => g.value === goal)?.labelKey ?? "")}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Frecuencia</span>
-                <span className="text-sm font-bold">{daysPerWeek} días/semana</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("onboarding.summaryFrequency")}</span>
+                <span className="text-sm font-bold">{daysPerWeek} {t("onboarding.daysWeek")}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>Equipamiento</span>
-                <span className="text-sm font-bold">{EQUIPMENT_OPTIONS.find((e) => e.value === equipment)?.label}</span>
+                <span className="text-[0.65rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("onboarding.summaryEquipment")}</span>
+                <span className="text-sm font-bold">{t(EQUIPMENT_OPTIONS.find((e) => e.value === equipment)?.labelKey ?? "")}</span>
               </div>
             </div>
           </div>
@@ -351,7 +352,7 @@ export default function OnboardingPage() {
             className="btn w-full py-3.5 text-base font-bold text-white border-none cursor-pointer rounded-xl flex items-center justify-center gap-2"
             style={{ background: "linear-gradient(135deg, var(--accent), var(--accent))" }}
           >
-            Siguiente <ChevronRight size={18} />
+            {t("onboarding.next")} <ChevronRight size={18} />
           </button>
         ) : (
           <button
@@ -359,7 +360,7 @@ export default function OnboardingPage() {
             className="btn w-full py-3.5 text-base font-bold text-white border-none cursor-pointer rounded-xl flex items-center justify-center gap-2"
             style={{ background: "linear-gradient(135deg, #34C759, #30D158)" }}
           >
-            Empezar 🚀
+            {t("onboarding.start")} 🚀
           </button>
         )}
       </div>

@@ -52,25 +52,26 @@ import {
   type RoutineFolder,
 } from "@/lib/routines-storage";
 import { getTopRecommendations, estimateUserLevel } from "@/lib/recommendations";
+import { t } from "@/lib/i18n";
 
 // ── Tabs ──
 type Tab = "library" | "routines";
 
 // ── Category labels ──
-const CATEGORY_LABELS: Record<LibraryProgram["category"], string> = {
-  strength: "Fuerza",
-  hypertrophy: "Hipertrofia",
-  powerbuilding: "Powerbuilding",
-  bodyweight: "Calistenia",
-  beginner: "Principiante",
-  sport: "Deporte",
-  conditioning: "Acondicionamiento",
+const CATEGORY_KEYS: Record<LibraryProgram["category"], string> = {
+  strength: "programs.strength",
+  hypertrophy: "programs.hypertrophy",
+  powerbuilding: "programs.powerbuilding",
+  bodyweight: "programs.bodyweight",
+  beginner: "programs.beginner",
+  sport: "programs.sport",
+  conditioning: "programs.conditioning",
 };
 
-const LEVEL_LABELS: Record<LibraryProgram["level"], string> = {
-  beginner: "Principiante",
-  intermediate: "Intermedio",
-  advanced: "Avanzado",
+const LEVEL_KEYS: Record<LibraryProgram["level"], string> = {
+  beginner: "programs.level.beginner",
+  intermediate: "programs.level.intermediate",
+  advanced: "programs.level.advanced",
 };
 
 const LEVEL_COLORS: Record<LibraryProgram["level"], string> = {
@@ -133,7 +134,7 @@ export default function RoutinesPage() {
   }
 
   function handleCreateEmpty() {
-    const routine = createEmptyRoutine("Mi Rutina");
+    const routine = createEmptyRoutine(t("routines.myRoutines").split(" ").pop() || "Rutina");
     reload();
     router.push(`/routines/editor?id=${routine.id}`);
   }
@@ -205,7 +206,7 @@ export default function RoutinesPage() {
       reload();
       setTab("routines");
     } else {
-      setImportError("Código inválido. Verificá que esté completo.");
+      setImportError(t("routines.invalidCode"));
     }
   }
 
@@ -227,10 +228,10 @@ export default function RoutinesPage() {
                 className="text-[0.55rem] font-bold px-2 py-0.5 rounded-full text-white"
                 style={{ background: LEVEL_COLORS[p.level] }}
               >
-                {LEVEL_LABELS[p.level]}
+                {t(LEVEL_KEYS[p.level])}
               </span>
               <span className="text-[0.55rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
-                {CATEGORY_LABELS[p.category]}
+                {t(CATEGORY_KEYS[p.category])}
               </span>
             </div>
             <p className="text-[0.9rem] font-bold text-[var(--text)] mb-0.5">{p.name}</p>
@@ -244,7 +245,7 @@ export default function RoutinesPage() {
         {/* Meta pills */}
         <div className="flex gap-2 mt-2 flex-wrap">
           <span className="text-[0.6rem] px-2 py-0.5 rounded-full flex items-center gap-1" style={{ background: "var(--bg-elevated)", color: "var(--text)" }}>
-            <Calendar size={10} /> {p.daysPerWeek} días/sem
+            <Calendar size={10} /> {p.daysPerWeek} {t("routines.daysPerWeek")}
           </span>
           <span className="text-[0.6rem] px-2 py-0.5 rounded-full flex items-center gap-1" style={{ background: "var(--bg-elevated)", color: "var(--text)" }}>
             <Target size={10} /> {p.split}
@@ -276,7 +277,7 @@ export default function RoutinesPage() {
                   <table className="w-full text-[0.6rem]">
                     <thead>
                       <tr className="text-left" style={{ color: "var(--text-muted)" }}>
-                        <th className="pb-1 font-medium">Ejercicio</th>
+                        <th className="pb-1 font-medium">{t("common.exercise")}</th>
                         <th className="pb-1 font-medium text-center">Sets</th>
                         <th className="pb-1 font-medium text-center">Reps</th>
                         <th className="pb-1 font-medium text-center">RPE</th>
@@ -302,7 +303,7 @@ export default function RoutinesPage() {
               className="w-full mt-2 py-2.5 rounded-xl font-bold text-[0.78rem] text-white flex items-center justify-center gap-2"
               style={{ background: "var(--accent)" }}
             >
-              <Plus size={16} /> Agregar a Mis Rutinas
+              <Plus size={16} /> {t("routines.addToMyRoutines")}
             </button>
           </div>
         )}
@@ -351,31 +352,31 @@ export default function RoutinesPage() {
               onClick={() => router.push(`/routines/editor?id=${r.id}`)}
               className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
-              <Edit size={13} /> Editar
+              <Edit size={13} /> {t("common.edit")}
             </button>
             <button
               onClick={() => handleCloneRoutine(r.id)}
               className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
-              <Copy size={13} /> Duplicar
+              <Copy size={13} /> {t("common.duplicate")}
             </button>
             <button
               onClick={() => handleExport(r.id)}
               className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
-              <Share2 size={13} /> Compartir Código
+              <Share2 size={13} /> {t("routines.shareCode")}
             </button>
             <button
               onClick={() => { setMoveTarget(r.id); setMenuOpen(null); }}
               className="w-full text-left px-3 py-2 text-[0.72rem] text-[var(--text)] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
-              <FolderInput size={13} /> Mover a carpeta
+              <FolderInput size={13} /> {t("routines.moveToFolder")}
             </button>
             <button
               onClick={() => handleDeleteRoutine(r.id)}
               className="w-full text-left px-3 py-2 text-[0.72rem] text-[#FF453A] flex items-center gap-2 hover:bg-[var(--bg-elevated)]"
             >
-              <Trash2 size={13} /> Eliminar
+              <Trash2 size={13} /> {t("common.delete")}
             </button>
           </div>
         )}
@@ -392,7 +393,7 @@ export default function RoutinesPage() {
         style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
       >
         <div className="flex justify-between items-center mb-3">
-          <p className="text-[0.85rem] font-bold text-[var(--text)]">Mover a carpeta</p>
+          <p className="text-[0.85rem] font-bold text-[var(--text)]">{t("routines.moveToFolder")}</p>
           <button onClick={() => setMoveTarget(null)} style={{ color: "var(--text-muted)" }}><X size={18} /></button>
         </div>
         <button
@@ -400,7 +401,7 @@ export default function RoutinesPage() {
           className="w-full text-left px-3 py-2.5 rounded-lg text-[0.75rem] text-[var(--text)] mb-1"
           style={{ background: "var(--bg-elevated)" }}
         >
-          Sin carpeta
+          {t("routines.noFolder")}
         </button>
         {folders.map((f) => (
           <button
@@ -423,7 +424,7 @@ export default function RoutinesPage() {
         <Link href="/workout" style={{ color: "var(--text-muted)" }}>
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-xl font-extrabold tracking-tight">Rutinas</h1>
+        <h1 className="text-xl font-extrabold tracking-tight">{t("routines.title")}</h1>
       </div>
 
       {/* Tabs */}
@@ -436,7 +437,7 @@ export default function RoutinesPage() {
             color: tab === "library" ? "#fff" : "var(--text-muted)",
           }}
         >
-          <Library size={14} className="inline mr-1" /> Biblioteca
+          <Library size={14} className="inline mr-1" /> {t("routines.library")}
         </button>
         <button
           onClick={() => setTab("routines")}
@@ -446,7 +447,7 @@ export default function RoutinesPage() {
             color: tab === "routines" ? "#fff" : "var(--text-muted)",
           }}
         >
-          <Dumbbell size={14} className="inline mr-1" /> Mis Rutinas
+          <Dumbbell size={14} className="inline mr-1" /> {t("routines.myRoutines")}
           {routines.length > 0 && (
             <span className="ml-1 text-[0.6rem] bg-white/20 px-1.5 rounded-full">{routines.length}</span>
           )}
@@ -461,7 +462,7 @@ export default function RoutinesPage() {
             <div className="mb-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <Sparkles size={14} style={{ color: "var(--accent)" }} />
-                <span className="text-[0.72rem] font-bold text-[var(--text)]">Recomendados para vos</span>
+                <span className="text-[0.72rem] font-bold text-[var(--text)]">{t("routines.recommendedForYou")}</span>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {recommendations.map(({ program, reasons }) => (
@@ -475,11 +476,11 @@ export default function RoutinesPage() {
                       className="text-[0.5rem] font-bold px-1.5 py-0.5 rounded-full text-white"
                       style={{ background: LEVEL_COLORS[program.level] }}
                     >
-                      {LEVEL_LABELS[program.level]}
+                      {t(LEVEL_KEYS[program.level])}
                     </span>
                     <p className="text-[0.75rem] font-bold text-[var(--text)] mt-1.5 line-clamp-1">{program.name}</p>
                     <p className="text-[0.58rem] mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>
-                      {program.daysPerWeek} días · {program.split}
+                      {program.daysPerWeek} {t("routines.days")} · {program.split}
                     </p>
                     {reasons[0] && (
                       <p className="text-[0.52rem] mt-1" style={{ color: "var(--accent)" }}>
@@ -499,7 +500,7 @@ export default function RoutinesPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar programa..."
+              placeholder={t("routines.searchProgram")}
               className="w-full pl-9 pr-3 py-2 rounded-lg text-[0.75rem] text-[var(--text)] placeholder-[var(--text-secondary)]"
               style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
             />
@@ -515,7 +516,7 @@ export default function RoutinesPage() {
                 color: catFilter === "all" ? "#fff" : "var(--text-muted)",
               }}
             >
-              Todos
+              {t("routines.allFilter")}
             </button>
             {categories.map((cat) => (
               <button
@@ -527,20 +528,20 @@ export default function RoutinesPage() {
                   color: catFilter === cat ? "#fff" : "var(--text-muted)",
                 }}
               >
-                {CATEGORY_LABELS[cat]}
+                {t(CATEGORY_KEYS[cat])}
               </button>
             ))}
           </div>
 
           {/* Results count */}
-          <p className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>{filteredPrograms.length} programas</p>
+          <p className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>{filteredPrograms.length} {t("routines.programs")}</p>
 
           {/* Program cards */}
           {filteredPrograms.map(renderProgramCard)}
 
           {filteredPrograms.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-[0.8rem]" style={{ color: "var(--text-muted)" }}>No se encontraron programas</p>
+              <p className="text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("routines.noProgramsFound")}</p>
             </div>
           )}
         </>
@@ -556,7 +557,7 @@ export default function RoutinesPage() {
               className="flex-1 py-2.5 rounded-xl font-bold text-[0.72rem] text-white flex items-center justify-center gap-1.5"
               style={{ background: "var(--accent)" }}
             >
-              <Plus size={14} /> Crear Rutina
+              <Plus size={14} /> {t("routines.createRoutine")}
             </button>
             <button
               onClick={() => { setShowImportModal(true); setImportError(""); setImportCode(""); }}
@@ -583,7 +584,7 @@ export default function RoutinesPage() {
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
-                placeholder="Nombre de carpeta..."
+                placeholder={t("routines.folderNamePlaceholder")}
                 className="flex-1 px-3 py-2 rounded-lg text-[0.75rem] text-[var(--text)] placeholder-[var(--text-secondary)]"
                 style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
               />
@@ -592,7 +593,7 @@ export default function RoutinesPage() {
                 className="px-3 py-2 rounded-lg text-[0.72rem] font-bold text-white"
                 style={{ background: "var(--accent)" }}
               >
-                Crear
+                {t("common.create")}
               </button>
               <button
                 onClick={() => { setShowNewFolder(false); setNewFolderName(""); }}
@@ -661,7 +662,7 @@ export default function RoutinesPage() {
                 {isOpen && (
                   <div className="ml-2">
                     {folderRoutines.length === 0 ? (
-                      <p className="text-[0.65rem] py-2 pl-4" style={{ color: "var(--text-secondary)" }}>Carpeta vacía</p>
+                      <p className="text-[0.65rem] py-2 pl-4" style={{ color: "var(--text-secondary)" }}>{t("routines.emptyFolder")}</p>
                     ) : (
                       folderRoutines.map(renderRoutineCard)
                     )}
@@ -678,9 +679,9 @@ export default function RoutinesPage() {
               return (
                 <div className="text-center py-12">
                   <Dumbbell size={40} className="mx-auto mb-3" style={{ color: "var(--text-secondary)" }} />
-                  <p className="text-[0.82rem] font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Sin rutinas todavía</p>
+                  <p className="text-[0.82rem] font-semibold mb-1" style={{ color: "var(--text-muted)" }}>{t("routines.noRoutinesYet")}</p>
                   <p className="text-[0.7rem]" style={{ color: "var(--text-secondary)" }}>
-                    Creá una desde cero o explorá la biblioteca
+                    {t("routines.noRoutinesHint")}
                   </p>
                 </div>
               );
@@ -689,7 +690,7 @@ export default function RoutinesPage() {
               return (
                 <div className="mt-2">
                   {folders.length > 0 && (
-                    <p className="text-[0.68rem] font-semibold mb-2" style={{ color: "var(--text-muted)" }}>Sin carpeta</p>
+                    <p className="text-[0.68rem] font-semibold mb-2" style={{ color: "var(--text-muted)" }}>{t("routines.noFolder")}</p>
                   )}
                   {unfiled.map(renderRoutineCard)}
                 </div>
@@ -711,17 +712,17 @@ export default function RoutinesPage() {
             style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
           >
             <div className="flex justify-between items-center mb-3">
-              <p className="text-[0.85rem] font-bold text-[var(--text)]">Importar Rutina</p>
+              <p className="text-[0.85rem] font-bold text-[var(--text)]">{t("routines.importRoutine")}</p>
               <button onClick={() => setShowImportModal(false)} style={{ color: "var(--text-muted)" }}><X size={18} /></button>
             </div>
             <p className="text-[0.68rem] mb-3" style={{ color: "var(--text-muted)" }}>
-              Pegá el código que te compartieron para importar la rutina.
+              {t("routines.importHint")}
             </p>
             <textarea
               autoFocus
               value={importCode}
               onChange={(e) => { setImportCode(e.target.value); setImportError(""); }}
-              placeholder="Pegar código aquí..."
+              placeholder={t("routines.pasteCodePlaceholder")}
               rows={4}
               className="w-full text-[0.72rem] py-2.5 px-3 rounded-lg text-[var(--text)] placeholder-[var(--text-secondary)] resize-none mb-2"
               style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
@@ -735,7 +736,7 @@ export default function RoutinesPage() {
               className="w-full py-2.5 rounded-xl font-bold text-[0.78rem] text-white flex items-center justify-center gap-2"
               style={{ background: importCode.trim() ? "var(--accent)" : "var(--bg-elevated)", opacity: importCode.trim() ? 1 : 0.5 }}
             >
-              <Download size={16} /> Importar
+              <Download size={16} /> {t("routines.import")}
             </button>
           </div>
         </div>
@@ -750,11 +751,11 @@ export default function RoutinesPage() {
             style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
           >
             <div className="flex justify-between items-center mb-3">
-              <p className="text-[0.85rem] font-bold text-[var(--text)]">Código de Rutina</p>
+              <p className="text-[0.85rem] font-bold text-[var(--text)]">{t("routines.routineCode")}</p>
               <button onClick={() => setShareCode(null)} style={{ color: "var(--text-muted)" }}><X size={18} /></button>
             </div>
             <p className="text-[0.68rem] mb-3" style={{ color: "var(--text-muted)" }}>
-              Compartí este código para que alguien pueda importar tu rutina.
+              {t("routines.shareHint")}
             </p>
             <div
               className="p-3 rounded-lg text-[0.6rem] font-mono break-all mb-3 max-h-32 overflow-y-auto"
@@ -767,7 +768,7 @@ export default function RoutinesPage() {
               className="w-full py-2.5 rounded-xl font-bold text-[0.78rem] text-white flex items-center justify-center gap-2"
               style={{ background: copied ? "#34C759" : "var(--accent)" }}
             >
-              {copied ? <><Check size={16} /> Copiado!</> : <><ClipboardCopy size={16} /> Copiar Código</>}
+              {copied ? <><Check size={16} /> {t("routines.copied")}</> : <><ClipboardCopy size={16} /> {t("routines.copyCode")}</>}
             </button>
           </div>
         </div>

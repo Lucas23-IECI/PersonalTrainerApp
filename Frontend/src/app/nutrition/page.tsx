@@ -37,6 +37,7 @@ import {
 import { SwipeTabs } from "@/components/motion";
 import CalorieRing from "@/components/CalorieRing";
 import AddFoodScreen from "@/components/AddFoodScreen";
+import { t } from "@/lib/i18n";
 
 type Tab = "tracker" | "plan" | "shopping" | "supps" | "cooking";
 
@@ -221,23 +222,23 @@ export default function NutritionPage() {
   const dayIsEmpty = totalCal === 0;
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "tracker", label: "Diario", icon: <UtensilsCrossed size={14} /> },
-    { id: "plan", label: "Plan", icon: <ChefHat size={14} /> },
-    { id: "shopping", label: "Compras", icon: <ShoppingCart size={14} /> },
-    { id: "supps", label: "Supps", icon: <Pill size={14} /> },
-    { id: "cooking", label: "Cocinar", icon: <ChefHat size={14} /> },
+    { id: "tracker", label: t("nutrition.daily"), icon: <UtensilsCrossed size={14} /> },
+    { id: "plan", label: t("nutrition.plan"), icon: <ChefHat size={14} /> },
+    { id: "shopping", label: t("nutrition.shopping"), icon: <ShoppingCart size={14} /> },
+    { id: "supps", label: t("nutrition.supplements"), icon: <Pill size={14} /> },
+    { id: "cooking", label: t("nutrition.cooking"), icon: <ChefHat size={14} /> },
   ];
 
   const dateObj = new Date(selectedDate + "T12:00:00");
   const dateLabel = isToday(selectedDate)
-    ? "Hoy"
+    ? t("common.today")
     : dateObj.toLocaleDateString("es-CL", { weekday: "short", day: "numeric", month: "short" });
 
   return (
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-0.5">
-        <h1 className="text-xl font-black tracking-tight">Nutrición</h1>
+        <h1 className="text-xl font-black tracking-tight">{t("nutrition.title")}</h1>
         <button
           onClick={() => setShowTargetEditor(true)}
           className="bg-transparent border-none cursor-pointer p-1.5 rounded-lg"
@@ -323,7 +324,7 @@ export default function NutritionPage() {
                 <TrendingUp size={14} style={{ color: "#FF3B30" }} />
               )}
               <span className="text-[0.75rem] font-bold" style={{ color: remainingCal >= 0 ? "#34C759" : "#FF3B30" }}>
-                {remainingCal >= 0 ? `${remainingCal} kcal restantes` : `+${Math.abs(remainingCal)} kcal excedido`}
+                {remainingCal >= 0 ? `${remainingCal} ${t("nutrition.caloriesRemaining")}` : `+${Math.abs(remainingCal)} ${t("nutrition.caloriesExceeded")}`}
               </span>
             </div>
             <div className="flex items-end gap-0.5" style={{ height: "28px" }}>
@@ -353,7 +354,7 @@ export default function NutritionPage() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Droplets size={14} style={{ color: "#007AFF" }} />
-                <span className="text-[0.75rem] font-bold" style={{ color: "var(--text)" }}>Agua</span>
+                <span className="text-[0.75rem] font-bold" style={{ color: "var(--text)" }}>{t("nutrition.water")}</span>
               </div>
               <span className="text-[0.7rem] font-bold" style={{ color: "#007AFF" }}>
                 {(waterMl / 1000).toFixed(1)}L <span style={{ color: "var(--text-muted)" }}>/ {targets.water}L</span>
@@ -364,10 +365,10 @@ export default function NutritionPage() {
             </div>
             <div className="flex gap-1.5">
               <button onClick={() => addWater(GLASS_ML)} className="flex-1 py-1.5 rounded-lg border-none cursor-pointer text-[0.7rem] font-bold text-white" style={{ background: "#007AFF" }}>
-                +1 Vaso
+                {t("nutrition.addGlass")}
               </button>
               <button onClick={() => addWater(500)} className="py-1.5 px-3 rounded-lg border-none cursor-pointer text-[0.65rem] font-bold" style={{ background: "var(--bg-elevated)", color: "#007AFF" }}>
-                +500ml
+                {t("nutrition.add500ml")}
               </button>
               <button onClick={() => addWater(-GLASS_ML)} className="py-1.5 px-3 rounded-lg border-none cursor-pointer text-[0.65rem] font-bold" style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}>
                 <Minus size={12} />
@@ -383,7 +384,7 @@ export default function NutritionPage() {
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl cursor-pointer border-none text-[0.75rem] font-bold"
                 style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
               >
-                <Copy size={14} /> Copiar de Ayer
+                <Copy size={14} /> {t("nutrition.copyFromYesterday")}
               </button>
               {templates.length > 0 && (
                 <button
@@ -391,7 +392,7 @@ export default function NutritionPage() {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl cursor-pointer border-none text-[0.75rem] font-bold"
                   style={{ background: "var(--bg-elevated)", color: "#34C759" }}
                 >
-                  <FolderOpen size={14} /> Usar Template
+                  <FolderOpen size={14} /> {t("nutrition.useTemplate")}
                 </button>
               )}
             </div>
@@ -460,7 +461,7 @@ export default function NutritionPage() {
                     className="w-full py-3 rounded-lg border border-dashed cursor-pointer text-[0.7rem] font-medium"
                     style={{ background: "transparent", borderColor: "var(--border)", color: "var(--text-muted)" }}
                   >
-                    Agregar alimento...
+                    {t("nutrition.addFood")}
                   </button>
                 )}
 
@@ -471,7 +472,7 @@ export default function NutritionPage() {
                     className="mt-1.5 text-[0.6rem] font-semibold bg-transparent border-none cursor-pointer"
                     style={{ color: "var(--accent)" }}
                   >
-                    {showSuggestions === slotName ? "Ocultar sugerencias ▲" : "Ver sugerencias del plan ▼"}
+                    {showSuggestions === slotName ? t("nutrition.hideSuggestions") : t("nutrition.showSuggestions")}
                   </button>
                 )}
 

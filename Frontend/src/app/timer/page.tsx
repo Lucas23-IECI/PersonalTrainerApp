@@ -13,6 +13,7 @@ import {
   type TimerMode, type TimerPreset,
   saveTimerSession, getTimerHistory, type TimerSession,
 } from "@/lib/timer-presets";
+import { t } from "@/lib/i18n";
 
 // ── SVG ring constants ──
 const RADIUS = 90;
@@ -264,16 +265,16 @@ export default function TimerPage() {
             <Link href="/" style={{ color: "var(--accent)" }}><ArrowLeft size={22} /></Link>
             <div>
               <h1 className="text-[1.1rem] font-black tracking-tight flex items-center gap-2">
-                <Timer size={18} style={{ color: modeColor }} /> Timer
+                <Timer size={18} style={{ color: modeColor }} /> {t("timer.title")}
               </h1>
-              <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>EMOM · Tabata · AMRAP · Custom</p>
+              <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("timer.subtitle")}</p>
             </div>
             <button
               onClick={() => setView("history")}
               className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-[0.7rem] font-bold border-none cursor-pointer"
               style={{ background: "var(--card-bg)", color: "var(--text-main)" }}
             >
-              <History size={14} /> Historial
+              <History size={14} /> {t("timer.history")}
             </button>
           </div>
 
@@ -298,7 +299,7 @@ export default function TimerPage() {
           </div>
 
           {/* Quick presets */}
-          <h2 className="text-[0.8rem] font-bold mb-3">⚡ Presets Rápidos</h2>
+          <h2 className="text-[0.8rem] font-bold mb-3">{t("timer.quickPresets")}</h2>
           <div className="space-y-2">
             {TIMER_PRESETS.map((preset) => (
               <button
@@ -345,14 +346,14 @@ export default function TimerPage() {
                 <Settings2 size={18} style={{ color: modeColor }} />
                 {MODE_LABELS[selectedMode]}
               </h1>
-              <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>Configurá tu timer</p>
+              <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>{t("timer.configureTimer")}</p>
             </div>
           </div>
 
           <div className="card p-4 mb-4">
             {selectedMode !== "amrap" && (
               <Stepper
-                label="⏱ Trabajo"
+                label={t("timer.work")}
                 value={workSec}
                 onChange={setWorkSec}
                 min={5}
@@ -363,7 +364,7 @@ export default function TimerPage() {
             )}
             {selectedMode === "amrap" && (
               <Stepper
-                label="⏱ Tiempo total"
+                label={t("timer.totalTimeIcon")}
                 value={workSec}
                 onChange={setWorkSec}
                 min={60}
@@ -374,7 +375,7 @@ export default function TimerPage() {
             )}
             {(selectedMode === "tabata" || selectedMode === "custom") && (
               <Stepper
-                label="😮‍💨 Descanso"
+                label={t("timer.rest")}
                 value={restSec}
                 onChange={setRestSec}
                 min={0}
@@ -385,7 +386,7 @@ export default function TimerPage() {
             )}
             {selectedMode !== "amrap" && (
               <Stepper
-                label="🔄 Rondas"
+                label={t("timer.rounds")}
                 value={rounds}
                 onChange={setRounds}
                 min={1}
@@ -398,14 +399,14 @@ export default function TimerPage() {
           {/* Summary */}
           <div className="card p-4 mb-6 text-center" style={{ borderTop: `3px solid ${modeColor}` }}>
             <div className="text-[0.6rem] uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>
-              Tiempo total
+              {t("timer.totalTime")}
             </div>
             <div className="text-3xl font-black tabular-nums" style={{ color: modeColor }}>
               {fmt(totalTime)}
             </div>
             {selectedMode !== "amrap" && (
               <div className="text-[0.65rem] mt-1" style={{ color: "var(--text-muted)" }}>
-                {rounds} rondas · {workSec}s trabajo {restSec > 0 ? `· ${restSec}s descanso` : ""}
+                {rounds} {t("timer.roundsText")} · {workSec}s {t("timer.workText")} {restSec > 0 ? `· ${restSec}s ${t("timer.restText")}` : ""}
               </div>
             )}
           </div>
@@ -415,7 +416,7 @@ export default function TimerPage() {
             className="w-full py-4 rounded-2xl text-[1rem] font-black border-none cursor-pointer flex items-center justify-center gap-2"
             style={{ background: modeColor, color: "#fff" }}
           >
-            <Play size={20} fill="#fff" /> INICIAR
+            <Play size={20} fill="#fff" /> {t("common.start")}
           </button>
         </main>
       </PageTransition>
@@ -434,16 +435,16 @@ export default function TimerPage() {
               <ArrowLeft size={22} />
             </button>
             <h1 className="text-[1.1rem] font-black tracking-tight flex items-center gap-2">
-              <History size={18} /> Historial Timer
+              <History size={18} /> {t("timer.history")}
             </h1>
           </div>
 
           {history.length === 0 ? (
             <div className="card p-8 text-center">
               <Timer size={32} style={{ color: "var(--text-muted)", marginBottom: 8 }} />
-              <p className="text-[0.8rem] font-bold mb-1">Sin sesiones</p>
+              <p className="text-[0.8rem] font-bold mb-1">{t("timer.noSessions")}</p>
               <p className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>
-                Completá un timer para ver tu historial acá
+                {t("timer.completeToSeeHistory")}
               </p>
             </div>
           ) : (
@@ -459,7 +460,7 @@ export default function TimerPage() {
                   <div className="flex-1 min-w-0">
                     <span className="text-[0.75rem] font-bold block">{s.presetName}</span>
                     <span className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
-                      {s.date} · {fmt(s.totalSec)} · {s.roundsCompleted}/{s.roundsTotal} rondas
+                      {s.date} · {fmt(s.totalSec)} · {s.roundsCompleted}/{s.roundsTotal} {t("timer.roundsText")}
                     </span>
                   </div>
                 </div>
@@ -494,14 +495,14 @@ export default function TimerPage() {
         {/* Round counter */}
         {selectedMode !== "amrap" && (
           <div className="text-[0.8rem] font-bold mb-6" style={{ color: "var(--text-muted)" }}>
-            Ronda {currentRound} / {rounds}
+            {t("timer.round")}{currentRound} / {rounds}
           </div>
         )}
 
         {/* AMRAP round counter */}
         {selectedMode === "amrap" && phase !== "done" && (
           <div className="mb-6">
-            <div className="text-[0.7rem] mb-2" style={{ color: "var(--text-muted)" }}>Rondas completadas</div>
+            <div className="text-[0.7rem] mb-2" style={{ color: "var(--text-muted)" }}>{t("timer.roundsCompleted")}</div>
             <div className="flex items-center justify-center gap-4">
               <button
                 onClick={() => { vibrateLight(); setAmrapRounds(Math.max(0, amrapRounds - 1)); }}
@@ -545,7 +546,7 @@ export default function TimerPage() {
                 className="text-[0.7rem] font-bold uppercase tracking-wider mt-1"
                 style={{ color: phaseColor }}
               >
-                {phase === "work" ? "TRABAJO" : "DESCANSO"}
+                {phase === "work" ? t("timer.workText").toUpperCase() : t("timer.restText").toUpperCase()}
               </span>
             </div>
           </div>
@@ -553,11 +554,11 @@ export default function TimerPage() {
           /* Done view */
           <div className="mb-8">
             <div className="text-5xl mb-3">🎉</div>
-            <div className="text-2xl font-black mb-2">¡Completado!</div>
+            <div className="text-2xl font-black mb-2">{t("timer.completed")}</div>
             <div className="text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
               {fmt(totalElapsed)} total
-              {selectedMode === "amrap" && ` · ${amrapRounds} rondas`}
-              {selectedMode !== "amrap" && ` · ${rounds} rondas`}
+              {selectedMode === "amrap" && ` · ${amrapRounds} ${t("timer.roundsText")}`}
+              {selectedMode !== "amrap" && ` · ${rounds} ${t("timer.roundsText")}`}
             </div>
           </div>
         )}
@@ -565,7 +566,7 @@ export default function TimerPage() {
         {/* Elapsed */}
         {phase !== "done" && (
           <div className="text-[0.7rem] mb-8" style={{ color: "var(--text-muted)" }}>
-            Tiempo total: {fmt(totalElapsed)}
+            {t("timer.totalTime")}: {fmt(totalElapsed)}
           </div>
         )}
 
@@ -596,14 +597,14 @@ export default function TimerPage() {
                 className="px-6 py-3 rounded-xl text-[0.85rem] font-bold border-none cursor-pointer"
                 style={{ background: "var(--card-bg)", color: "var(--text-main)" }}
               >
-                Volver
+                {t("common.back")}
               </button>
               <button
                 onClick={startTimer}
                 className="px-6 py-3 rounded-xl text-[0.85rem] font-bold border-none cursor-pointer"
                 style={{ background: modeColor, color: "#fff" }}
               >
-                Repetir
+                {t("common.repeat")}
               </button>
             </>
           )}
@@ -617,7 +618,7 @@ export default function TimerPage() {
             className="inline-block px-4 py-1.5 rounded-full text-[0.75rem] font-bold animate-pulse"
             style={{ background: "rgba(255,149,0,0.15)", color: "#FF9500" }}
           >
-            ⏸ PAUSADO
+            {t("timer.paused")}
           </span>
         </div>
       )}

@@ -9,6 +9,7 @@ import {
   type ExerciseCategory,
 } from '@/data/exercises';
 import { getAllExercises, createCustomExercise, cloneExerciseFromLibrary, type CustomExercise } from '@/lib/custom-exercises';
+import { t } from '@/lib/i18n';
 import { getAlternativesByName } from '@/lib/exercise-alternatives';
 import { getExerciseHistory, type ExerciseHistory } from '@/lib/progression';
 import { getFavorites, toggleFavorite, isFavorite as checkFavorite } from '@/lib/exercise-favorites';
@@ -17,11 +18,11 @@ import { Search, X, ChevronRight, Plus, RotateCcw, Copy, ChevronDown, Star, Arro
 
 type SortOption = 'name' | 'difficulty' | 'favorites' | 'recent';
 
-const SORT_LABELS: Record<SortOption, string> = {
-  name: 'A-Z',
-  difficulty: 'Dificultad',
-  favorites: 'Favoritos',
-  recent: 'Recientes',
+const SORT_KEYS: Record<SortOption, string> = {
+  name: 'addexercise.sort.name',
+  difficulty: 'addexercise.sort.difficulty',
+  favorites: 'addexercise.sort.favorites',
+  recent: 'addexercise.sort.recent',
 };
 
 const DIFFICULTY_ORDER: Record<string, number> = {
@@ -30,14 +31,14 @@ const DIFFICULTY_ORDER: Record<string, number> = {
   advanced: 3,
 };
 
-const EQUIPMENT_LABELS: Record<ExerciseCategory, string> = {
-  barbell: 'Barra',
-  dumbbell: 'Mancuerna',
-  bodyweight: 'Peso Corporal',
-  cable: 'Cable',
-  machine: 'Máquina',
-  band: 'Banda',
-  cardio: 'Cardio',
+const EQUIPMENT_KEYS: Record<ExerciseCategory, string> = {
+  barbell: 'addexercise.equip.barbell',
+  dumbbell: 'addexercise.equip.dumbbell',
+  bodyweight: 'addexercise.equip.bodyweight',
+  cable: 'addexercise.equip.cable',
+  machine: 'addexercise.equip.machine',
+  band: 'addexercise.equip.band',
+  cardio: 'addexercise.equip.cardio',
 };
 
 const EQUIPMENT_ICONS: Record<ExerciseCategory, string> = {
@@ -182,10 +183,10 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
           className="text-sm font-semibold bg-transparent border-none cursor-pointer"
           style={{ color: 'var(--accent)' }}
         >
-          Cancelar
+          {t("common.cancel")}
         </button>
         <span className="text-base font-bold" style={{ color: 'var(--text)' }}>
-          Añadir Ejercicio
+          {t("addexercise.addExercise")}
         </span>
         <div style={{ width: 60 }} />
       </div>
@@ -200,7 +201,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
           />
           <input
             type="text"
-            placeholder="Buscar ejercicio..."
+            placeholder={t("addexercise.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl"
@@ -235,9 +236,9 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
             color: equipFilter ? '#fff' : 'var(--text-secondary)',
           }}
         >
-          <option value="">Todo Equipo</option>
-          {Object.entries(EQUIPMENT_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          <option value="">{t("addexercise.allEquipment")}</option>
+          {Object.entries(EQUIPMENT_KEYS).map(([k, v]) => (
+            <option key={k} value={k}>{t(v)}</option>
           ))}
         </select>
 
@@ -251,7 +252,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
             color: muscleFilter ? '#fff' : 'var(--text-secondary)',
           }}
         >
-          <option value="">Todo Músculo</option>
+          <option value="">{t("addexercise.allMuscle")}</option>
           {Object.entries(MUSCLE_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
@@ -268,8 +269,8 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
             color: sortBy !== 'name' ? '#fff' : 'var(--text-secondary)',
           }}
         >
-          {Object.entries(SORT_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          {Object.entries(SORT_KEYS).map(([k, v]) => (
+            <option key={k} value={k}>{t(v)}</option>
           ))}
         </select>
       </div>
@@ -282,7 +283,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
           className="w-full mb-3 py-2 rounded-lg text-[0.72rem] font-semibold flex items-center justify-center gap-1.5"
           style={{ background: 'var(--bg-card)', color: 'var(--accent)', border: '1px dashed var(--border)' }}
         >
-          <Plus size={14} /> Crear Ejercicio Personalizado
+          <Plus size={14} /> {t("addexercise.createCustom")}
         </button>
         {showCreateForm && (
           <div className="mb-4 p-3 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
@@ -291,7 +292,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Nombre del ejercicio"
+              placeholder={t("addexercise.exerciseNamePlaceholder")}
               className="w-full text-[0.75rem] py-2 px-2.5 rounded-lg mb-2 text-[var(--text)] placeholder-[var(--text-secondary)]"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
             />
@@ -302,8 +303,8 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
                 className="text-[0.7rem] py-2 px-2 rounded-lg text-[var(--text)]"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
               >
-                {Object.entries(EQUIPMENT_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
+                {Object.entries(EQUIPMENT_KEYS).map(([k, v]) => (
+                  <option key={k} value={k}>{t(v)}</option>
                 ))}
               </select>
               <select
@@ -312,7 +313,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
                 className="text-[0.7rem] py-2 px-2 rounded-lg text-[var(--text)]"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
               >
-                <option value="">Músculo principal</option>
+                <option value="">{t("addexercise.primaryMuscle")}</option>
                 {Object.entries(MUSCLE_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
                 ))}
@@ -324,7 +325,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
               className="w-full py-2 rounded-lg text-[0.72rem] font-bold text-white"
               style={{ background: newName.trim() && newPrimary ? 'var(--accent)' : 'var(--bg-elevated)', opacity: newName.trim() && newPrimary ? 1 : 0.5 }}
             >
-              Crear
+              {t("common.create")}
             </button>
           </div>
         )}
@@ -335,7 +336,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
             <div className="flex justify-between items-center mb-2">
               <span className="text-[0.68rem] font-bold" style={{ color: 'var(--accent)' }}>
                 <RotateCcw size={12} className="inline mr-1" />
-                Alternativas para &quot;{alternativesFor}&quot;
+                {t("addexercise.alternativesFor")} &quot;{alternativesFor}&quot;
               </span>
               <button onClick={() => setAlternativesFor(null)} style={{ color: "var(--text-muted)" }}><X size={14} /></button>
             </div>
@@ -352,7 +353,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
               className="text-[0.65rem] font-bold uppercase tracking-wider mb-2 px-1"
               style={{ color: 'var(--text-muted)' }}
             >
-              Recientes
+              {t("addexercise.recent")}
             </div>
             {recentList.map((ex) => (
               <ExerciseRow key={ex.id} exercise={ex} onSelect={handleSelect} onShowAlternatives={setAlternativesFor} onClone={handleClone} isFav={favoritesSet.has(ex.name)} onToggleFav={handleToggleFavorite} />
@@ -365,7 +366,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
           className="text-[0.65rem] font-bold uppercase tracking-wider mb-2 px-1"
           style={{ color: 'var(--text-muted)' }}
         >
-          {filteredExercises.length} ejercicios
+          {filteredExercises.length} {t("addexercise.exercisesCount")}
         </div>
 
         {/* All exercises */}
@@ -377,7 +378,7 @@ export default function AddExerciseModal({ open, onClose, onSelect, recentExerci
           <div className="text-center py-10">
             <div className="text-3xl mb-2">🔍</div>
             <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              No se encontraron ejercicios
+              {t("addexercise.noExercisesFound")}
             </div>
           </div>
         )}

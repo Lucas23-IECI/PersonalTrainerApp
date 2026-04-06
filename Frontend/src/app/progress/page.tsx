@@ -17,6 +17,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { PageTransition, TabContent, SwipeTabs } from "@/components/motion";
 import { getSleepQualityAvg, QUALITY_EMOJIS } from "@/lib/sleep-utils";
+import { t } from "@/lib/i18n";
 
 const E1RMChart = dynamic(() => import("@/components/charts/E1RMChart"), { ssr: false });
 const MuscleVolumeChart = dynamic(() => import("@/components/charts/MuscleVolumeChart"), { ssr: false });
@@ -123,28 +124,28 @@ export default function ProgressPage() {
   }, [sessions]);
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "cuerpo", label: "Cuerpo" },
-    { id: "fuerza", label: "Fuerza" },
-    { id: "volumen", label: "Volumen" },
+    { id: "cuerpo", label: t("progress.body") },
+    { id: "fuerza", label: t("progress.strength") },
+    { id: "volumen", label: t("progress.volume") },
   ];
 
   return (
     <PageTransition>
     <main className="max-w-[600px] mx-auto px-4 py-5">
-      <h1 className="text-[1.3rem] font-black tracking-tight mb-1">Progreso</h1>
+      <h1 className="text-[1.3rem] font-black tracking-tight mb-1">{t("progress.title")}</h1>
       <p className="text-[0.7rem] mb-4" style={{ color: "var(--text-secondary)" }}>
-        {checkins.length} check-ins · {trainingDays} días de entreno
+        {checkins.length} {t("progress.checkins")} · {trainingDays} {t("progress.trainingDays")}
       </p>
 
       {/* 4.7 — Executive Summary: This week vs Last week */}
       {(weeklySummary.thisWeek.sessions > 0 || weeklySummary.lastWeek.sessions > 0) && (
         <div className="card mb-4">
-          <div className="text-[0.6rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-muted)" }}>Resumen Semanal</div>
+          <div className="text-[0.6rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-muted)" }}>{t("progress.weeklySummary")}</div>
           <div className="grid grid-cols-4 gap-2 text-center">
             {([
-              { label: "Sesiones", curr: weeklySummary.thisWeek.sessions, prev: weeklySummary.lastWeek.sessions, fmt: (v: number) => String(v) },
+              { label: t("progress.sessions"), curr: weeklySummary.thisWeek.sessions, prev: weeklySummary.lastWeek.sessions, fmt: (v: number) => String(v) },
               { label: "Sets", curr: weeklySummary.thisWeek.sets, prev: weeklySummary.lastWeek.sets, fmt: (v: number) => String(v) },
-              { label: "Volumen", curr: weeklySummary.thisWeek.volume, prev: weeklySummary.lastWeek.volume, fmt: (v: number) => v > 1000 ? `${(v / 1000).toFixed(1)}k` : String(v) },
+              { label: t("progress.volume"), curr: weeklySummary.thisWeek.volume, prev: weeklySummary.lastWeek.volume, fmt: (v: number) => v > 1000 ? `${(v / 1000).toFixed(1)}k` : String(v) },
               { label: "Rating", curr: weeklySummary.thisWeek.avgRating, prev: weeklySummary.lastWeek.avgRating, fmt: (v: number) => v > 0 ? v.toFixed(1) : "—" },
             ] as const).map((item) => {
               const diff = item.prev > 0 ? ((item.curr - item.prev) / item.prev) * 100 : (item.curr > 0 ? 100 : 0);
@@ -171,18 +172,18 @@ export default function ProgressPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "var(--bg-elevated)" }}>
-        {tabs.map((t) => (
+        {tabs.map((tb) => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tb.id}
+            onClick={() => setTab(tb.id)}
             className="flex-1 text-[0.72rem] font-bold py-2 rounded-lg cursor-pointer border-none transition-all"
             style={{
-              background: tab === t.id ? "var(--bg-card)" : "transparent",
-              color: tab === t.id ? "var(--text)" : "var(--text-muted)",
-              boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+              background: tab === tb.id ? "var(--bg-card)" : "transparent",
+              color: tab === tb.id ? "var(--text)" : "var(--text-muted)",
+              boxShadow: tab === tb.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
             }}
           >
-            {t.label}
+            {tb.label}
           </button>
         ))}
       </div>
@@ -195,7 +196,7 @@ export default function ProgressPage() {
           <div className="grid grid-cols-4 gap-1.5 mb-4">
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{unit === "lbs" ? kgToLbs(latestWeight) : latestWeight}{unit}</div>
-              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Peso</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.weight")}</div>
               {weightChange !== 0 && (
                 <div className={`text-[0.6rem] font-bold ${weightChange < 0 ? "text-[#34C759]" : "text-[#FF3B30]"}`}>
                   {weightChange > 0 ? "+" : ""}{(unit === "lbs" ? kgToLbs(weightChange) : weightChange).toFixed(1)}
@@ -204,26 +205,26 @@ export default function ProgressPage() {
             </div>
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{sleepAvg}h</div>
-              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Sueño</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.sleep")}</div>
             </div>
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{energyAvg}</div>
-              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Energía</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.energy")}</div>
             </div>
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{streak}</div>
-              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Racha</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.streak")}</div>
             </div>
           </div>
 
           {/* Weight Chart */}
           <div className="card mb-3.5">
             <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>
-              Evolución de Peso
+              {t("progress.weightEvolution")}
             </div>
             {weightData.length < 2 ? (
               <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>
-                Necesitás al menos 2 pesajes en check-ins
+                {t("progress.needAtLeast2Weights")}
               </div>
             ) : (
               <div className="relative h-[140px]">
@@ -238,7 +239,7 @@ export default function ProgressPage() {
                   ))}
                   {profileData.goalWeight >= minW && profileData.goalWeight <= maxW && (
                     <div className="absolute left-0 right-0 border-b border-dashed border-[#34C75966]" style={{ top: `${((maxW - profileData.goalWeight) / rangeW) * 100}%` }}>
-                      <span className="absolute right-0 -top-3 text-[0.5rem] text-[#34C759]">Meta {profileData.goalWeight}</span>
+                      <span className="absolute right-0 -top-3 text-[0.5rem] text-[#34C759]">{t("progress.goalMeta")} {profileData.goalWeight}</span>
                     </div>
                   )}
                   <svg viewBox={`0 0 ${(weightData.length - 1) * 40 + 20} 140`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
@@ -264,23 +265,23 @@ export default function ProgressPage() {
           {/* Sleep History */}
           <div className="card mb-3.5">
             <div className="flex items-center justify-between mb-2.5">
-              <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Sueño</div>
-              <Link href="/sleep" className="text-[0.58rem] no-underline font-semibold" style={{ color: "#5E5CE6" }}>Ver detalle →</Link>
+              <div className="text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>{t("progress.sleep")}</div>
+              <Link href="/sleep" className="text-[0.58rem] no-underline font-semibold" style={{ color: "#5E5CE6" }}>{t("progress.seeDetail")}</Link>
             </div>
             <div className="flex items-center gap-3 mb-2.5">
               <div className="text-center">
                 <div className="text-lg font-black">{sleepAvg}h</div>
-                <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Promedio</div>
+                <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.average")}</div>
               </div>
               {getSleepQualityAvg(7) > 0 && (
                 <div className="text-center">
                   <div className="text-lg">{QUALITY_EMOJIS[Math.round(getSleepQualityAvg(7))]}</div>
-                  <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Calidad</div>
+                  <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.quality")}</div>
                 </div>
               )}
             </div>
             {checkins.length === 0 ? (
-              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Sin datos todavía</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("progress.noDataYet")}</div>
             ) : (
               <>
                 <div className="flex gap-0.5 items-end h-[60px]">
@@ -310,10 +311,10 @@ export default function ProgressPage() {
           {/* Energy Trend */}
           <div className="card mb-3.5">
             <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>
-              Energía · {energyAvg}/5
+              {t("progress.energy")} · {energyAvg}/5
             </div>
             {checkins.length === 0 ? (
-              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Sin datos todavía</div>
+              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("progress.noDataYet")}</div>
             ) : (
               <div className="flex gap-0.5 items-end h-[40px]">
                 {checkins.slice(-21).map((c, i) => {
@@ -338,22 +339,22 @@ export default function ProgressPage() {
           <div className="card">
             <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Check-ins</div>
             {checkins.length === 0 ? (
-              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Hacé tu primer check-in desde el dashboard</div>
+              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("progress.makeFirstCheckin")}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-[0.7rem]" style={{ borderCollapse: "collapse" }}>
                   <thead>
                     <tr className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>
-                      <th className="text-left py-1 font-semibold">Fecha</th>
-                      <th className="text-center py-1 font-semibold">Peso</th>
-                      <th className="text-center py-1 font-semibold">Sueño</th>
-                      <th className="text-center py-1 font-semibold">Energía</th>
-                      <th className="text-center py-1 font-semibold">Dolor</th>
+                      <th className="text-left py-1 font-semibold">{t("progress.dateCol")}</th>
+                      <th className="text-center py-1 font-semibold">{t("progress.weightCol")}</th>
+                      <th className="text-center py-1 font-semibold">{t("progress.sleepCol")}</th>
+                      <th className="text-center py-1 font-semibold">{t("progress.energyCol")}</th>
+                      <th className="text-center py-1 font-semibold">{t("progress.painCol")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[...checkins].reverse().slice(0, 14).map((c, i) => {
-                      const sorenessLabels = ["—", "Leve", "Mod", "Alto"];
+                      const sorenessLabels = [t("progress.sorenessNone"), t("progress.sorenessLight"), t("progress.sorenessMod"), t("progress.sorenessHigh")];
                       const energyLabels = ["", "1", "2", "3", "4", "5"];
                       return (
                         <tr key={i} style={{ borderTop: "1px solid var(--border-subtle)" }}>
@@ -386,8 +387,8 @@ export default function ProgressPage() {
                 <div className="card mb-3.5 flex items-center gap-3" style={{ borderLeft: "3px solid #FF9500" }}>
                   <AlertTriangle size={20} className="text-[#FF9500] shrink-0" />
                   <div>
-                    <div className="text-sm font-bold text-[#FF9500]">Semana de Deload</div>
-                    <div className="text-[0.68rem]" style={{ color: "var(--text-muted)" }}>Reducí volumen -40%, mantené intensidad.</div>
+                    <div className="text-sm font-bold text-[#FF9500]">{t("progress.deloadWeek")}</div>
+                    <div className="text-[0.68rem]" style={{ color: "var(--text-muted)" }}>{t("progress.deloadAdvice")}</div>
                   </div>
                 </div>
               );
@@ -397,8 +398,8 @@ export default function ProgressPage() {
                 <div className="card mb-3.5 flex items-center gap-3" style={{ borderLeft: "3px solid #FFCC00" }}>
                   <AlertTriangle size={18} className="text-[#FFCC00] shrink-0" />
                   <div>
-                    <div className="text-[0.75rem] font-bold">Deload la próxima semana</div>
-                    <div className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>Pusheá fuerte esta semana.</div>
+                    <div className="text-[0.75rem] font-bold">{t("progress.deloadNextWeek")}</div>
+                    <div className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>{t("progress.pushHardThisWeek")}</div>
                   </div>
                 </div>
               );
@@ -425,17 +426,17 @@ export default function ProgressPage() {
             <div className="card p-3 text-center">
               <Dumbbell size={16} className="text-[#34C759] mx-auto mb-1" />
               <div className="text-xl font-black">{trainingDays}</div>
-              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Días entreno</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.trainingDaysFull")}</div>
             </div>
             <div className="card p-3 text-center">
               <Activity size={16} className="mx-auto mb-1" style={{ color: "var(--accent)" }} />
               <div className="text-xl font-black">{sessions.reduce((a, s) => a + s.exercises.reduce((b, e) => b + e.sets.length, 0), 0)}</div>
-              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Sets totales</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.totalSets")}</div>
             </div>
             <div className="card p-3 text-center">
               <Flame size={16} className="text-[#FF9500] mx-auto mb-1" />
               <div className="text-xl font-black">{streak}</div>
-              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>Racha</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.streak")}</div>
             </div>
           </div>
 
@@ -453,9 +454,9 @@ export default function ProgressPage() {
 
           {/* Sets per week chart */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Sets por Semana</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>{t("progress.setsPerWeek")}</div>
             {weeklyVolume.length < 2 ? (
-              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Necesitás al menos 2 semanas de datos</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("progress.needAtLeast2Weeks")}</div>
             ) : (() => {
               const maxSets = Math.max(...weeklyVolume.map((w) => w.sets));
               return (
@@ -479,9 +480,9 @@ export default function ProgressPage() {
 
           {/* Volume (weight × reps) per week */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Volumen Total (kg × reps)</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>{t("progress.totalVolume")}</div>
             {weeklyVolume.length < 2 ? (
-              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Necesitás más datos</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("progress.needMoreData")}</div>
             ) : (() => {
               const maxVol = Math.max(...weeklyVolume.map((w) => w.volume));
               return (
@@ -503,9 +504,9 @@ export default function ProgressPage() {
 
           {/* Sessions per week */}
           <div className="card mb-3.5">
-            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Sesiones por Semana</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>{t("progress.sessionsPerWeek")}</div>
             {weeklyVolume.length < 2 ? (
-              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Necesitás más datos</div>
+              <div className="text-center py-5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("progress.needMoreData")}</div>
             ) : (
               <div className="flex gap-1 items-end h-[70px]">
                 {weeklyVolume.map((w, i) => (
@@ -521,18 +522,18 @@ export default function ProgressPage() {
 
           {/* Weekly breakdown table */}
           <div className="card">
-            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>Detalle Semanal</div>
+            <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>{t("progress.weeklyDetail")}</div>
             {weeklyVolume.length === 0 ? (
-              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>Sin datos</div>
+              <div className="text-center py-2.5 text-[0.8rem]" style={{ color: "var(--text-muted)" }}>{t("progress.noData")}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-[0.7rem]" style={{ borderCollapse: "collapse" }}>
                   <thead>
                     <tr className="text-[0.55rem] uppercase" style={{ color: "var(--text-muted)" }}>
-                      <th className="text-left py-1 font-semibold">Semana</th>
-                      <th className="text-center py-1 font-semibold">Sesiones</th>
-                      <th className="text-center py-1 font-semibold">Sets</th>
-                      <th className="text-right py-1 font-semibold">Volumen</th>
+                      <th className="text-left py-1 font-semibold">{t("progress.weekCol")}</th>
+                      <th className="text-center py-1 font-semibold">{t("progress.sessions")}</th>
+                      <th className="text-center py-1 font-semibold">{t("progress.setsCol")}</th>
+                      <th className="text-right py-1 font-semibold">{t("progress.volumeCol")}</th>
                     </tr>
                   </thead>
                   <tbody>
