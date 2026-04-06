@@ -401,6 +401,11 @@ const KEYS = {
   goals: "mark-pt-goals",
   supplements: "mark-pt-supplements",
   supplementLogs: "mark-pt-supplement-logs",
+  habits: "mark-pt-habits",
+  habitLogs: "mark-pt-habit-logs",
+  faceExercises: "mark-pt-face-exercises",
+  faceRoutines: "mark-pt-face-routines",
+  faceSessions: "mark-pt-face-sessions",
 } as const;
 
 // === Helpers ===

@@ -17,6 +17,8 @@ import {
   type DayStatus,
 } from "@/lib/storage";
 import { getAchievementStats } from "@/lib/achievements";
+import { getActiveHabits, getDayCompletionRate } from "@/lib/habits";
+import { getActiveFaceRoutines, getFaceRoutineCompletionForDate } from "@/lib/face-exercises";
 import Link from "next/link";
 import {
   Play,
@@ -30,6 +32,8 @@ import {
   Moon,
   CalendarDays,
   Search,
+  CheckSquare,
+  Scan,
 } from "lucide-react";
 import { PageTransition, StaggerList, StaggerItem } from "@/components/motion";
 import { t } from "@/lib/i18n";
@@ -61,6 +65,10 @@ export default function Dashboard() {
   const [badgeStats, setBadgeStats] = useState({ unlocked: 0, total: 0, percentage: 0 });
   const [isRestDay, setIsRestDay] = useState(false);
   const [startWeight, setStartWeight] = useState(81.2);
+  const [habitCount, setHabitCount] = useState(0);
+  const [habitCompletion, setHabitCompletion] = useState(0);
+  const [faceRoutineCount, setFaceRoutineCount] = useState(0);
+  const [faceCompletion, setFaceCompletion] = useState(0);
 
   useEffect(() => { reload(); }, []);
 
@@ -120,6 +128,20 @@ export default function Dashboard() {
     );
 
     setBadgeStats(getAchievementStats());
+
+    // Habits & Face
+    const activeHabits = getActiveHabits();
+    setHabitCount(activeHabits.length);
+    setHabitCompletion(Math.round(getDayCompletionRate(todayStr) * 100));
+    const faceRoutines = getActiveFaceRoutines();
+    setFaceRoutineCount(faceRoutines.length);
+    if (faceRoutines.length > 0) {
+      const completions = faceRoutines.map(r => {
+        const c = getFaceRoutineCompletionForDate(r.id, todayStr);
+        return c.done / Math.max(c.total, 1);
+      });
+      setFaceCompletion(Math.round((completions.reduce((a, b) => a + b, 0) / completions.length) * 100));
+    }
   }
 
   const proteinPct = Math.min(100, Math.round((todayProtein / macroTargets.protein) * 100));
@@ -313,6 +335,50 @@ export default function Dashboard() {
               </div>
             </Link>
           </StaggerItem>
+
+          {/* ───── HABITS CARD ───── */}
+          {habitCount > 0 && (
+            <StaggerItem>
+              <Link href="/habits" className="no-underline text-inherit">
+                <div className="card mb-4 flex items-center justify-between py-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(48,209,88,0.08)" }}>
+                      <CheckSquare size={15} style={{ color: "var(--accent-green)" }} />
+                    </div>
+                    <div>
+                      <div className="text-[0.75rem] font-semibold">{t("habits.title")}</div>
+                      <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                        {habitCompletion}% hoy · {habitCount} hábitos
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+                </div>
+              </Link>
+            </StaggerItem>
+          )}
+
+          {/* ───── FACE TRAINING CARD ───── */}
+          {faceRoutineCount > 0 && (
+            <StaggerItem>
+              <Link href="/face" className="no-underline text-inherit">
+                <div className="card mb-4 flex items-center justify-between py-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(94,92,230,0.08)" }}>
+                      <Scan size={15} style={{ color: "var(--accent-violet)" }} />
+                    </div>
+                    <div>
+                      <div className="text-[0.75rem] font-semibold">{t("face.title")}</div>
+                      <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                        {faceCompletion}% hoy · {faceRoutineCount} rutinas
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+                </div>
+              </Link>
+            </StaggerItem>
+          )}
 
           {/* ───── RECENT ACTIVITY ───── */}
           {recentSessions.length > 0 && (

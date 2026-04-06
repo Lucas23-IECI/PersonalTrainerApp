@@ -136,3 +136,63 @@ export function getQuickActions(): { id: string; title: string; href: string }[]
     { id: "calculators", title: "Calculadoras", href: "/calculators" },
   ];
 }
+
+// === 9.0 — Habit Reminders ===
+const HABIT_REMINDER_BASE_ID = 70000;
+
+function habitIdToNotificationId(habitId: string, slotIndex: number): number {
+  let hash = 0;
+  for (let i = 0; i < habitId.length; i++) {
+    hash = ((hash << 5) - hash + habitId.charCodeAt(i)) | 0;
+  }
+  return HABIT_REMINDER_BASE_ID + (Math.abs(hash) % 9000) + slotIndex;
+}
+
+export async function scheduleHabitReminders(
+  habitId: string,
+  habitName: string,
+  times: { hour: number; minute: number; label: string }[]
+) {
+  if (!isNative()) {
+    safeSetItem(`mark-pt-habit-reminders-${habitId}`, JSON.stringify(times));
+    return;
+  }
+  try {
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
+    const perm = await LocalNotifications.checkPermissions();
+    if (perm.display !== "granted") {
+      const req = await LocalNotifications.requestPermissions();
+      if (req.display !== "granted") return;
+    }
+    // Cancel existing for this habit
+    await cancelHabitReminders(habitId, times.length);
+
+    const now = new Date();
+    const notifications = times.map((t, i) => {
+      const scheduled = new Date(now.getFullYear(), now.getMonth(), now.getDate(), t.hour, t.minute, 0);
+      if (scheduled <= now) scheduled.setDate(scheduled.getDate() + 1);
+      return {
+        id: habitIdToNotificationId(habitId, i),
+        title: `⏰ ${habitName}`,
+        body: t.label ? `${t.label} — ¡Es hora!` : "¡Es hora de completar tu hábito!",
+        schedule: { at: scheduled, repeats: true, every: "day" as const },
+      };
+    });
+    await LocalNotifications.schedule({ notifications });
+  } catch { /* silently fail */ }
+}
+
+export async function cancelHabitReminders(habitId: string, maxSlots = 3) {
+  if (isNative()) {
+    try {
+      const { LocalNotifications } = await import("@capacitor/local-notifications");
+      const ids = Array.from({ length: maxSlots }, (_, i) => ({
+        id: habitIdToNotificationId(habitId, i),
+      }));
+      await LocalNotifications.cancel({ notifications: ids });
+    } catch { /* silently fail */ }
+  }
+  if (typeof window !== "undefined") {
+    safeRemoveItem(`mark-pt-habit-reminders-${habitId}`);
+  }
+}
