@@ -22,6 +22,8 @@ interface Props {
 const energyLabels = ["", "Muerto", "Bajo", "Normal", "Bien", "Top"];
 const energyColors = ["", "#FF3B30", "#FF9500", "#FF9500", "#34C759", "#34C759"];
 const sorenessLabels = ["Nada", "Leve", "Moderado", "Fuerte"];
+const stressLabels = ["", "Relajado", "Bajo", "Normal", "Alto", "Extremo"];
+const stressColors = ["", "#34C759", "#34C759", "#FF9500", "#FF3B30", "#FF3B30"];
 
 export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeight }: Props) {
   const todayStr = today();
@@ -29,6 +31,7 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
   const [sleepQuality, setSleepQuality] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [energy, setEnergy] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [soreness, setSoreness] = useState<0 | 1 | 2 | 3>(1);
+  const [stress, setStress] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [weight, setWeight] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -40,6 +43,7 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
         setSleepQuality(existing.sleepQuality || 3);
         setEnergy(existing.energy);
         setSoreness(existing.soreness);
+        setStress(existing.stress || 3);
         setWeight(existing.weight ? String(existing.weight) : "");
         setNotes(existing.notes || "");
       } else {
@@ -47,6 +51,7 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
         setSleepQuality(3);
         setEnergy(3);
         setSoreness(1);
+        setStress(3);
         setWeight(defaultWeight ? String(defaultWeight) : "");
         setNotes("");
       }
@@ -60,6 +65,7 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
       sleepQuality,
       energy,
       soreness,
+      stress,
       weight: weight ? parseFloat(weight) : undefined,
       notes: notes || undefined,
     };
@@ -202,6 +208,30 @@ export default function CheckinBottomSheet({ open, onClose, onSaved, defaultWeig
                       }}
                     >
                       {sorenessLabels[v]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stress (7.3) */}
+              <div className="mb-5">
+                <label className="block text-[0.62rem] uppercase mb-2" style={{ color: "var(--text-muted)" }}>
+                  Nivel de estrés
+                </label>
+                <div className="flex gap-1.5">
+                  {([1, 2, 3, 4, 5] as const).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setStress(v)}
+                      className="flex-1 py-2.5 rounded-lg text-[0.6rem] font-semibold"
+                      style={{
+                        background: stress === v ? stressColors[v] : "var(--bg-elevated)",
+                        border: `1px solid ${stress === v ? stressColors[v] : "var(--border)"}`,
+                        color: stress === v ? "#000" : "var(--text-muted)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {stressLabels[v]}
                     </button>
                   ))}
                 </div>

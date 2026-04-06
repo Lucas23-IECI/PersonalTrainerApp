@@ -710,6 +710,39 @@ const translations: Record<string, Record<Lang, string>> = {
   "search.hint": { es: "Escribí al menos 2 letras para buscar", en: "Type at least 2 letters to search" },
   "search.noResults": { es: "Sin resultados", en: "No results" },
   "search.tryAnother": { es: "Probá con otro término", en: "Try a different term" },
+
+  // ── Supplements (7.1) ──
+  "supps.title": { es: "Suplementos", en: "Supplements" },
+  "supps.taken": { es: "Tomado", en: "Taken" },
+  "supps.pending": { es: "Pendiente", en: "Pending" },
+  "supps.streak": { es: "Racha", en: "Streak" },
+  "supps.days": { es: "días", en: "days" },
+  "supps.addNew": { es: "Agregar suplemento", en: "Add supplement" },
+  "supps.name": { es: "Nombre", en: "Name" },
+  "supps.dose": { es: "Dosis", en: "Dose" },
+  "supps.when": { es: "Cuándo", en: "When" },
+  "supps.icon": { es: "Icono", en: "Icon" },
+  "supps.save": { es: "Guardar", en: "Save" },
+  "supps.delete": { es: "Eliminar", en: "Delete" },
+  "supps.allTaken": { es: "¡Todos tomados!", en: "All taken!" },
+  "supps.progress": { es: "progreso hoy", en: "today's progress" },
+
+  // ── Hydration (7.2) ──
+  "hydration.dynamic": { es: "Meta dinámica", en: "Dynamic goal" },
+  "hydration.trainingDay": { es: "Día de entrenamiento (+0.5L)", en: "Training day (+0.5L)" },
+  "hydration.restDay": { es: "Día de descanso", en: "Rest day" },
+  "hydration.basedOnWeight": { es: "Basado en tu peso", en: "Based on your weight" },
+
+  // ── Stress (7.3) ──
+  "stress.title": { es: "Estrés", en: "Stress" },
+  "stress.level": { es: "Nivel de estrés", en: "Stress level" },
+  "stress.relaxed": { es: "Relajado", en: "Relaxed" },
+  "stress.low": { es: "Bajo", en: "Low" },
+  "stress.normal": { es: "Normal", en: "Normal" },
+  "stress.high": { es: "Alto", en: "High" },
+  "stress.extreme": { es: "Extremo", en: "Extreme" },
+  "stress.avg": { es: "Estrés prom", en: "Avg stress" },
+  "stress.correlation": { es: "Estrés vs Rendimiento", en: "Stress vs Performance" },
 };
 
 /** Get a translated string by key */

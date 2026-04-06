@@ -16,7 +16,25 @@ export interface DailyCheckin {
   wakeTime?: string; // HH:MM
   energy: 1 | 2 | 3 | 4 | 5;
   soreness: 0 | 1 | 2 | 3;
+  stress?: 1 | 2 | 3 | 4 | 5; // 7.3 — stress level
   notes?: string;
+}
+
+// === Supplement Tracking (7.1) ===
+
+export interface Supplement {
+  id: string;
+  name: string;
+  dose: string;
+  when: string;
+  icon: string;
+  reminderTime?: string;
+  active: boolean;
+}
+
+export interface SupplementLog {
+  date: string;
+  taken: Record<string, boolean>;
 }
 
 export type SetType = 'normal' | 'warmup' | 'dropset' | 'failure' | 'amrap' | 'restpause' | 'myoreps' | 'cluster';
@@ -359,6 +377,8 @@ const KEYS = {
   pantry: "mark-pt-pantry",
   mealPrepList: "mark-pt-meal-prep-list",
   goals: "mark-pt-goals",
+  supplements: "mark-pt-supplements",
+  supplementLogs: "mark-pt-supplement-logs",
 } as const;
 
 // === Helpers ===
@@ -1071,4 +1091,118 @@ export function updateGoalProgress(id: string, currentValue: number): void {
   if (!goal) return;
   goal.currentValue = currentValue;
   save(KEYS.goals, all);
+}
+
+// =============================================
+// 7.1 — Supplement Tracking
+// =============================================
+
+const DEFAULT_SUPPLEMENTS: Supplement[] = [
+  { id: "creatina", name: "Creatina", dose: "5g", when: "Con cualquier comida", icon: "💪", active: true },
+  { id: "vitamina-c", name: "Vitamina C", dose: "1000mg", when: "Con desayuno", icon: "🍊", active: true },
+  { id: "vitamina-d3", name: "Vitamina D3", dose: "2000 IU", when: "Con comida con grasa", icon: "☀️", active: true },
+  { id: "whey", name: "Whey Protein", dose: "1 scoop", when: "Post-entreno", icon: "🥛", active: true },
+  { id: "potasio", name: "Citrato de Potasio", dose: "600mg", when: "Con comida", icon: "🧂", active: false },
+];
+
+export function getSupplements(): Supplement[] {
+  const raw = load<Supplement>(KEYS.supplements);
+  if (raw.length === 0) {
+    save(KEYS.supplements, DEFAULT_SUPPLEMENTS);
+    return DEFAULT_SUPPLEMENTS;
+  }
+  return raw;
+}
+
+export function saveSupplement(supp: Supplement): void {
+  const all = getSupplements().filter((s) => s.id !== supp.id);
+  all.push(supp);
+  save(KEYS.supplements, all);
+}
+
+export function deleteSupplement(id: string): void {
+  save(KEYS.supplements, getSupplements().filter((s) => s.id !== id));
+}
+
+export function getSupplementLog(date: string): SupplementLog {
+  const all = load<SupplementLog>(KEYS.supplementLogs);
+  return all.find((l) => l.date === date) || { date, taken: {} };
+}
+
+export function toggleSupplementTaken(date: string, suppId: string): void {
+  const all = load<SupplementLog>(KEYS.supplementLogs);
+  const existing = all.find((l) => l.date === date);
+  if (existing) {
+    existing.taken[suppId] = !existing.taken[suppId];
+  } else {
+    all.push({ date, taken: { [suppId]: true } });
+  }
+  save(KEYS.supplementLogs, all);
+}
+
+export function getSupplementStreak(suppId: string): number {
+  const logs = load<SupplementLog>(KEYS.supplementLogs);
+  let streak = 0;
+  const d = new Date();
+  for (let i = 0; i < 365; i++) {
+    const dateStr = d.toISOString().split("T")[0];
+    const log = logs.find((l) => l.date === dateStr);
+    if (log?.taken[suppId]) {
+      streak++;
+    } else if (i > 0) {
+      break;
+    }
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+// =============================================
+// 7.2 — Dynamic Hydration Goal
+// =============================================
+
+export function getDynamicWaterGoal(): number {
+  const profile = getProfile();
+  const weight = profile?.weight || 70;
+  let goal = weight * 0.033;
+  const todayStr = today();
+  const sessions = getSessions();
+  const trainedToday = sessions.some((s) => s.date === todayStr && s.completed);
+  if (trainedToday) goal += 0.5;
+  return Math.round(Math.max(2.0, Math.min(5.0, goal)) * 10) / 10;
+}
+
+// =============================================
+// 7.3 — Stress-Performance Correlation
+// =============================================
+
+export function getStressPerformanceData(): { date: string; stress: number; volume: number; avgRPE: number }[] {
+  const checkins = getCheckins();
+  const sessions = getSessions().filter((s) => s.completed);
+  const result: { date: string; stress: number; volume: number; avgRPE: number }[] = [];
+
+  for (const ci of checkins) {
+    if (!ci.stress) continue;
+    const daySessions = sessions.filter((s) => s.date === ci.date);
+    if (daySessions.length === 0) continue;
+    let totalVolume = 0;
+    let totalRPE = 0;
+    let rpeCount = 0;
+    for (const session of daySessions) {
+      for (const ex of session.exercises) {
+        if (ex.skipped) continue;
+        for (const set of ex.sets) {
+          totalVolume += (set.weight || 0) * set.reps;
+          if (set.rpe) { totalRPE += set.rpe; rpeCount++; }
+        }
+      }
+    }
+    result.push({
+      date: ci.date,
+      stress: ci.stress,
+      volume: Math.round(totalVolume),
+      avgRPE: rpeCount > 0 ? Math.round((totalRPE / rpeCount) * 10) / 10 : 0,
+    });
+  }
+  return result.sort((a, b) => a.date.localeCompare(b.date));
 }

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import {
   mealPlan,
   weeklyShoppingList,
-  supplementPlan,
   cookingLessons,
   type Meal,
 } from "@/data/nutrition";
@@ -36,6 +35,16 @@ import {
   type NutritionTargets,
   type MealSlotTarget,
   type Recipe,
+} from "@/lib/storage";
+import {
+  getSupplements,
+  getSupplementLog,
+  toggleSupplementTaken,
+  getSupplementStreak,
+  saveSupplement,
+  deleteSupplement,
+  getDynamicWaterGoal,
+  type Supplement,
 } from "@/lib/storage";
 import {
   Check, Plus, ShoppingCart, Pill, ChefHat, UtensilsCrossed, Trash2,
@@ -83,11 +92,23 @@ export default function NutritionPage() {
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
 
+  // Supplements (7.1)
+  const [supplements, setSupplements] = useState<Supplement[]>([]);
+  const [suppLog, setSuppLog] = useState<Record<string, boolean>>({});
+  const [showAddSupp, setShowAddSupp] = useState(false);
+  const [editSupp, setEditSupp] = useState<Supplement | null>(null);
+
+  // Dynamic hydration (7.2)
+  const [dynamicWaterGoal, setDynamicWaterGoal] = useState(3.0);
+
   useEffect(() => {
     setEntry(getNutritionForDate(selectedDate));
     setCheckedItems(getShoppingChecked());
     setTemplates(getMealTemplates());
     setTargets(getNutritionTargets());
+    setSupplements(getSupplements());
+    setSuppLog(getSupplementLog(selectedDate).taken);
+    setDynamicWaterGoal(getDynamicWaterGoal());
   }, [selectedDate]);
 
   const WATER_TARGET_ML = targets.water * 1000;
@@ -385,7 +406,7 @@ export default function NutritionPage() {
             </div>
           </div>
 
-          {/* Water Tracker - Compact */}
+          {/* Water Tracker - Enhanced (7.2) */}
           <div className="card mb-3">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
@@ -393,11 +414,15 @@ export default function NutritionPage() {
                 <span className="text-[0.75rem] font-bold" style={{ color: "var(--text)" }}>{t("nutrition.water")}</span>
               </div>
               <span className="text-[0.7rem] font-bold" style={{ color: "#007AFF" }}>
-                {(waterMl / 1000).toFixed(1)}L <span style={{ color: "var(--text-muted)" }}>/ {targets.water}L</span>
+                {(waterMl / 1000).toFixed(1)}L <span style={{ color: "var(--text-muted)" }}>/ {dynamicWaterGoal}L</span>
               </span>
             </div>
-            <div className="progress-bar mb-2">
-              <div className="progress-fill" style={{ width: `${Math.min((waterMl / WATER_TARGET_ML) * 100, 100)}%`, background: "#007AFF" }} />
+            <div className="progress-bar mb-1.5">
+              <div className="progress-fill" style={{ width: `${Math.min((waterMl / (dynamicWaterGoal * 1000)) * 100, 100)}%`, background: "#007AFF" }} />
+            </div>
+            <div className="text-[0.55rem] mb-2" style={{ color: "var(--text-muted)" }}>
+              {t("hydration.basedOnWeight")} · {dynamicWaterGoal !== targets.water ? `${t("hydration.dynamic")}: ${dynamicWaterGoal}L` : t("hydration.restDay")}
+              {dynamicWaterGoal > targets.water && ` · ${t("hydration.trainingDay")}`}
             </div>
             <div className="flex gap-1.5">
               <button onClick={() => addWater(GLASS_ML)} className="flex-1 py-1.5 rounded-lg border-none cursor-pointer text-[0.7rem] font-bold text-white" style={{ background: "#007AFF" }}>
@@ -693,23 +718,119 @@ export default function NutritionPage() {
         </div>
       )}
 
-      {/* SUPPS */}
+      {/* SUPPS — Interactive (7.1) */}
       {tab === "supps" && (
-        <div className="card">
-          <div className="text-[0.85rem] font-bold mb-2.5" style={{ color: "var(--text)" }}>Suplementos</div>
-          {supplementPlan.map((s, i) => (
-            <div key={i} className="py-2.5" style={i < supplementPlan.length - 1 ? { borderBottom: "1px solid var(--border)" } : {}}>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-bold" style={{ color: "var(--text)" }}>{s.name}</span>
-                <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded" style={{
-                  background: s.status === "actual" ? "#34C75922" : s.status === "AGREGAR" ? "#FFCC0022" : "var(--accent-soft)",
-                  color: s.status === "actual" ? "#34C759" : s.status === "AGREGAR" ? "#FFCC00" : "var(--accent)",
-                }}>{s.status}</span>
+        <div>
+          {/* Progress banner */}
+          {(() => {
+            const activeSupps = supplements.filter((s) => s.active);
+            const takenCount = activeSupps.filter((s) => suppLog[s.id]).length;
+            const total = activeSupps.length;
+            const allDone = total > 0 && takenCount === total;
+            return (
+              <div className="card mb-3" style={{ borderLeft: allDone ? "3px solid #34C759" : "3px solid var(--accent)" }}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-[0.85rem] font-bold" style={{ color: allDone ? "#34C759" : "var(--text)" }}>
+                      {allDone ? `✅ ${t("supps.allTaken")}` : `${t("supps.title")}`}
+                    </div>
+                    <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                      {takenCount}/{total} · {t("supps.progress")}
+                    </div>
+                  </div>
+                  <div className="text-2xl font-black" style={{ color: allDone ? "#34C759" : "var(--accent)" }}>
+                    {total > 0 ? Math.round((takenCount / total) * 100) : 0}%
+                  </div>
+                </div>
+                {total > 0 && (
+                  <div className="progress-bar mt-2">
+                    <div className="progress-fill" style={{ width: `${(takenCount / total) * 100}%`, background: allDone ? "#34C759" : "var(--accent)" }} />
+                  </div>
+                )}
               </div>
-              <div className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>{s.dose} · {s.when}</div>
-              {s.notes && <div className="text-[0.65rem] mt-0.5" style={{ color: "var(--text-muted)" }}>{s.notes}</div>}
+            );
+          })()}
+
+          {/* Supplement list */}
+          {supplements.filter((s) => s.active).map((s) => {
+            const taken = !!suppLog[s.id];
+            const streak = getSupplementStreak(s.id);
+            return (
+              <div
+                key={s.id}
+                className="card mb-2 flex items-center gap-3 cursor-pointer transition-all"
+                style={{ opacity: taken ? 0.7 : 1, borderLeft: taken ? "3px solid #34C759" : "3px solid transparent" }}
+                onClick={() => {
+                  toggleSupplementTaken(selectedDate, s.id);
+                  setSuppLog(getSupplementLog(selectedDate).taken);
+                }}
+              >
+                <div className="text-2xl flex-shrink-0">{s.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[0.8rem] font-bold ${taken ? "line-through" : ""}`} style={{ color: "var(--text)" }}>
+                      {s.name}
+                    </span>
+                    {taken && <Check size={14} style={{ color: "#34C759" }} />}
+                  </div>
+                  <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                    {s.dose} · {s.when}
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  {streak > 0 && (
+                    <div className="text-[0.55rem] font-bold" style={{ color: "#FF9500" }}>
+                      🔥 {streak} {t("supps.days")}
+                    </div>
+                  )}
+                  <span className={`text-[0.55rem] font-bold px-1.5 py-0.5 rounded ${taken ? "bg-[#34C75922] text-[#34C759]" : "bg-[#FF950022] text-[#FF9500]"}`}>
+                    {taken ? t("supps.taken") : t("supps.pending")}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Inactive supplements */}
+          {supplements.filter((s) => !s.active).length > 0 && (
+            <div className="mt-3 mb-2">
+              <div className="text-[0.6rem] uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>Inactivos</div>
+              {supplements.filter((s) => !s.active).map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg mb-1 cursor-pointer"
+                  style={{ background: "var(--bg-elevated)", opacity: 0.6 }}
+                  onClick={() => {
+                    saveSupplement({ ...s, active: true });
+                    setSupplements(getSupplements());
+                  }}
+                >
+                  <span className="text-sm">{s.icon}</span>
+                  <span className="text-[0.7rem]" style={{ color: "var(--text-muted)" }}>{s.name} — {s.dose}</span>
+                  <Plus size={12} className="ml-auto" style={{ color: "var(--accent)" }} />
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+
+          {/* Add supplement button */}
+          <button
+            onClick={() => { setEditSupp(null); setShowAddSupp(true); }}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 mt-2 rounded-xl cursor-pointer border-none text-[0.75rem] font-bold"
+            style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
+          >
+            <Plus size={14} /> {t("supps.addNew")}
+          </button>
+
+          {/* Add/Edit Supplement Modal */}
+          {showAddSupp && (
+            <SuppModal
+              initial={editSupp}
+              onSave={(s) => { saveSupplement(s); setSupplements(getSupplements()); setShowAddSupp(false); }}
+              onDelete={editSupp ? () => { deleteSupplement(editSupp.id); setSupplements(getSupplements()); setShowAddSupp(false); } : undefined}
+              onClose={() => setShowAddSupp(false)}
+            />
+          )}
         </div>
       )}
 
@@ -1095,4 +1216,84 @@ function getWeeklyCalories(targetCal: number): { label: string; cal: number; isT
     });
   }
   return result;
+}
+
+// ── Supplement Add/Edit Modal (7.1) ──
+function SuppModal({
+  initial,
+  onSave,
+  onDelete,
+  onClose,
+}: {
+  initial: Supplement | null;
+  onSave: (s: Supplement) => void;
+  onDelete?: () => void;
+  onClose: () => void;
+}) {
+  const ICONS = ["💪", "🍊", "☀️", "🥛", "🧂", "💊", "🫧", "🧬", "🩸", "🐟"];
+  const [name, setName] = useState(initial?.name || "");
+  const [dose, setDose] = useState(initial?.dose || "");
+  const [when, setWhen] = useState(initial?.when || "");
+  const [icon, setIcon] = useState(initial?.icon || "💊");
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center" style={{ background: "rgba(0,0,0,0.45)" }} onClick={onClose}>
+      <div
+        className="w-full max-w-[540px] rounded-t-2xl p-5"
+        style={{ background: "var(--bg-card)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-[0.85rem] font-bold mb-4" style={{ color: "var(--text)" }}>
+          {initial ? "Editar suplemento" : t("supps.addNew")}
+        </div>
+
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {ICONS.map((ic) => (
+            <button
+              key={ic}
+              onClick={() => setIcon(ic)}
+              className="w-9 h-9 rounded-lg text-lg flex items-center justify-center cursor-pointer border"
+              style={{
+                background: icon === ic ? "var(--accent-soft)" : "var(--bg-elevated)",
+                borderColor: icon === ic ? "var(--accent)" : "transparent",
+              }}
+            >
+              {ic}
+            </button>
+          ))}
+        </div>
+
+        <input
+          type="text"
+          placeholder={t("supps.name")}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full mb-2"
+        />
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <input type="text" placeholder={t("supps.dose")} value={dose} onChange={(e) => setDose(e.target.value)} />
+          <input type="text" placeholder={t("supps.when")} value={when} onChange={(e) => setWhen(e.target.value)} />
+        </div>
+
+        <div className="flex gap-2">
+          {onDelete && (
+            <button onClick={onDelete} className="py-2.5 px-4 rounded-xl border-none cursor-pointer text-sm font-bold" style={{ background: "#FF3B3022", color: "#FF3B30" }}>
+              {t("supps.delete")}
+            </button>
+          )}
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border cursor-pointer text-sm font-semibold" style={{ background: "transparent", borderColor: "var(--border)", color: "var(--text-muted)" }}>
+            Cancelar
+          </button>
+          <button
+            disabled={!name.trim()}
+            onClick={() => onSave({ id: initial?.id || `supp-${Date.now()}`, name: name.trim(), dose: dose.trim(), when: when.trim(), icon, active: true, reminderTime: initial?.reminderTime })}
+            className="flex-[2] py-2.5 rounded-xl border-none cursor-pointer text-white font-bold text-sm"
+            style={{ background: "var(--accent)", opacity: name.trim() ? 1 : 0.5 }}
+          >
+            {t("supps.save")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

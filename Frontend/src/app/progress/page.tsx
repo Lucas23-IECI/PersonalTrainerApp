@@ -8,6 +8,7 @@ import {
   getTrainingStreak,
   getSettings,
   kgToLbs,
+  getStressPerformanceData,
   type DailyCheckin,
   type WorkoutSession,
 } from "@/lib/storage";
@@ -58,6 +59,10 @@ export default function ProgressPage() {
     : "—";
   const energyAvg = checkins.length > 0
     ? (checkins.reduce((s, c) => s + c.energy, 0) / checkins.length).toFixed(1)
+    : "—";
+  const stressCheckins = checkins.filter((c) => c.stress);
+  const stressAvg = stressCheckins.length > 0
+    ? (stressCheckins.reduce((s, c) => s + (c.stress || 0), 0) / stressCheckins.length).toFixed(1)
     : "—";
 
   const trainingDays = new Set(sessions.filter((s) => s.completed).map((s) => s.date)).size;
@@ -193,7 +198,7 @@ export default function ProgressPage() {
       {tab === "cuerpo" && (
         <TabContent tabKey="cuerpo">
           {/* Summary row */}
-          <div className="grid grid-cols-4 gap-1.5 mb-4">
+          <div className="grid grid-cols-5 gap-1.5 mb-4">
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{unit === "lbs" ? kgToLbs(latestWeight) : latestWeight}{unit}</div>
               <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.weight")}</div>
@@ -210,6 +215,10 @@ export default function ProgressPage() {
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{energyAvg}</div>
               <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("progress.energy")}</div>
+            </div>
+            <div className="card p-2.5 text-center">
+              <div className="text-lg font-black" style={{ color: stressAvg !== "—" && parseFloat(stressAvg) >= 4 ? "#FF3B30" : "var(--text)" }}>{stressAvg}</div>
+              <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>{t("stress.title")}</div>
             </div>
             <div className="card p-2.5 text-center">
               <div className="text-lg font-black">{streak}</div>
@@ -290,6 +299,70 @@ export default function ProgressPage() {
           {/* Training Streak (Feature 2.7) */}
           <TrainingStreakCard />
 
+          {/* Stress Trend (7.3) */}
+          {stressCheckins.length > 0 && (
+            <div className="card mb-3.5">
+              <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>
+                {t("stress.title")} · {stressAvg}/5
+              </div>
+              <div className="flex gap-0.5 items-end h-[40px]">
+                {checkins.slice(-21).map((c, i) => {
+                  const sv = c.stress || 0;
+                  const stressColors: Record<number, string> = { 1: "bg-[#34C759]", 2: "bg-[#34C759]", 3: "bg-[#FF9500]", 4: "bg-[#FF3B30]", 5: "bg-[#FF3B30]" };
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                      <div className={`w-full max-w-[14px] rounded-sm min-h-[2px] opacity-70 ${sv > 0 ? stressColors[sv] : "bg-[var(--border)]"}`} style={{ height: sv > 0 ? `${(sv / 5) * 100}%` : "4%" }} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Stress vs Performance Correlation (7.3) */}
+          {(() => {
+            const spData = getStressPerformanceData();
+            if (spData.length < 3) return null;
+            const byStress: Record<number, { volumes: number[]; rpes: number[] }> = {};
+            for (const d of spData) {
+              if (!byStress[d.stress]) byStress[d.stress] = { volumes: [], rpes: [] };
+              byStress[d.stress].volumes.push(d.volume);
+              if (d.avgRPE > 0) byStress[d.stress].rpes.push(d.avgRPE);
+            }
+            const stressLabelMap = ["", t("stress.relaxed"), t("stress.low"), t("stress.normal"), t("stress.high"), t("stress.extreme")];
+            return (
+              <div className="card mb-3.5">
+                <div className="text-[0.65rem] uppercase tracking-widest mb-2.5" style={{ color: "var(--text-secondary)" }}>
+                  {t("stress.correlation")}
+                </div>
+                <div className="grid grid-cols-5 gap-1 text-center">
+                  {[1, 2, 3, 4, 5].map((level) => {
+                    const data = byStress[level];
+                    const avgVol = data ? Math.round(data.volumes.reduce((a, b) => a + b, 0) / data.volumes.length) : 0;
+                    const avgRPE = data && data.rpes.length > 0 ? (data.rpes.reduce((a, b) => a + b, 0) / data.rpes.length).toFixed(1) : "—";
+                    const count = data ? data.volumes.length : 0;
+                    return (
+                      <div key={level} className="p-1.5 rounded-lg" style={{ background: count > 0 ? "var(--bg-elevated)" : "transparent" }}>
+                        <div className="text-[0.5rem] font-bold mb-0.5" style={{ color: level >= 4 ? "#FF3B30" : level <= 2 ? "#34C759" : "#FF9500" }}>
+                          {stressLabelMap[level]}
+                        </div>
+                        {count > 0 ? (
+                          <>
+                            <div className="text-[0.65rem] font-black">{avgVol > 1000 ? `${(avgVol / 1000).toFixed(1)}k` : avgVol}</div>
+                            <div className="text-[0.45rem]" style={{ color: "var(--text-muted)" }}>vol · RPE {avgRPE}</div>
+                            <div className="text-[0.4rem]" style={{ color: "var(--text-muted)" }}>{count} días</div>
+                          </>
+                        ) : (
+                          <div className="text-[0.5rem]" style={{ color: "var(--text-muted)" }}>—</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Body Weight + PRs (Feature 2.5) */}
           <BodyWeightPRChart />
 
@@ -307,6 +380,7 @@ export default function ProgressPage() {
                       <th className="text-center py-1 font-semibold">{t("progress.weightCol")}</th>
                       <th className="text-center py-1 font-semibold">{t("progress.sleepCol")}</th>
                       <th className="text-center py-1 font-semibold">{t("progress.energyCol")}</th>
+                      <th className="text-center py-1 font-semibold">{t("stress.title")}</th>
                       <th className="text-center py-1 font-semibold">{t("progress.painCol")}</th>
                     </tr>
                   </thead>
@@ -320,6 +394,7 @@ export default function ProgressPage() {
                           <td className="py-1.5 text-center font-bold">{c.weight ? `${c.weight}` : "—"}</td>
                           <td className={`py-1.5 text-center ${(c.sleepHours || 0) < 7 ? "text-[#FF3B30]" : "text-[#34C759]"}`}>{c.sleepHours || "—"}h</td>
                           <td className="py-1.5 text-center">{energyLabels[c.energy]}/5</td>
+                          <td className="py-1.5 text-center" style={{ color: c.stress && c.stress >= 4 ? "#FF3B30" : c.stress && c.stress <= 2 ? "#34C759" : "var(--text-secondary)" }}>{c.stress ? `${c.stress}/5` : "—"}</td>
                           <td className="py-1.5 text-center" style={{ color: "var(--text-secondary)" }}>{sorenessLabels[c.soreness]}</td>
                         </tr>
                       );
