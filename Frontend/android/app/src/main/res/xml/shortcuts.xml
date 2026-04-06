@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="quick_workout"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_workout"
+        android:shortcutLongLabel="@string/shortcut_workout_long"
+        android:icon="@drawable/ic_shortcut_workout">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.markpt.app"
+            android:targetClass="com.markpt.app.MainActivity"
+            android:data="markpt://workout" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="log_weight"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_weight"
+        android:shortcutLongLabel="@string/shortcut_weight_long"
+        android:icon="@drawable/ic_shortcut_weight">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.markpt.app"
+            android:targetClass="com.markpt.app.MainActivity"
+            android:data="markpt://log" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="nutrition"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_nutrition"
+        android:shortcutLongLabel="@string/shortcut_nutrition_long"
+        android:icon="@drawable/ic_shortcut_nutrition">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.markpt.app"
+            android:targetClass="com.markpt.app.MainActivity"
+            android:data="markpt://nutrition" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="timer"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_timer"
+        android:shortcutLongLabel="@string/shortcut_timer_long"
+        android:icon="@drawable/ic_shortcut_timer">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.markpt.app"
+            android:targetClass="com.markpt.app.MainActivity"
+            android:data="markpt://timer" />
+    </shortcut>
+</shortcuts>

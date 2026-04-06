@@ -194,6 +194,7 @@ export type WeightUnit = "kg" | "lbs";
 export type WorkoutViewMode = "today" | "carousel" | "calendar";
 
 export type AccentColor = "blue" | "green" | "red" | "purple" | "orange";
+export type LayoutDensity = "compact" | "default" | "expanded";
 
 export interface UserSettings {
   unit: WeightUnit;
@@ -209,6 +210,8 @@ export interface UserSettings {
   sleepGoal: number; // target hours per night (default 8)
   accentColor: AccentColor; // theme accent color (default "blue")
   customTabs: string[]; // selected nav tab hrefs
+  layoutDensity: LayoutDensity; // 3.8 — compact/default/expanded
+  fontScale: number; // 3.9 — 0.85-1.3 (default 1)
 }
 
 const SETTINGS_KEY = "mark-pt-settings";
@@ -227,6 +230,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   sleepGoal: 8,
   accentColor: "blue",
   customTabs: ["/", "/workout", "/exercises", "/nutrition", "/log", "/profile"],
+  layoutDensity: "default",
+  fontScale: 1,
 };
 
 export function getSettings(): UserSettings {

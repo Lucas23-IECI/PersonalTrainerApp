@@ -4,4 +4,14 @@
     <string name="title_activity_main">MARK PT</string>
     <string name="package_name">com.markpt.app</string>
     <string name="custom_url_scheme">com.markpt.app</string>
+
+    <!-- App Shortcuts (3.7) -->
+    <string name="shortcut_workout">Entreno</string>
+    <string name="shortcut_workout_long">Entreno Rápido</string>
+    <string name="shortcut_weight">Peso</string>
+    <string name="shortcut_weight_long">Registrar Peso</string>
+    <string name="shortcut_nutrition">Nutrición</string>
+    <string name="shortcut_nutrition_long">Ver Nutrición</string>
+    <string name="shortcut_timer">Timer</string>
+    <string name="shortcut_timer_long">Abrir Timer</string>
 </resources>

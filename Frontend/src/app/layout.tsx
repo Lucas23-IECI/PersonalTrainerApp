@@ -9,6 +9,7 @@ import SplashScreen from "@/components/SplashScreen";
 import AutoBackup from "@/components/AutoBackup";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SwipeNavigation from "@/components/SwipeNavigation";
+import DeepLinkHandler from "@/components/DeepLinkHandler";
 
 export const metadata: Metadata = {
   title: "MARK PT - Personal Trainer",
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SplashScreen />
         <AutoBackup />
+        <DeepLinkHandler />
         <OnboardingGate />
         <PWAManager />
         <UpdateChecker />
@@ -60,6 +62,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 try {
                   var s = JSON.parse(localStorage.getItem('mark-pt-settings') || '{}');
                   if (s.accentColor && s.accentColor !== 'blue') document.documentElement.setAttribute('data-accent', s.accentColor);
+                  if (s.layoutDensity && s.layoutDensity !== 'default') document.documentElement.setAttribute('data-density', s.layoutDensity);
+                  if (s.fontScale && s.fontScale !== 1) document.documentElement.setAttribute('data-font-scale', String(s.fontScale));
                 } catch(e){}
               })();
             `,

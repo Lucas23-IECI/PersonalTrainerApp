@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
-import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit, type WorkoutViewMode, type AccentColor } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock, LayoutList, GalleryHorizontalEnd, CalendarDays, Activity, GripVertical } from "lucide-react";
+import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit, type WorkoutViewMode, type AccentColor, type LayoutDensity } from "@/lib/storage";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock, LayoutList, GalleryHorizontalEnd, CalendarDays, Activity, GripVertical, Rows3, Rows4, ALargeSmall } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
 import { t } from "@/lib/i18n";
@@ -40,6 +40,8 @@ export default function SettingsPage() {
   const [gfitLastSync, setGfitLastSync] = useState<string | null>(null);
   const [accentColor, setAccentColor] = useState<AccentColor>("blue");
   const [customTabs, setCustomTabs] = useState<string[]>(DEFAULT_TAB_HREFS);
+  const [layoutDensity, setLayoutDensity] = useState<LayoutDensity>("default");
+  const [fontScale, setFontScale] = useState(1);
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
@@ -60,6 +62,8 @@ export default function SettingsPage() {
     setSleepGoal(s.sleepGoal);
     setAccentColor(s.accentColor || "blue");
     setCustomTabs(s.customTabs || DEFAULT_TAB_HREFS);
+    setLayoutDensity(s.layoutDensity || "default");
+    setFontScale(s.fontScale || 1);
     setGfitConnected(isGoogleFitConnected());
     setGfitLastSync(getLastSyncDate());
     // Handle OAuth callback from Google Fit
@@ -190,6 +194,79 @@ export default function SettingsPage() {
               <span className="text-[0.55rem] font-semibold" style={{ color: accentColor === id ? color : "var(--text-muted)" }}>{label}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* LAYOUT DENSITY — 3.8 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-1">{t("settings.layoutDensity")}</div>
+        <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("settings.layoutDensityDesc")}</p>
+        <div className="flex gap-2">
+          {([
+            { value: "compact" as const, icon: Rows4, label: t("settings.densityCompact") },
+            { value: "default" as const, icon: Rows3, label: t("settings.densityDefault") },
+            { value: "expanded" as const, icon: LayoutList, label: t("settings.densityExpanded") },
+          ]).map(({ value, icon: Icon, label }) => (
+            <button
+              key={value}
+              onClick={() => {
+                setLayoutDensity(value);
+                saveSettings({ ...getSettings(), layoutDensity: value });
+                if (value === "default") {
+                  document.documentElement.removeAttribute("data-density");
+                } else {
+                  document.documentElement.setAttribute("data-density", value);
+                }
+              }}
+              className="flex-1 py-2 rounded-lg text-[0.72rem] font-bold border-none cursor-pointer transition-colors flex flex-col items-center gap-1"
+              style={{
+                background: layoutDensity === value ? "var(--accent)" : "var(--bg-elevated)",
+                color: layoutDensity === value ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* FONT SIZE — 3.9 */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-1 flex items-center gap-2">
+          <ALargeSmall size={16} style={{ color: "var(--accent)" }} />
+          {t("settings.fontSize")}
+        </div>
+        <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("settings.fontSizeDesc")}</p>
+        <div className="flex items-center gap-3">
+          <span className="text-[0.65rem] font-bold" style={{ color: "var(--text-muted)" }}>{t("settings.fontSizeSmall")}</span>
+          <input
+            type="range"
+            min={0.85}
+            max={1.3}
+            step={0.05}
+            value={fontScale}
+            onChange={(e) => {
+              const v = parseFloat(e.target.value);
+              // Round to 2 decimals to avoid float weirdness
+              const rounded = Math.round(v * 100) / 100;
+              setFontScale(rounded);
+              saveSettings({ ...getSettings(), fontScale: rounded });
+              if (rounded === 1) {
+                document.documentElement.removeAttribute("data-font-scale");
+              } else {
+                document.documentElement.setAttribute("data-font-scale", String(rounded));
+              }
+            }}
+            className="flex-1"
+            style={{ accentColor: "var(--accent)" }}
+          />
+          <span className="text-[1rem] font-bold" style={{ color: "var(--text-muted)" }}>{t("settings.fontSizeLarge")}</span>
+        </div>
+        <div className="text-center mt-2">
+          <span className="text-[0.7rem] font-bold" style={{ color: "var(--accent)" }}>
+            {Math.round(fontScale * 100)}%
+          </span>
         </div>
       </div>
 
