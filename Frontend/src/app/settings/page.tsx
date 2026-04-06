@@ -4,11 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
 import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit, type WorkoutViewMode } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock, LayoutList, GalleryHorizontalEnd, CalendarDays } from "lucide-react";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock, LayoutList, GalleryHorizontalEnd, CalendarDays, Activity } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
 import { t } from "@/lib/i18n";
 import { scheduleDailyReminder, cancelDailyReminder } from "@/lib/native";
+import { isGoogleFitConnected, clearGoogleFitAuth, getLastSyncDate } from "@/lib/health-data";
+import { getGoogleFitOAuthUrl, disconnectGoogleFit } from "@/lib/google-fit";
 
 const WEIGHT_INCREMENTS = [0.5, 1, 1.25, 2.5, 5];
 
@@ -33,6 +35,8 @@ export default function SettingsPage() {
   const [reminderMinute, setReminderMinute] = useState(0);
   const [workoutView, setWorkoutView] = useState<WorkoutViewMode>("today");
   const [sleepGoal, setSleepGoal] = useState(8);
+  const [gfitConnected, setGfitConnected] = useState(false);
+  const [gfitLastSync, setGfitLastSync] = useState<string | null>(null);
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
@@ -51,6 +55,16 @@ export default function SettingsPage() {
     setReminderMinute(s.reminderMinute);
     setWorkoutView(s.workoutView);
     setSleepGoal(s.sleepGoal);
+    setGfitConnected(isGoogleFitConnected());
+    setGfitLastSync(getLastSyncDate());
+    // Handle OAuth callback from Google Fit
+    if (typeof window !== "undefined" && window.location.hash.includes("access_token")) {
+      import("@/lib/google-fit").then(({ handleOAuthCallback }) => {
+        handleOAuthCallback();
+        setGfitConnected(isGoogleFitConnected());
+        window.location.hash = "";
+      });
+    }
   }, []);
 
   function toggleTheme() {
@@ -358,6 +372,52 @@ export default function SettingsPage() {
           <div className="flex items-center gap-1.5 text-[0.72rem] text-[#34C759] mt-2">
             <Check size={14} /> {t("settings.backupRestored")}
           </div>
+        )}
+      </div>
+
+      {/* GOOGLE FIT */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2 flex items-center gap-2">
+          <Activity size={16} style={{ color: "var(--accent)" }} />
+          {t("settings.googleFit")}
+        </div>
+        <p className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("settings.googleFitDesc")}</p>
+        {gfitConnected ? (
+          <>
+            <div className="flex items-center gap-1.5 text-[0.72rem] text-[#34C759] mb-2">
+              <Check size={14} /> {t("settings.googleFitConnected")}
+            </div>
+            {gfitLastSync && (
+              <p className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>
+                {t("health.lastSync")}: {new Date(gfitLastSync).toLocaleString()}
+              </p>
+            )}
+            <button
+              onClick={async () => {
+                await disconnectGoogleFit();
+                setGfitConnected(false);
+                setGfitLastSync(null);
+              }}
+              className="btn btn-ghost w-full text-sm"
+              style={{ color: "#FF3B30" }}
+            >
+              {t("settings.googleFitDisconnect")}
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              const url = getGoogleFitOAuthUrl(
+                "",
+                window.location.origin + "/settings"
+              );
+              window.location.href = url;
+            }}
+            className="btn btn-ghost w-full text-sm"
+            style={{ color: "var(--accent)" }}
+          >
+            <Activity size={14} /> {t("settings.googleFitConnect")}
+          </button>
         )}
       </div>
 

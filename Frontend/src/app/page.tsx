@@ -37,6 +37,7 @@ import GoalCountdown from "@/components/home/GoalCountdown";
 import WeekHybridView from "@/components/home/WeekHybridView";
 import NextWorkoutPreview from "@/components/home/NextWorkoutPreview";
 import SleepLogModal from "@/components/sleep/SleepLogModal";
+import GoogleFitWidget from "@/components/GoogleFitWidget";
 
 export default function Dashboard() {
   const todayStr = today();
@@ -240,6 +241,11 @@ export default function Dashboard() {
                 <div className="stat-label">fase</div>
               </div>
             </div>
+          </StaggerItem>
+
+          {/* ───── GOOGLE FIT HEALTH ───── */}
+          <StaggerItem>
+            <GoogleFitWidget />
           </StaggerItem>
 
           {/* ───── MACROS (compact) ───── */}
