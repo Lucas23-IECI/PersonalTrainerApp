@@ -40,8 +40,9 @@ import { type SessionSet, type SessionExercise, SUPERSET_COLORS, SUPERSET_TAGS, 
 import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
 import { vibrateTimerComplete, vibrateMedium, vibrateHeavy, vibrateSuccess, vibrateLight } from "@/lib/haptics";
 import { exerciseLibrary, type LibraryExercise, type ExerciseCategory } from "@/data/exercises";
+import WarmupGenerator from "@/components/WarmupGenerator";
 
-// Default rest times (seconds) by exercise category
+// 4.3 — Smart rest times: compound vs accessory, RPE-adjusted
 const REST_BY_CATEGORY: Record<ExerciseCategory, number> = {
   barbell: 150,
   dumbbell: 90,
@@ -52,18 +53,35 @@ const REST_BY_CATEGORY: Record<ExerciseCategory, number> = {
   cardio: 30,
 };
 
-function getDefaultRest(exerciseId?: string, restStr?: string): number {
-  // If the workout explicitly defines rest, respect it
+// Compound exercises get longer rest; RPE adjusts further
+function getSmartRest(exerciseId: string | undefined, restStr: string | undefined, isCompound: boolean, lastRpe?: number): number {
+  // If explicitly defined, use it
   if (restStr) {
     const parsed = parseInt(restStr.replace(/[^0-9]/g, ""), 10);
     if (parsed > 0) return parsed;
   }
-  // Look up category from library
+  // Base rest by compound/accessory
+  let base = isCompound ? 180 : 75; // 3min compounds, 75s accessories
+
+  // Refine by category if available
   if (exerciseId) {
     const lib = exerciseLibrary.find((e) => e.id === exerciseId);
-    if (lib) return REST_BY_CATEGORY[lib.category];
+    if (lib) {
+      base = isCompound
+        ? (lib.category === "barbell" ? 210 : 180) // barbell compounds 3.5min
+        : REST_BY_CATEGORY[lib.category];
+    }
   }
-  return 60;
+
+  // RPE adjustment: higher RPE = more rest
+  if (lastRpe && lastRpe >= 9) base = Math.round(base * 1.3);      // RPE 9-10: +30%
+  else if (lastRpe && lastRpe >= 8) base = Math.round(base * 1.15); // RPE 8-8.5: +15%
+
+  return base;
+}
+
+function getDefaultRest(exerciseId?: string, restStr?: string): number {
+  return getSmartRest(exerciseId, restStr, false);
 }
 
 
@@ -97,6 +115,16 @@ function SessionContent() {
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [replaceExerciseIdx, setReplaceExerciseIdx] = useState<number | null>(null);
+  const [warmupDismissed, setWarmupDismissed] = useState(false);
+
+  // Collect target muscles for warmup generator
+  const targetMuscles = useMemo(() => {
+    const muscles = new Set<string>();
+    for (const ex of workout.exercises) {
+      for (const m of (ex.primaryMuscles || [])) muscles.add(m);
+    }
+    return [...muscles] as import("@/data/exercises").MuscleGroup[];
+  }, [workout.exercises]);
   const [expandedSetNote, setExpandedSetNote] = useState<string | null>(null); // "exIdx-setIdx"
 
   const [swipeState, setSwipeState] = useState<{ key: string; startX: number; dx: number } | null>(null);
@@ -141,8 +169,8 @@ function SessionContent() {
       const history = getExerciseHistory(ex.name, 1);
       const prev = history[0]?.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps })) || [];
       const restStr = ex.rest || "";
-      const restSec = getDefaultRest(ex.exerciseId, restStr);
       const progEx = programDay?.exercises[i];
+      const restSec = getSmartRest(ex.exerciseId, restStr, progEx?.isCompound ?? false);
 
       const plannedSets: SessionSet[] = [];
       // Warmup sets for compound exercises
@@ -175,6 +203,7 @@ function SessionContent() {
         exIndex: i,
         notes: "",
         restSeconds: restSec,
+        isCompound: progEx?.isCompound ?? false,
         sets: plannedSets,
         supersetTag: ex.superset,
         previousSets: prev,
@@ -304,8 +333,58 @@ function SessionContent() {
         setPrAlert(ex.name);
         setTimeout(() => setPrAlert(null), 3000);
       }
-      setRestTotal(ex.restSeconds);
-      setRestSeconds(ex.restSeconds);
+
+      // 4.4 Special set protocols
+      if (set.setType === 'dropset') {
+        // Auto-add next drop set with ~20% less weight
+        const nextWeight = set.weight ? Math.round(set.weight * 0.8 / 2.5) * 2.5 : undefined;
+        setExercises((prev) =>
+          prev.map((e, i) => {
+            if (i !== exIdx) return e;
+            const insertIdx = setIdx + 1;
+            const newSet: SessionSet = { reps: set.reps, weight: nextWeight, completed: false, isWarmup: false, setType: 'dropset' };
+            const sets = [...e.sets];
+            sets.splice(insertIdx, 0, newSet);
+            return { ...e, sets };
+          })
+        );
+        // Short rest for drop sets (10s)
+        setRestTotal(10);
+        setRestSeconds(10);
+        setRestActive(true);
+        return;
+      }
+
+      if (set.setType === 'restpause') {
+        // Rest-pause: 15s mini-rest between mini-sets
+        setRestTotal(15);
+        setRestSeconds(15);
+        setRestActive(true);
+        return;
+      }
+
+      if (set.setType === 'myoreps') {
+        // Myo-reps: 5s breaths between "match" sets
+        // If reps dropped significantly (< 50% of first myo set), don't auto-rest
+        const myoSets = ex.sets.filter((s) => s.setType === 'myoreps' && s.completed);
+        const firstMyo = ex.sets.find((s) => s.setType === 'myoreps');
+        if (firstMyo && set.reps < firstMyo.reps * 0.5) {
+          // Reps dropped too much — myo-rep cluster done, normal rest
+          const smartRest = getSmartRest(ex.exerciseRef.exerciseId, ex.exerciseRef.rest, ex.isCompound, set.rpe);
+          setRestTotal(smartRest);
+          setRestSeconds(smartRest);
+        } else {
+          setRestTotal(5);
+          setRestSeconds(5);
+        }
+        setRestActive(true);
+        return;
+      }
+
+      // 4.3 Smart rest: adjust by compound/accessory + RPE
+      const smartRest = getSmartRest(ex.exerciseRef.exerciseId, ex.exerciseRef.rest, ex.isCompound, set.rpe);
+      setRestTotal(smartRest);
+      setRestSeconds(smartRest);
       setRestActive(true);
     }
   }
@@ -354,6 +433,7 @@ function SessionContent() {
         exIndex: p.length,
         notes: '',
         restSeconds: REST_BY_CATEGORY[libEx.category] || 60,
+        isCompound: false,
         sets: [
           { reps: prev[0]?.reps || 10, weight: prev[0]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
           { reps: prev[1]?.reps || 10, weight: prev[1]?.weight || undefined, completed: false, isWarmup: false, setType: 'normal' as SetType },
@@ -505,6 +585,10 @@ function SessionContent() {
           <div className="text-[0.72rem] mb-4 py-2.5 px-3 rounded-xl leading-relaxed" style={{ background: "var(--bg-card)", borderLeft: `3px solid ${workout.color}`, color: "var(--text-muted)" }}>
             {workout.note}
           </div>
+        )}
+        {/* 4.1 — Warmup Generator */}
+        {!warmupDismissed && targetMuscles.length > 0 && (
+          <WarmupGenerator targetMuscles={targetMuscles} onClose={() => setWarmupDismissed(true)} />
         )}
         <div className="card mb-5">
           {workout.exercises.map((ex, i) => (

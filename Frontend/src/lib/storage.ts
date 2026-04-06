@@ -19,7 +19,7 @@ export interface DailyCheckin {
   notes?: string;
 }
 
-export type SetType = 'normal' | 'warmup' | 'dropset' | 'failure' | 'amrap';
+export type SetType = 'normal' | 'warmup' | 'dropset' | 'failure' | 'amrap' | 'restpause' | 'myoreps';
 
 export interface LoggedSet {
   reps: number;

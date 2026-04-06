@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, Calculator, Flame, Target, Trophy } from "lucide-react";
+import { ChevronLeft, Calculator, Flame, Target, Trophy, Disc } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSettings } from "@/lib/storage";
+import PlateCalculator from "@/components/PlateCalculator";
 
-type Tab = "1rm" | "tdee" | "macros" | "wilks";
+type Tab = "1rm" | "tdee" | "macros" | "wilks" | "plates";
 
 // ===== FORMULAS =====
 function epley1RM(weight: number, reps: number): number {
@@ -120,6 +121,7 @@ export default function CalculatorsPage() {
     { id: "tdee", label: "TDEE", icon: <Flame size={14} /> },
     { id: "macros", label: "Macros", icon: <Target size={14} /> },
     { id: "wilks", label: "Wilks", icon: <Trophy size={14} /> },
+    { id: "plates", label: "Discos", icon: <Disc size={14} /> },
   ];
 
   return (
@@ -400,6 +402,15 @@ export default function CalculatorsPage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* 4.2 — Plate Calculator */}
+      {tab === "plates" && (
+        <div className="card">
+          <h2 className="text-base font-bold mb-3" style={{ color: "var(--text)" }}>Calculador de Discos</h2>
+          <p className="text-[0.65rem] mb-4" style={{ color: "var(--text-muted)" }}>Visualizá qué discos cargar por cada lado de la barra</p>
+          <PlateCalculator />
         </div>
       )}
     </main>

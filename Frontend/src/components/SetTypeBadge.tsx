@@ -9,14 +9,16 @@ interface SetTypeBadgeProps {
 }
 
 const CONFIG: Record<SetType, { label: string; color: string }> = {
-  normal:  { label: '',  color: 'var(--text-secondary)' },
-  warmup:  { label: 'W', color: '#FF9500' },
-  dropset: { label: 'D', color: '#AF52DE' },
-  failure: { label: 'F', color: '#FF3B30' },
-  amrap:   { label: 'A', color: '#30D158' },
+  normal:    { label: '',   color: 'var(--text-secondary)' },
+  warmup:    { label: 'W',  color: '#FF9500' },
+  dropset:   { label: 'D',  color: '#AF52DE' },
+  failure:   { label: 'F',  color: '#FF3B30' },
+  amrap:     { label: 'A',  color: '#30D158' },
+  restpause: { label: 'RP', color: '#FF6482' },
+  myoreps:   { label: 'M',  color: '#64D2FF' },
 };
 
-const CYCLE_ORDER: SetType[] = ['normal', 'warmup', 'dropset', 'failure', 'amrap'];
+const CYCLE_ORDER: SetType[] = ['normal', 'warmup', 'dropset', 'failure', 'amrap', 'restpause', 'myoreps'];
 
 export default function SetTypeBadge({ type, index, onCycle }: SetTypeBadgeProps) {
   const cfg = CONFIG[type];

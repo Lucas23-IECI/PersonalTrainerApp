@@ -217,7 +217,7 @@ export default function SessionSummary({ session, workoutName }: Props) {
                     {e.sets.map((set, j) => {
                       const typeLabel =
                         set.setType && set.setType !== "normal"
-                          ? { warmup: "W", dropset: "D", failure: "F", amrap: "A" }[set.setType]
+                          ? { warmup: "W", dropset: "D", failure: "F", amrap: "A", restpause: "RP", myoreps: "M" }[set.setType]
                           : null;
                       const typeColor =
                         set.setType === "dropset"
@@ -226,7 +226,11 @@ export default function SessionSummary({ session, workoutName }: Props) {
                             ? "#FF3B30"
                             : set.setType === "amrap"
                               ? "#30D158"
-                              : "#FF9500";
+                              : set.setType === "restpause"
+                                ? "#FF6482"
+                                : set.setType === "myoreps"
+                                  ? "#64D2FF"
+                                  : "#FF9500";
                       return (
                         <tr key={j}>
                           <td className="py-1.5 px-1 font-bold" style={{ color: typeColor }}>

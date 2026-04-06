@@ -14,6 +14,7 @@ export interface SessionExercise {
   exIndex: number;
   notes: string;
   restSeconds: number;
+  isCompound: boolean;
   sets: SessionSet[];
   supersetTag?: string;
   previousSets: { weight: number; reps: number }[];
