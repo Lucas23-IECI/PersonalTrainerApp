@@ -47,11 +47,10 @@ jobs:
 
       - name: Rename APK
         run: |
-          VERSION="${GITHUB_REF_NAME}"
-          cp android/app/build/outputs/apk/debug/app-debug.apk "markpt-${VERSION}.apk"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "mark-pt.apk"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: Frontend/markpt-${{ github.ref_name }}.apk
+          files: Frontend/mark-pt.apk
           generate_release_notes: true
