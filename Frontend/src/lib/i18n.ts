@@ -811,6 +811,28 @@ const translations: Record<string, Record<Lang, string>> = {
   "phaseReview.worstWeek": { es: "Semana más floja", en: "Weakest week" },
   "phaseReview.muscleBreakdown": { es: "Músculos", en: "Muscles" },
   "phaseReview.recommendations": { es: "Recomendaciones", en: "Recommendations" },
+
+  // ── Training Readiness (8.5) ──
+  "readiness.title": { es: "Preparación", en: "Readiness" },
+  "readiness.subtitle": { es: "¿Qué tan listo estás para entrenar?", en: "How ready are you to train?" },
+  "readiness.checkinReminder": { es: "Registrá tu check-in de hoy para mayor precisión", en: "Log today's check-in for better accuracy" },
+  "readiness.sleep": { es: "Sueño", en: "Sleep" },
+  "readiness.recovery": { es: "Recuperación", en: "Recovery" },
+  "readiness.fatigue": { es: "Fatiga", en: "Fatigue" },
+  "readiness.wellness": { es: "Bienestar", en: "Wellness" },
+  "readiness.volume": { es: "Volumen", en: "Volume" },
+  "readiness.intensity": { es: "Intensidad", en: "Intensity" },
+  "readiness.focus": { es: "Enfoque de hoy", en: "Today's focus" },
+  "readiness.breakdown": { es: "Desglose", en: "Breakdown" },
+  "readiness.acwr": { es: "Carga de Entrenamiento", en: "Training Load" },
+  "readiness.weeklyLoad": { es: "Volumen semanal", en: "Weekly volume" },
+  "readiness.acute": { es: "Aguda", en: "Acute" },
+  "readiness.chronic": { es: "Crónica", en: "Chronic" },
+  "readiness.trend": { es: "Tendencia (14 días)", en: "Trend (14 days)" },
+  "readiness.signals": { es: "Señales", en: "Signals" },
+  "readiness.showAll": { es: "Ver todas las señales", en: "Show all signals" },
+  "readiness.showLess": { es: "Ver menos", en: "Show less" },
+  "readiness.howItWorks": { es: "Cómo funciona", en: "How it works" },
 };
 
 /** Get a translated string by key */

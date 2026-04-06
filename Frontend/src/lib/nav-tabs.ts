@@ -19,6 +19,7 @@ import {
   BarChart3,
   Sparkles,
   ClipboardCheck,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 import { getSettings } from "./storage";
@@ -51,6 +52,7 @@ export const ALL_TABS: NavTab[] = [
   { href: "/forecast", label: "Predicciones", icon: BarChart3 },
   { href: "/insights", label: "Insights", icon: Sparkles },
   { href: "/phase-review", label: "Revisión Fase", icon: ClipboardCheck },
+  { href: "/readiness", label: "Preparación", icon: ShieldCheck },
 ];
 
 export const DEFAULT_TAB_HREFS = ["/", "/workout", "/exercises", "/nutrition", "/log", "/profile"];
