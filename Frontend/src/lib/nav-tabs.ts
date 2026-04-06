@@ -13,6 +13,7 @@ import {
   Camera,
   Calculator,
   Activity,
+  CalendarRange,
   type LucideIcon,
 } from "lucide-react";
 import { getSettings } from "./storage";
@@ -39,6 +40,7 @@ export const ALL_TABS: NavTab[] = [
   { href: "/photos", label: "Fotos", icon: Camera },
   { href: "/calculators", label: "Calculadoras", icon: Calculator },
   { href: "/cardio", label: "Cardio", icon: HeartPulse },
+  { href: "/planning", label: "Planificación", icon: CalendarRange },
 ];
 
 export const DEFAULT_TAB_HREFS = ["/", "/workout", "/exercises", "/nutrition", "/log", "/profile"];
