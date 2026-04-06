@@ -1,27 +1,24 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Dumbbell,
-  UtensilsCrossed,
-  ClipboardList,
-  Home,
-  Target,
-  User,
-} from "lucide-react";
-
-const links = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/workout", label: "Entreno", icon: Dumbbell },
-  { href: "/exercises", label: "Músculos", icon: Target },
-  { href: "/nutrition", label: "Nutrición", icon: UtensilsCrossed },
-  { href: "/log", label: "Log", icon: ClipboardList },
-  { href: "/profile", label: "Perfil", icon: User },
-];
+import { getNavTabs, type NavTab } from "@/lib/nav-tabs";
 
 export default function Navigation() {
   const pathname = usePathname();
+  const [tabs, setTabs] = useState<NavTab[]>([]);
+
+  useEffect(() => {
+    setTabs(getNavTabs());
+    const onStorage = () => setTabs(getNavTabs());
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("nav-tabs-changed", onStorage);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("nav-tabs-changed", onStorage);
+    };
+  }, []);
 
   // Hide nav on onboarding and workout session
   if (pathname === "/onboarding" || pathname === "/workout/session") return null;
@@ -38,7 +35,7 @@ export default function Navigation() {
       }}
     >
       <div className="flex justify-around items-center max-w-[540px] mx-auto">
-        {links.map(({ href, label, icon: Icon }) => {
+        {tabs.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== "/" && pathname.startsWith(href));
           return (
             <Link

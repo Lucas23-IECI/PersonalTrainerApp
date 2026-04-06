@@ -136,6 +136,10 @@ const translations: Record<string, Record<Lang, string>> = {
   "settings.darkMode": { es: "Tema Oscuro", en: "Dark Theme" },
   "settings.lightMode": { es: "Tema Claro", en: "Light Theme" },
   "settings.tapToChange": { es: "Tocá para cambiar", en: "Tap to change" },
+  "settings.accentColor": { es: "Color de acento", en: "Accent Color" },
+  "settings.customTabs": { es: "Tabs de navegación", en: "Navigation Tabs" },
+  "settings.customTabsDesc": { es: "Elegí entre 3 y 6 secciones para tu barra de navegación", en: "Choose 3 to 6 sections for your navigation bar" },
+  "settings.customTabsMin": { es: "mín. 3 · máx. 6", en: "min. 3 · max. 6" },
   "settings.weightUnits": { es: "Unidades de Peso", en: "Weight Units" },
   "settings.sound": { es: "Sonido y Vibración", en: "Sound & Haptics" },
   "settings.vibration": { es: "Vibración", en: "Vibration" },
@@ -663,6 +667,23 @@ const translations: Record<string, Record<Lang, string>> = {
   "settings.googleFitConnected": { es: "Google Fit conectado", en: "Google Fit connected" },
   "settings.googleFitConnect": { es: "Conectar Google Fit", en: "Connect Google Fit" },
   "settings.googleFitDisconnect": { es: "Desconectar Google Fit", en: "Disconnect Google Fit" },
+
+  // ── Quick Log ──
+  "quickLog.title": { es: "Registro rápido", en: "Quick Log" },
+  "quickLog.weight": { es: "Peso", en: "Weight" },
+  "quickLog.sleep": { es: "Sueño", en: "Sleep" },
+  "quickLog.water": { es: "Agua", en: "Water" },
+  "quickLog.weightLabel": { es: "Peso corporal (kg)", en: "Body weight (kg)" },
+  "quickLog.sleepLabel": { es: "Horas de sueño", en: "Hours of sleep" },
+  "quickLog.waterLabel": { es: "Registrar agua", en: "Log water" },
+  "quickLog.waterToday": { es: "hoy", en: "today" },
+  "quickLog.saved": { es: "Guardado", en: "Saved" },
+
+  // ── Search ──
+  "search.placeholder": { es: "Buscar ejercicios, rutinas, logros...", en: "Search exercises, routines, badges..." },
+  "search.hint": { es: "Escribí al menos 2 letras para buscar", en: "Type at least 2 letters to search" },
+  "search.noResults": { es: "Sin resultados", en: "No results" },
+  "search.tryAnother": { es: "Probá con otro término", en: "Try a different term" },
 };
 
 /** Get a translated string by key */

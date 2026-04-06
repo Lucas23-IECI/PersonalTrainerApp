@@ -29,9 +29,11 @@ import {
   Trophy,
   Moon,
   CalendarDays,
+  Search,
 } from "lucide-react";
 import { PageTransition, StaggerList, StaggerItem } from "@/components/motion";
 import CheckinBottomSheet from "@/components/CheckinBottomSheet";
+import QuickLogSheet from "@/components/QuickLogSheet";
 import QuickActionsChips from "@/components/home/QuickActionsChips";
 import GoalCountdown from "@/components/home/GoalCountdown";
 import WeekHybridView from "@/components/home/WeekHybridView";
@@ -48,6 +50,7 @@ export default function Dashboard() {
   const [checkin, setCheckin] = useState<DailyCheckin | null>(null);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [sleepOpen, setSleepOpen] = useState(false);
+  const [waterOpen, setWaterOpen] = useState(false);
   const [todayTrained, setTodayTrained] = useState(false);
   const [todayProtein, setTodayProtein] = useState(0);
   const [todayCalories, setTodayCalories] = useState(0);
@@ -155,6 +158,9 @@ export default function Dashboard() {
                 <span className="text-[0.8rem] font-bold" style={{ color: "var(--accent-orange)" }}>{streak}</span>
               </div>
             )}
+            <Link href="/search" className="transition-colors" style={{ color: "var(--text-muted)" }} title="Buscar">
+              <Search size={20} strokeWidth={1.6} />
+            </Link>
             <Link href="/settings" className="transition-colors" style={{ color: "var(--text-muted)" }} title="Ajustes">
               <Settings size={20} strokeWidth={1.6} />
             </Link>
@@ -162,7 +168,7 @@ export default function Dashboard() {
         </div>
 
         {/* ───── QUICK ACTIONS CHIPS ───── */}
-        <QuickActionsChips onOpenCheckin={() => setCheckinOpen(true)} onOpenSleep={() => setSleepOpen(true)} />
+        <QuickActionsChips onOpenCheckin={() => setCheckinOpen(true)} onOpenSleep={() => setSleepOpen(true)} onOpenWater={() => setWaterOpen(true)} />
 
         {/* ───── TODAY'S WORKOUT (hero card) ───── */}
         <StaggerList>
@@ -386,6 +392,12 @@ export default function Dashboard() {
           open={sleepOpen}
           onClose={() => setSleepOpen(false)}
           onSaved={reload}
+        />
+        <QuickLogSheet
+          open={waterOpen}
+          onClose={() => setWaterOpen(false)}
+          onSaved={reload}
+          initialTab="water"
         />
       </main>
     </PageTransition>

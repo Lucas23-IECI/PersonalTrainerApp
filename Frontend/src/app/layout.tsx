@@ -8,6 +8,7 @@ import UpdateChecker from "@/components/UpdateChecker";
 import SplashScreen from "@/components/SplashScreen";
 import AutoBackup from "@/components/AutoBackup";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import SwipeNavigation from "@/components/SwipeNavigation";
 
 export const metadata: Metadata = {
   title: "MARK PT - Personal Trainer",
@@ -42,9 +43,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PWAManager />
         <UpdateChecker />
         <ErrorBoundary>
-          <div className="pb-[70px]">
-            {children}
-          </div>
+          <SwipeNavigation>
+            <div className="pb-[70px]">
+              {children}
+            </div>
+          </SwipeNavigation>
         </ErrorBoundary>
         <ActiveWorkoutBar />
         <Navigation />
@@ -54,6 +57,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               (function(){
                 var t = localStorage.getItem('mark-pt-theme');
                 if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+                try {
+                  var s = JSON.parse(localStorage.getItem('mark-pt-settings') || '{}');
+                  if (s.accentColor && s.accentColor !== 'blue') document.documentElement.setAttribute('data-accent', s.accentColor);
+                } catch(e){}
               })();
             `,
           }}

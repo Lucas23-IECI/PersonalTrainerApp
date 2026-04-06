@@ -67,6 +67,72 @@ html {
   --gradient-orange: linear-gradient(135deg, #FF9F0A 0%, #CC7F08 100%);
 }
 
+/* ── Accent color themes ── */
+[data-accent="green"] {
+  --accent: #34C759;
+  --accent-hover: #2DB84D;
+  --accent-soft: rgba(52, 199, 89, 0.1);
+  --ring: rgba(52, 199, 89, 0.18);
+  --radar-fill: rgba(52, 199, 89, 0.12);
+  --gradient-hero: linear-gradient(135deg, #34C759 0%, #28A745 100%);
+}
+[data-theme="dark"][data-accent="green"] {
+  --accent: #30D158;
+  --accent-hover: #4AE075;
+  --accent-soft: rgba(48, 209, 88, 0.12);
+  --ring: rgba(48, 209, 88, 0.2);
+  --radar-fill: rgba(48, 209, 88, 0.18);
+  --gradient-hero: linear-gradient(135deg, #30D158 0%, #25A244 100%);
+}
+[data-accent="red"] {
+  --accent: #FF3B30;
+  --accent-hover: #E6342B;
+  --accent-soft: rgba(255, 59, 48, 0.1);
+  --ring: rgba(255, 59, 48, 0.18);
+  --radar-fill: rgba(255, 59, 48, 0.12);
+  --gradient-hero: linear-gradient(135deg, #FF3B30 0%, #CC2F26 100%);
+}
+[data-theme="dark"][data-accent="red"] {
+  --accent: #FF453A;
+  --accent-hover: #FF6961;
+  --accent-soft: rgba(255, 69, 58, 0.12);
+  --ring: rgba(255, 69, 58, 0.2);
+  --radar-fill: rgba(255, 69, 58, 0.18);
+  --gradient-hero: linear-gradient(135deg, #FF453A 0%, #CC362E 100%);
+}
+[data-accent="purple"] {
+  --accent: #AF52DE;
+  --accent-hover: #9A3FCB;
+  --accent-soft: rgba(175, 82, 222, 0.1);
+  --ring: rgba(175, 82, 222, 0.18);
+  --radar-fill: rgba(175, 82, 222, 0.12);
+  --gradient-hero: linear-gradient(135deg, #AF52DE 0%, #8B41B2 100%);
+}
+[data-theme="dark"][data-accent="purple"] {
+  --accent: #BF5AF2;
+  --accent-hover: #CF7FF5;
+  --accent-soft: rgba(191, 90, 242, 0.12);
+  --ring: rgba(191, 90, 242, 0.2);
+  --radar-fill: rgba(191, 90, 242, 0.18);
+  --gradient-hero: linear-gradient(135deg, #BF5AF2 0%, #9942C1 100%);
+}
+[data-accent="orange"] {
+  --accent: #FF9500;
+  --accent-hover: #E68600;
+  --accent-soft: rgba(255, 149, 0, 0.1);
+  --ring: rgba(255, 149, 0, 0.18);
+  --radar-fill: rgba(255, 149, 0, 0.12);
+  --gradient-hero: linear-gradient(135deg, #FF9500 0%, #CC7700 100%);
+}
+[data-theme="dark"][data-accent="orange"] {
+  --accent: #FF9F0A;
+  --accent-hover: #FFB340;
+  --accent-soft: rgba(255, 159, 10, 0.12);
+  --ring: rgba(255, 159, 10, 0.2);
+  --radar-fill: rgba(255, 159, 10, 0.18);
+  --gradient-hero: linear-gradient(135deg, #FF9F0A 0%, #CC7F08 100%);
+}
+
 * {
   box-sizing: border-box;
 }

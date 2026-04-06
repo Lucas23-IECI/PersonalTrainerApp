@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getCurrentPhase, setPhaseOverride } from "@/data/phases";
-import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit, type WorkoutViewMode } from "@/lib/storage";
-import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock, LayoutList, GalleryHorizontalEnd, CalendarDays, Activity } from "lucide-react";
+import { exportAllData, importAllData, exportCSV, getSettings, saveSettings, getAutoBackupDate, restoreAutoBackup, type WeightUnit, type WorkoutViewMode, type AccentColor } from "@/lib/storage";
+import { ChevronLeft, Download, Upload, RotateCcw, Check, AlertTriangle, Sun, Moon, Smartphone, FileSpreadsheet, Weight, Volume2, VolumeX, Globe, Database, Plus, Minus, Bell, BellOff, Clock, LayoutList, GalleryHorizontalEnd, CalendarDays, Activity, GripVertical } from "lucide-react";
 import Link from "next/link";
 import { APP_VERSION } from "@/lib/version";
 import { t } from "@/lib/i18n";
+import { ALL_TABS, DEFAULT_TAB_HREFS } from "@/lib/nav-tabs";
 import { scheduleDailyReminder, cancelDailyReminder } from "@/lib/native";
 import { isGoogleFitConnected, clearGoogleFitAuth, getLastSyncDate } from "@/lib/health-data";
 import { getGoogleFitOAuthUrl, disconnectGoogleFit } from "@/lib/google-fit";
@@ -37,6 +38,8 @@ export default function SettingsPage() {
   const [sleepGoal, setSleepGoal] = useState(8);
   const [gfitConnected, setGfitConnected] = useState(false);
   const [gfitLastSync, setGfitLastSync] = useState<string | null>(null);
+  const [accentColor, setAccentColor] = useState<AccentColor>("blue");
+  const [customTabs, setCustomTabs] = useState<string[]>(DEFAULT_TAB_HREFS);
 
   useEffect(() => {
     const override = localStorage.getItem("mark-pt-phase-override");
@@ -55,6 +58,8 @@ export default function SettingsPage() {
     setReminderMinute(s.reminderMinute);
     setWorkoutView(s.workoutView);
     setSleepGoal(s.sleepGoal);
+    setAccentColor(s.accentColor || "blue");
+    setCustomTabs(s.customTabs || DEFAULT_TAB_HREFS);
     setGfitConnected(isGoogleFitConnected());
     setGfitLastSync(getLastSyncDate());
     // Handle OAuth callback from Google Fit
@@ -147,6 +152,45 @@ export default function SettingsPage() {
             {t("settings.tapToChange")}
           </span>
         </button>
+      </div>
+
+      {/* ACCENT COLOR */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-2">{t("settings.accentColor")}</div>
+        <div className="flex gap-3 justify-center py-1">
+          {([
+            { id: "blue" as AccentColor, color: "#4F8CFF", label: "Azul" },
+            { id: "green" as AccentColor, color: "#34C759", label: "Verde" },
+            { id: "red" as AccentColor, color: "#FF3B30", label: "Rojo" },
+            { id: "purple" as AccentColor, color: "#AF52DE", label: "Morado" },
+            { id: "orange" as AccentColor, color: "#FF9500", label: "Naranja" },
+          ]).map(({ id, color, label }) => (
+            <button
+              key={id}
+              onClick={() => {
+                setAccentColor(id);
+                saveSettings({ ...getSettings(), accentColor: id });
+                if (id === "blue") {
+                  document.documentElement.removeAttribute("data-accent");
+                } else {
+                  document.documentElement.setAttribute("data-accent", id);
+                }
+              }}
+              className="flex flex-col items-center gap-1.5 border-none bg-transparent cursor-pointer p-0"
+              title={label}
+            >
+              <div
+                className="w-8 h-8 rounded-full transition-all"
+                style={{
+                  background: color,
+                  boxShadow: accentColor === id ? `0 0 0 3px var(--bg), 0 0 0 5px ${color}` : "none",
+                  transform: accentColor === id ? "scale(1.1)" : "scale(1)",
+                }}
+              />
+              <span className="text-[0.55rem] font-semibold" style={{ color: accentColor === id ? color : "var(--text-muted)" }}>{label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* WORKOUT VIEW TOGGLE */}
@@ -580,6 +624,54 @@ export default function SettingsPage() {
         >
           <Smartphone size={14} /> {t("settings.downloadAPK")}
         </button>
+      </div>
+
+      {/* CUSTOMIZABLE TABS */}
+      <div className="card mb-3">
+        <div className="text-[0.75rem] font-bold mb-1">{t("settings.customTabs")}</div>
+        <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("settings.customTabsDesc")}</p>
+        <div className="space-y-1.5">
+          {ALL_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = customTabs.includes(tab.href);
+            const isHome = tab.href === "/";
+            return (
+              <button
+                key={tab.href}
+                disabled={isHome}
+                onClick={() => {
+                  let next: string[];
+                  if (isSelected) {
+                    next = customTabs.filter((h) => h !== tab.href);
+                  } else {
+                    if (customTabs.length >= 6) return;
+                    next = [...customTabs, tab.href];
+                  }
+                  if (next.length < 3) return;
+                  setCustomTabs(next);
+                  saveSettings({ ...getSettings(), customTabs: next });
+                  window.dispatchEvent(new Event("nav-tabs-changed"));
+                }}
+                className="w-full flex items-center gap-3 p-2.5 rounded-lg border-none cursor-pointer transition-colors"
+                style={{
+                  background: isSelected ? "var(--accent-soft)" : "var(--bg-elevated)",
+                  opacity: isHome ? 0.6 : 1,
+                }}
+              >
+                <Icon size={16} style={{ color: isSelected ? "var(--accent)" : "var(--text-muted)" }} />
+                <span className="flex-1 text-left text-[0.72rem] font-semibold" style={{ color: isSelected ? "var(--text)" : "var(--text-muted)" }}>
+                  {tab.label}
+                </span>
+                {isSelected && (
+                  <Check size={14} style={{ color: "var(--accent)" }} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[0.55rem] mt-2 text-center" style={{ color: "var(--text-muted)" }}>
+          {customTabs.length}/6 · {t("settings.customTabsMin")}
+        </p>
       </div>
 
       {/* APP INFO */}

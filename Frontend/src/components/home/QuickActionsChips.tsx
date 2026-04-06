@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Scale, Calculator, Camera, Plus, Moon, Timer, StretchHorizontal, HeartPulse } from "lucide-react";
+import { Scale, Calculator, Camera, Plus, Moon, Timer, StretchHorizontal, HeartPulse, Droplets } from "lucide-react";
 
 interface Props {
   onOpenCheckin: () => void;
   onOpenSleep: () => void;
+  onOpenWater: () => void;
 }
 
 const chips = [
   { label: "Pesar", icon: Scale, action: "checkin" as const },
   { label: "Sueño", icon: Moon, action: "sleep" as const },
+  { label: "Agua", icon: Droplets, action: "water" as const },
   { label: "Timer", icon: Timer, href: "/timer" },
   { label: "Stretching", icon: StretchHorizontal, href: "/stretching" },
   { label: "Cardio", icon: HeartPulse, href: "/cardio" },
@@ -19,7 +21,7 @@ const chips = [
   { label: "Entreno vacío", icon: Plus, href: "/workout/session" },
 ];
 
-export default function QuickActionsChips({ onOpenCheckin, onOpenSleep }: Props) {
+export default function QuickActionsChips({ onOpenCheckin, onOpenSleep, onOpenWater }: Props) {
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1 scrollbar-hide">
       {chips.map((chip) => {
@@ -41,6 +43,18 @@ export default function QuickActionsChips({ onOpenCheckin, onOpenSleep }: Props)
             <button
               key={chip.label}
               onClick={onOpenSleep}
+              className="quick-chip"
+            >
+              <Icon size={14} />
+              <span>{chip.label}</span>
+            </button>
+          );
+        }
+        if (chip.action === "water") {
+          return (
+            <button
+              key={chip.label}
+              onClick={onOpenWater}
               className="quick-chip"
             >
               <Icon size={14} />

@@ -193,6 +193,8 @@ export interface ActiveSessionData {
 export type WeightUnit = "kg" | "lbs";
 export type WorkoutViewMode = "today" | "carousel" | "calendar";
 
+export type AccentColor = "blue" | "green" | "red" | "purple" | "orange";
+
 export interface UserSettings {
   unit: WeightUnit;
   hapticsEnabled: boolean;
@@ -205,6 +207,8 @@ export interface UserSettings {
   reminderMinute: number; // 7.15 — 0-59
   workoutView: WorkoutViewMode;
   sleepGoal: number; // target hours per night (default 8)
+  accentColor: AccentColor; // theme accent color (default "blue")
+  customTabs: string[]; // selected nav tab hrefs
 }
 
 const SETTINGS_KEY = "mark-pt-settings";
@@ -221,6 +225,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   reminderMinute: 0,
   workoutView: "today",
   sleepGoal: 8,
+  accentColor: "blue",
+  customTabs: ["/", "/workout", "/exercises", "/nutrition", "/log", "/profile"],
 };
 
 export function getSettings(): UserSettings {
