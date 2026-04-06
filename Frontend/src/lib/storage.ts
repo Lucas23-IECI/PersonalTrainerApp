@@ -5,6 +5,28 @@
 
 import { findExerciseByName } from "./custom-exercises";
 
+// ── Safe localStorage helpers (quota / private-browsing safe) ──
+
+export function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+export function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch { /* quota exceeded or private browsing */ }
+}
+
+export function safeRemoveItem(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch { /* ignore */ }
+}
+
 // === Types ===
 
 export interface DailyCheckin {
@@ -327,7 +349,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 export function getSettings(): UserSettings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;
   try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
+    const raw = safeGetItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch {
@@ -336,7 +358,7 @@ export function getSettings(): UserSettings {
 }
 
 export function saveSettings(s: UserSettings) {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  safeSetItem(SETTINGS_KEY, JSON.stringify(s));
 }
 
 /** Convert kg to lbs */
@@ -394,7 +416,7 @@ export function generateId(): string {
 function load<T>(key: string): T[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(key);
+    const raw = safeGetItem(key);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -402,7 +424,7 @@ function load<T>(key: string): T[] {
 }
 
 function save<T>(key: string, data: T[]) {
-  localStorage.setItem(key, JSON.stringify(data));
+  safeSetItem(key, JSON.stringify(data));
 }
 
 // === Check-ins ===
@@ -452,13 +474,13 @@ export function deleteSession(id: string) {
 // === Active Session (in-progress workout) ===
 
 export function saveActiveSession(data: ActiveSessionData) {
-  localStorage.setItem(KEYS.activeSession, JSON.stringify(data));
+  safeSetItem(KEYS.activeSession, JSON.stringify(data));
 }
 
 export function getActiveSession(): ActiveSessionData | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(KEYS.activeSession);
+    const raw = safeGetItem(KEYS.activeSession);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -466,7 +488,7 @@ export function getActiveSession(): ActiveSessionData | null {
 }
 
 export function clearActiveSession() {
-  localStorage.removeItem(KEYS.activeSession);
+  safeRemoveItem(KEYS.activeSession);
 }
 
 // === Nutrition Entries ===
@@ -536,7 +558,7 @@ export function addRecentFood(food: CustomMeal) {
 export function getNutritionTargets(): NutritionTargets {
   if (typeof window === "undefined") return { calories: 2300, protein: 170, carbs: 230, fat: 77, water: 3.0 };
   try {
-    const raw = localStorage.getItem(KEYS.nutritionTargets);
+    const raw = safeGetItem(KEYS.nutritionTargets);
     if (raw) return JSON.parse(raw);
   } catch { /* fall through */ }
   // Try to compute from profile
@@ -552,7 +574,7 @@ export function getNutritionTargets(): NutritionTargets {
 }
 
 export function saveNutritionTargets(targets: NutritionTargets) {
-  localStorage.setItem(KEYS.nutritionTargets, JSON.stringify(targets));
+  safeSetItem(KEYS.nutritionTargets, JSON.stringify(targets));
 }
 
 const DEFAULT_MEAL_DISTRIBUTION: Record<string, number> = {
@@ -681,13 +703,13 @@ export function deletePantryItem(id: string) {
 export function getMealPrepList(): ShoppingItem[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(KEYS.mealPrepList);
+    const raw = safeGetItem(KEYS.mealPrepList);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
 
 export function saveMealPrepList(items: ShoppingItem[]) {
-  localStorage.setItem(KEYS.mealPrepList, JSON.stringify(items));
+  safeSetItem(KEYS.mealPrepList, JSON.stringify(items));
 }
 
 // === Aggregation ===
@@ -883,13 +905,13 @@ export function saveWeeklyNote(text: string) {
 export function getShoppingChecked(): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(KEYS.shoppingChecked);
+    const raw = safeGetItem(KEYS.shoppingChecked);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
 
 export function setShoppingChecked(items: string[]) {
-  localStorage.setItem(KEYS.shoppingChecked, JSON.stringify(items));
+  safeSetItem(KEYS.shoppingChecked, JSON.stringify(items));
 }
 
 // === Profile ===
@@ -897,13 +919,13 @@ export function setShoppingChecked(items: string[]) {
 export function getProfile(): UserProfile | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(KEYS.profile);
+    const raw = safeGetItem(KEYS.profile);
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 }
 
 export function saveProfile(profile: UserProfile) {
-  localStorage.setItem(KEYS.profile, JSON.stringify(profile));
+  safeSetItem(KEYS.profile, JSON.stringify(profile));
 }
 
 // === Body Measurements ===
@@ -958,17 +980,17 @@ export function exportAllData(): string {
   const data: Record<string, unknown> = {};
   Object.entries(KEYS).forEach(([key, storageKey]) => {
     try {
-      const raw = localStorage.getItem(storageKey);
+      const raw = safeGetItem(storageKey);
       if (raw) data[key] = JSON.parse(raw);
     } catch { /* skip corrupted */ }
   });
   // Also export settings, phase override and custom programs
-  const settings = localStorage.getItem(SETTINGS_KEY);
+  const settings = safeGetItem(SETTINGS_KEY);
   if (settings) data["settings"] = JSON.parse(settings);
-  const override = localStorage.getItem("mark-pt-phase-override");
+  const override = safeGetItem("mark-pt-phase-override");
   if (override) data["phaseOverride"] = override;
   for (let i = 0; i < 8; i++) {
-    const custom = localStorage.getItem("mark-pt-custom-program-" + i);
+    const custom = safeGetItem("mark-pt-custom-program-" + i);
     if (custom) data["customProgram" + i] = JSON.parse(custom);
   }
   return JSON.stringify(data, null, 2);
@@ -979,13 +1001,13 @@ export function importAllData(json: string): boolean {
     const data = JSON.parse(json);
     if (typeof data !== "object" || data === null) return false;
     Object.entries(KEYS).forEach(([key, storageKey]) => {
-      if (data[key]) localStorage.setItem(storageKey, JSON.stringify(data[key]));
+      if (data[key]) safeSetItem(storageKey, JSON.stringify(data[key]));
     });
-    if (data["settings"]) localStorage.setItem(SETTINGS_KEY, JSON.stringify(data["settings"]));
-    if (data["phaseOverride"]) localStorage.setItem("mark-pt-phase-override", data["phaseOverride"]);
+    if (data["settings"]) safeSetItem(SETTINGS_KEY, JSON.stringify(data["settings"]));
+    if (data["phaseOverride"]) safeSetItem("mark-pt-phase-override", data["phaseOverride"]);
     for (let i = 0; i < 8; i++) {
       if (data["customProgram" + i]) {
-        localStorage.setItem("mark-pt-custom-program-" + i, JSON.stringify(data["customProgram" + i]));
+        safeSetItem("mark-pt-custom-program-" + i, JSON.stringify(data["customProgram" + i]));
       }
     }
     return true;
@@ -1027,24 +1049,24 @@ const BACKUP_DATE_KEY = "mark-pt-auto-backup-date";
 export function runAutoBackup() {
   if (typeof window === "undefined") return;
   if (!getSettings().autoBackup) return;
-  const lastBackup = localStorage.getItem(BACKUP_DATE_KEY);
+  const lastBackup = safeGetItem(BACKUP_DATE_KEY);
   const now = today();
   if (lastBackup === now) return; // max once per day
   const data = exportAllData();
-  localStorage.setItem(BACKUP_KEY, data);
-  localStorage.setItem(BACKUP_DATE_KEY, now);
+  safeSetItem(BACKUP_KEY, data);
+  safeSetItem(BACKUP_DATE_KEY, now);
 }
 
 /** Restore from the auto-backup stored in localStorage */
 export function restoreAutoBackup(): boolean {
-  const data = localStorage.getItem(BACKUP_KEY);
+  const data = safeGetItem(BACKUP_KEY);
   if (!data) return false;
   return importAllData(data);
 }
 
 /** Get the date of the last auto-backup */
 export function getAutoBackupDate(): string | null {
-  return localStorage.getItem(BACKUP_DATE_KEY);
+  return safeGetItem(BACKUP_DATE_KEY);
 }
 
 // =============================================

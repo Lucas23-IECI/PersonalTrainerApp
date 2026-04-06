@@ -44,6 +44,7 @@ import WarmupGenerator from "@/components/WarmupGenerator";
 import { checkDeload, type DeloadCheck } from "@/lib/deload";
 
 // 4.3 — Smart rest times: compound vs accessory, RPE-adjusted
+import { PageTransition } from "@/components/motion";
 const REST_BY_CATEGORY: Record<ExerciseCategory, number> = {
   barbell: 150,
   dumbbell: 90,
@@ -1030,8 +1031,10 @@ function SessionContent() {
 
 export default function WorkoutSessionPage() {
   return (
+    <PageTransition>
     <Suspense fallback={<div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>Cargando...</div>}>
       <SessionContent />
     </Suspense>
+    </PageTransition>
   );
 }

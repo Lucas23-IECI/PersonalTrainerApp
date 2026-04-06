@@ -4,7 +4,7 @@
  * the user's actual training data for personalized responses.
  */
 
-import { getSessions, getCheckins, getProfile } from "./storage";
+import { getSessions, getCheckins, getProfile, safeGetItem, safeSetItem, safeRemoveItem} from "./storage";
 import { getWeaknessAnalysis } from "./weakness-analysis";
 import { getRecoveryDashboard } from "./muscle-recovery";
 import { calculateFatigue } from "./deload";
@@ -243,7 +243,7 @@ const CHAT_KEY = "mark-pt-coach-chat";
 export function getChatHistory(): CoachMessage[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(CHAT_KEY);
+    const raw = safeGetItem(CHAT_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -251,9 +251,9 @@ export function getChatHistory(): CoachMessage[] {
 }
 
 export function saveChatHistory(messages: CoachMessage[]): void {
-  localStorage.setItem(CHAT_KEY, JSON.stringify(messages.slice(-50))); // keep last 50 messages
+  safeSetItem(CHAT_KEY, JSON.stringify(messages.slice(-50))); // keep last 50 messages
 }
 
 export function clearChatHistory(): void {
-  localStorage.removeItem(CHAT_KEY);
+  safeRemoveItem(CHAT_KEY);
 }

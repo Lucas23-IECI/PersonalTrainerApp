@@ -1,4 +1,5 @@
 // =============================================
+import { safeGetItem, safeSetItem } from "@/lib/storage";
 // wger.de Exercise Images API (3.14)
 // Fetches exercise images with localStorage cache
 // =============================================
@@ -18,7 +19,7 @@ interface WgerCache {
 function loadCache(): WgerCache {
   if (typeof window === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = safeGetItem(CACHE_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
@@ -26,7 +27,7 @@ function loadCache(): WgerCache {
 }
 
 function saveCache(cache: WgerCache) {
-  localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  safeSetItem(CACHE_KEY, JSON.stringify(cache));
 }
 
 // Mapping of common exercise names to wger exercise IDs

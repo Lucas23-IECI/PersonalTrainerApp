@@ -13,6 +13,7 @@ import { Camera, Trash2, ChevronLeft, ChevronRight, Plus, X, Image as ImageIcon 
 import { t } from "@/lib/i18n";
 
 type Pose = "front" | "side" | "back";
+import { PageTransition } from "@/components/motion";
 const POSES: { id: Pose; label: string; icon: string }[] = [
   { id: "front", label: "Frente", icon: "🧍" },
   { id: "side", label: "Lateral", icon: "🧍‍♂️" },
@@ -127,6 +128,7 @@ export default function PhotosPage() {
   }
 
   return (
+    <PageTransition>
     <main className="max-w-[600px] mx-auto px-4 py-5">
       <div className="flex justify-between items-start mb-4">
         <div>
@@ -353,5 +355,6 @@ export default function PhotosPage() {
         </div>
       )}
     </main>
+    </PageTransition>
   );
 }

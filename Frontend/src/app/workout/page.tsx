@@ -12,6 +12,8 @@ import CarouselView from "@/components/workout/CarouselView";
 import CalendarView from "@/components/workout/CalendarView";
 import AddActivityModal from "@/components/workout/AddActivityModal";
 
+import { PageTransition } from "@/components/motion";
+import { t } from "@/lib/i18n";
 export default function WorkoutPage() {
   const router = useRouter();
   const plan = getWeeklyPlan();
@@ -45,15 +47,16 @@ export default function WorkoutPage() {
   }
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       <div className="flex items-center justify-between mb-0.5">
-        <h1 className="text-xl font-extrabold tracking-tight">Plan Semanal</h1>
+        <h1 className="text-xl font-extrabold tracking-tight">{t("workout.weeklyPlan")}</h1>
         <div className="flex items-center gap-3">
           <Link href="/routines" className="flex items-center gap-1 text-[0.7rem] text-[var(--accent)] no-underline font-semibold">
-            <BookOpen size={13} /> Rutinas
+            <BookOpen size={13} /> {t("workout.routines")}
           </Link>
           <Link href="/workout/editor" className="flex items-center gap-1 text-[0.7rem] no-underline font-semibold" style={{ color: 'var(--accent)' }}>
-            <Pencil size={13} /> Editar
+            <Pencil size={13} /> {t("common.edit")}
           </Link>
         </div>
       </div>
@@ -62,7 +65,7 @@ export default function WorkoutPage() {
           {phaseInfo.label}
         </p>
         <span className="text-[0.6rem]" style={{ color: 'var(--text-muted)' }}>
-          Semana {phaseInfo.week} de {phaseInfo.totalWeeks}
+          {t("workout.weekOf").replace("{n}", String(phaseInfo.week)).replace("{total}", String(phaseInfo.totalWeeks))}
         </span>
       </div>
       {/* Phase progress bar */}
@@ -91,14 +94,14 @@ export default function WorkoutPage() {
           className="flex-1 py-3 rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2"
           style={{ background: 'var(--bg-card)', border: '1px dashed var(--border)', color: 'var(--accent)' }}
         >
-          ⚡ Quick Start
+          {t("workout.quickStart")}
         </button>
         <button
           onClick={() => setShowActivityModal(true)}
           className="py-3 px-4 rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2"
           style={{ background: 'var(--bg-card)', border: '1px dashed var(--border)', color: 'var(--accent-orange)' }}
         >
-          <Activity size={16} /> Actividad
+          <Activity size={16} /> {t("workout.activity")}
         </button>
       </div>
 
@@ -114,17 +117,18 @@ export default function WorkoutPage() {
       {confirmNewDay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
           <div className="card mx-6 p-5 text-center" style={{ maxWidth: 320 }}>
-            <h3 className="text-lg font-bold mb-2" style={{ color: "var(--text)" }}>Descartar entrenamiento?</h3>
+            <h3 className="text-lg font-bold mb-2" style={{ color: "var(--text)" }}>{t("workout.discardTitle")}</h3>
             <p className="text-[0.78rem] mb-4" style={{ color: "var(--text-muted)" }}>
-              Hay un entrenamiento en progreso. Se va a perder todo el progreso si empezás uno nuevo.
+              {t("workout.discardMsg")}
             </p>
             <div className="flex gap-2">
-              <button onClick={() => setConfirmNewDay(null)} className="btn btn-ghost flex-1">Cancelar</button>
-              <button onClick={confirmDiscardAndStart} className="btn btn-danger flex-1">Descartar</button>
+              <button onClick={() => setConfirmNewDay(null)} className="btn btn-ghost flex-1">{t("common.cancel")}</button>
+              <button onClick={confirmDiscardAndStart} className="btn btn-danger flex-1">{t("common.discard")}</button>
             </div>
           </div>
         </div>
       )}
     </main>
+    </PageTransition>
   );
 }

@@ -51,7 +51,7 @@ import {
   Droplets, Save, FolderOpen, TrendingDown, TrendingUp, Copy,
   Minus, X, ChevronLeft, ChevronRight, Settings, BookOpen, Target,
 } from "lucide-react";
-import { SwipeTabs } from "@/components/motion";
+import { PageTransition, SwipeTabs } from "@/components/motion";
 import CalorieRing from "@/components/CalorieRing";
 import AddFoodScreen from "@/components/AddFoodScreen";
 import { t } from "@/lib/i18n";
@@ -275,6 +275,7 @@ export default function NutritionPage() {
     : dateObj.toLocaleDateString("es-CL", { weekday: "short", day: "numeric", month: "short" });
 
   return (
+    <PageTransition>
     <PullToRefresh onRefresh={() => setEntry(getNutritionForDate(selectedDate))}>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       {/* Header */}
@@ -972,6 +973,7 @@ export default function NutritionPage() {
       )}
     </main>
     </PullToRefresh>
+    </PageTransition>
   );
 }
 

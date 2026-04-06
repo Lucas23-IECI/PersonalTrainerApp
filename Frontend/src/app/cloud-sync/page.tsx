@@ -5,6 +5,8 @@ import { ChevronLeft, Cloud, CloudUpload, CloudDownload, Check, AlertTriangle, R
 import { useRouter } from "next/navigation";
 import { exportAllData, importAllData } from "@/lib/storage";
 
+import { PageTransition } from "@/components/motion";
+import { t } from "@/lib/i18n";
 /*
   7.13 — Cloud Sync
   Since this is a static export (no server), we use client-side file-based sync:
@@ -106,10 +108,10 @@ export default function CloudSyncPage() {
       setLastSync(dateStr);
       setIdbDate(new Date().toISOString());
       setStatus("success");
-      setMessage("Backup guardado correctamente");
+      setMessage(t("cloudSync.savedOk"));
     } catch {
       setStatus("error");
-      setMessage("Error al crear backup");
+      setMessage(t("cloudSync.saveError"));
     }
   }
 
@@ -127,10 +129,10 @@ export default function CloudSyncPage() {
         const ok = importAllData(text);
         if (ok) {
           setStatus("success");
-          setMessage("Datos restaurados. Recargá la página.");
+          setMessage(t("cloudSync.restoredOk"));
         } else {
           setStatus("error");
-          setMessage("Archivo inválido o corrupto.");
+          setMessage(t("cloudSync.invalidFile"));
         }
       };
       reader.readAsText(file);
@@ -144,32 +146,33 @@ export default function CloudSyncPage() {
       const res = await loadFromIndexedDB();
       if (!res) {
         setStatus("error");
-        setMessage("No hay backup en IndexedDB");
+        setMessage(t("cloudSync.noBackup"));
         return;
       }
       const ok = importAllData(res.data);
       if (ok) {
         setStatus("success");
-        setMessage("Restaurado desde backup local. Recargá la página.");
+        setMessage(t("cloudSync.restoredIdb"));
       } else {
         setStatus("error");
-        setMessage("Backup corrupto");
+        setMessage(t("cloudSync.corruptBackup"));
       }
     } catch {
       setStatus("error");
-      setMessage("Error al restaurar");
+      setMessage(t("cloudSync.restoreError"));
     }
   }
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
       <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
-        <ChevronLeft size={16} /> Volver
+        <ChevronLeft size={16} /> {t("common.back")}
       </button>
 
-      <h1 className="text-xl font-black tracking-tight mb-1">Cloud Sync</h1>
+      <h1 className="text-xl font-black tracking-tight mb-1">{t("cloudSync.title")}</h1>
       <p className="text-[0.65rem] mb-5" style={{ color: "var(--text-muted)" }}>
-        Guardá y restaurá tus datos en la nube
+        {t("cloudSync.description")}
       </p>
 
       {/* Status */}
@@ -184,10 +187,10 @@ export default function CloudSyncPage() {
       <div className="card mb-3">
         <div className="flex items-center gap-2 mb-2">
           <CloudUpload size={18} style={{ color: "var(--accent)" }} />
-          <div className="text-[0.75rem] font-bold">Guardar Backup</div>
+          <div className="text-[0.75rem] font-bold">{t("cloudSync.saveBackup")}</div>
         </div>
         <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>
-          Exporta todos tus datos como archivo JSON. Podés subirlo a Google Drive, iCloud, o cualquier nube.
+          {t("cloudSync.exportDesc")}
         </p>
         <button
           onClick={handleCloudUpload}
@@ -196,13 +199,13 @@ export default function CloudSyncPage() {
           style={{ background: "var(--accent)" }}
         >
           {status === "uploading" ? (
-            <><RefreshCw size={14} className="inline mr-1 animate-spin" /> Guardando...</>
+            <><RefreshCw size={14} className="inline mr-1 animate-spin" /> {t("cloudSync.saving")}</>
           ) : (
-            <><Cloud size={14} className="inline mr-1" /> Guardar en la Nube</>
+            <><Cloud size={14} className="inline mr-1" /> {t("cloudSync.uploadCloud")}</>
           )}
         </button>
         {lastSync && (
-          <p className="text-[0.6rem] mt-2" style={{ color: "var(--text-muted)" }}>Último sync: {lastSync}</p>
+          <p className="text-[0.6rem] mt-2" style={{ color: "var(--text-muted)" }}>{t("cloudSync.lastSync")} {lastSync}</p>
         )}
       </div>
 
@@ -210,10 +213,10 @@ export default function CloudSyncPage() {
       <div className="card mb-3">
         <div className="flex items-center gap-2 mb-2">
           <CloudDownload size={18} style={{ color: "#34C759" }} />
-          <div className="text-[0.75rem] font-bold">Restaurar Backup</div>
+          <div className="text-[0.75rem] font-bold">{t("cloudSync.restoreBackup")}</div>
         </div>
         <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>
-          Seleccioná un archivo JSON de backup previamente guardado.
+          {t("cloudSync.selectDesc")}
         </p>
         <button
           onClick={handleCloudDownload}
@@ -222,9 +225,9 @@ export default function CloudSyncPage() {
           style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
         >
           {status === "downloading" ? (
-            <><RefreshCw size={14} className="inline mr-1 animate-spin" /> Restaurando...</>
+            <><RefreshCw size={14} className="inline mr-1 animate-spin" /> {t("cloudSync.restoring")}</>
           ) : (
-            <><CloudDownload size={14} className="inline mr-1" /> Seleccionar Archivo</>
+            <><CloudDownload size={14} className="inline mr-1" /> {t("cloudSync.selectFile")}</>
           )}
         </button>
       </div>
@@ -233,15 +236,15 @@ export default function CloudSyncPage() {
       <div className="card mb-3">
         <div className="flex items-center gap-2 mb-2">
           <RefreshCw size={18} style={{ color: "#AF52DE" }} />
-          <div className="text-[0.75rem] font-bold">Backup Local (IndexedDB)</div>
+          <div className="text-[0.75rem] font-bold">{t("cloudSync.localBackup")}</div>
         </div>
         <p className="text-[0.6rem] mb-3" style={{ color: "var(--text-muted)" }}>
-          Backup adicional en IndexedDB del navegador. Sobrevive limpiezas de localStorage.
+          {t("cloudSync.indexeddbDesc")}
         </p>
         {idbDate && (
           <p className="text-[0.6rem] mb-2" style={{ color: "var(--text-muted)" }}>
-            Último: {new Date(idbDate).toLocaleString()}
-          </p>
+          {t("cloudSync.idbLast")} {new Date(idbDate).toLocaleString()}
+        </p>
         )}
         <button
           onClick={handleRestoreIDB}
@@ -249,20 +252,21 @@ export default function CloudSyncPage() {
           className="w-full py-2.5 rounded-xl border-none cursor-pointer font-bold text-[0.75rem] disabled:opacity-40"
           style={{ background: "var(--bg-elevated)", color: "#AF52DE" }}
         >
-          Restaurar desde IndexedDB
+          {t("cloudSync.restoreIndexedDB")}
         </button>
       </div>
 
       {/* Info */}
       <div className="card">
-        <div className="text-[0.75rem] font-bold mb-2">¿Cómo funciona?</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("cloudSync.howItWorks")}</div>
         <div className="text-[0.65rem] space-y-1.5" style={{ color: "var(--text-muted)" }}>
-          <p>1. <strong>Guardar</strong> descarga un archivo JSON con todos tus datos.</p>
-          <p>2. Subí ese archivo a <strong>Google Drive</strong>, iCloud, Dropbox o donde prefieras.</p>
-          <p>3. En otro dispositivo, descargá el archivo y usá <strong>Restaurar</strong>.</p>
-          <p>4. El <strong>backup local IndexedDB</strong> se guarda automáticamente cada vez que exportás.</p>
+          <p>1. {t("cloudSync.step1")}</p>
+          <p>2. {t("cloudSync.step2")}</p>
+          <p>3. {t("cloudSync.step3")}</p>
+          <p>4. {t("cloudSync.step4")}</p>
         </div>
       </div>
     </main>
+    </PageTransition>
   );
 }

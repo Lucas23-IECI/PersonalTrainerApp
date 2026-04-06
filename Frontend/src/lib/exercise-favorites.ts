@@ -1,4 +1,5 @@
 // =============================================
+import { safeGetItem, safeSetItem } from "@/lib/storage";
 // Exercise Favorites & Tags (3.12)
 // localStorage persistence for favorites/tags
 // =============================================
@@ -11,7 +12,7 @@ const KEYS = {
 function loadFavorites(): string[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(KEYS.favorites);
+    const raw = safeGetItem(KEYS.favorites);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -19,13 +20,13 @@ function loadFavorites(): string[] {
 }
 
 function saveFavorites(favs: string[]) {
-  localStorage.setItem(KEYS.favorites, JSON.stringify(favs));
+  safeSetItem(KEYS.favorites, JSON.stringify(favs));
 }
 
 function loadTags(): Record<string, string[]> {
   if (typeof window === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(KEYS.tags);
+    const raw = safeGetItem(KEYS.tags);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
@@ -33,7 +34,7 @@ function loadTags(): Record<string, string[]> {
 }
 
 function saveTags(tags: Record<string, string[]>) {
-  localStorage.setItem(KEYS.tags, JSON.stringify(tags));
+  safeSetItem(KEYS.tags, JSON.stringify(tags));
 }
 
 // === Favorites ===

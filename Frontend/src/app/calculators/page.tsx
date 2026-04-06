@@ -9,6 +9,7 @@ import PlateCalculator from "@/components/PlateCalculator";
 type Tab = "1rm" | "tdee" | "macros" | "wilks" | "plates";
 
 // ===== FORMULAS =====
+import { PageTransition } from "@/components/motion";
 function epley1RM(weight: number, reps: number): number {
   if (reps <= 0 || weight <= 0) return 0;
   if (reps === 1) return weight;
@@ -125,6 +126,7 @@ export default function CalculatorsPage() {
   ];
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
       <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
         <ChevronLeft size={16} /> Volver
@@ -414,5 +416,6 @@ export default function CalculatorsPage() {
         </div>
       )}
     </main>
+    </PageTransition>
   );
 }

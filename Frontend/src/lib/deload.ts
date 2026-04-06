@@ -4,7 +4,7 @@
  * Enhanced: Accumulated fatigue model using volume + RPE trends
  */
 
-import { getSessions, getWeeklyMuscleData, type WorkoutSession } from "./storage";
+import { getSessions, getWeeklyMuscleData, type WorkoutSession, safeGetItem, safeSetItem} from "./storage";
 import { getCurrentPhase } from "@/data/phases";
 import { getAllVolumeLandmarks } from "@/data/volume-landmarks";
 import type { MuscleGroup } from "@/data/exercises";
@@ -113,7 +113,7 @@ export interface FatigueHistoryEntry {
 export function getFatigueHistory(): FatigueHistoryEntry[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(FATIGUE_KEY);
+    const raw = safeGetItem(FATIGUE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -121,7 +121,7 @@ export function getFatigueHistory(): FatigueHistoryEntry[] {
 }
 
 function saveFatigueHistory(entries: FatigueHistoryEntry[]) {
-  localStorage.setItem(FATIGUE_KEY, JSON.stringify(entries.slice(-30))); // keep 30 days
+  safeSetItem(FATIGUE_KEY, JSON.stringify(entries.slice(-30))); // keep 30 days
 }
 
 /**

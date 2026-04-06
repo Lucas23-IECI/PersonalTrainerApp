@@ -1,4 +1,5 @@
 import type { MuscleGroup } from "@/data/exercises";
+import { safeGetItem, safeSetItem, safeRemoveItem } from "@/lib/storage";
 
 const STORAGE_KEY = "mark-pt-muscle-goals";
 
@@ -26,7 +27,7 @@ export const WEEKLY_SET_TARGETS: Record<MuscleGroup, { min: number; max: number 
 
 export function getMuscleGoals(): Record<MuscleGroup, { min: number; max: number }> {
   if (typeof window === "undefined") return { ...WEEKLY_SET_TARGETS };
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = safeGetItem(STORAGE_KEY);
   if (!stored) return { ...WEEKLY_SET_TARGETS };
   try {
     return JSON.parse(stored);
@@ -36,11 +37,11 @@ export function getMuscleGoals(): Record<MuscleGroup, { min: number; max: number
 }
 
 export function saveMuscleGoals(goals: Record<MuscleGroup, { min: number; max: number }>): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(goals));
+  safeSetItem(STORAGE_KEY, JSON.stringify(goals));
 }
 
 export function resetMuscleGoals(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  safeRemoveItem(STORAGE_KEY);
 }
 
 export type SetZone = "under" | "optimal" | "over";

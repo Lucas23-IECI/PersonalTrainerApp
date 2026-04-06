@@ -13,6 +13,7 @@ import { scheduleDailyReminder, cancelDailyReminder } from "@/lib/native";
 import { isGoogleFitConnected, clearGoogleFitAuth, getLastSyncDate } from "@/lib/health-data";
 import { getGoogleFitOAuthUrl, disconnectGoogleFit } from "@/lib/google-fit";
 
+import { PageTransition } from "@/components/motion";
 const WEIGHT_INCREMENTS = [0.5, 1, 1.25, 2.5, 5];
 
 export default function SettingsPage() {
@@ -133,6 +134,7 @@ export default function SettingsPage() {
   }
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
       <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
         <ChevronLeft size={16} /> {t("common.back")}
@@ -761,5 +763,6 @@ export default function SettingsPage() {
         </div>
       </div>
     </main>
+    </PageTransition>
   );
 }

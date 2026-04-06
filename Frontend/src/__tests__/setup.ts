@@ -1,4 +1,5 @@
 // Global test setup — mock localStorage and browser APIs
+import { afterEach } from 'vitest';
 
 const store: Record<string, string> = {};
 

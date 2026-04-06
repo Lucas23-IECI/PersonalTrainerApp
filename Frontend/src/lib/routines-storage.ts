@@ -1,4 +1,5 @@
 // =============================================
+import { safeGetItem, safeSetItem } from "@/lib/storage";
 // Routines storage — CRUD, Folders, Clone
 // Independent from the phase-based program system
 // =============================================
@@ -65,7 +66,7 @@ function generateId(): string {
 function load<T>(key: string): T[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(key);
+    const raw = safeGetItem(key);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -73,7 +74,7 @@ function load<T>(key: string): T[] {
 }
 
 function persist<T>(key: string, data: T[]) {
-  localStorage.setItem(key, JSON.stringify(data));
+  safeSetItem(key, JSON.stringify(data));
 }
 
 // =============================================

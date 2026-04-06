@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
+import { PageTransition } from "@/components/motion";
 const CIRCUM_FIELDS: { key: keyof BodyMeasurement; labelKey: string }[] = [
   { key: "chest", labelKey: "measurements.chest" },
   { key: "waist", labelKey: "measurements.waist" },
@@ -98,6 +99,7 @@ export default function ProfilePage() {
     : 100;
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       {/* HEADER */}
       <div className="flex items-center gap-3 mb-5">
@@ -577,6 +579,7 @@ export default function ProfilePage() {
         </div>
       )}
     </main>
+    </PageTransition>
   );
 }
 

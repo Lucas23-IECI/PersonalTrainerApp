@@ -32,6 +32,7 @@ import {
   Search,
 } from "lucide-react";
 import { PageTransition, StaggerList, StaggerItem } from "@/components/motion";
+import { t } from "@/lib/i18n";
 import CheckinBottomSheet from "@/components/CheckinBottomSheet";
 import QuickLogSheet from "@/components/QuickLogSheet";
 import QuickActionsChips from "@/components/home/QuickActionsChips";
@@ -65,19 +66,19 @@ export default function Dashboard() {
 
   function relativeDate(dateStr: string): string {
     const d = new Date(dateStr + "T00:00:00");
-    const t = new Date(todayStr + "T00:00:00");
-    const diff = Math.round((t.getTime() - d.getTime()) / 86400000);
-    if (diff === 0) return "Hoy";
-    if (diff === 1) return "Ayer";
-    if (diff < 7) return `Hace ${diff} días`;
+    const td = new Date(todayStr + "T00:00:00");
+    const diff = Math.round((td.getTime() - d.getTime()) / 86400000);
+    if (diff === 0) return t("common.today");
+    if (diff === 1) return t("common.yesterday");
+    if (diff < 7) return t("dashboard.daysAgo").replace("{n}", String(diff));
     return `${d.getDate()}/${d.getMonth() + 1}`;
   }
 
   function getGreeting(): string {
     const h = new Date().getHours();
-    if (h < 12) return "Buenos días";
-    if (h < 19) return "Buenas tardes";
-    return "Buenas noches";
+    if (h < 12) return t("dashboard.greetingMorning");
+    if (h < 19) return t("dashboard.greetingAfternoon");
+    return t("dashboard.greetingEvening");
   }
 
   function reload() {
@@ -202,14 +203,14 @@ export default function Dashboard() {
               /* Rest day card with next workout preview integrated */
               <div className="card mb-4 text-center py-5" style={{ background: "var(--bg-elevated)" }}>
                 <Dumbbell size={28} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
-                <div className="text-[0.82rem] font-semibold" style={{ color: "var(--text-secondary)" }}>Día de Descanso</div>
-                <div className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>Recuperá y volvé más fuerte</div>
+                <div className="text-[0.82rem] font-semibold" style={{ color: "var(--text-secondary)" }}>{t("dashboard.restDay")}</div>
+                <div className="text-[0.65rem] mb-3" style={{ color: "var(--text-muted)" }}>{t("dashboard.restDayMsg")}</div>
                 {nextWorkout && (
                   <div className="pt-3 mt-1" style={{ borderTop: "1px solid var(--border-subtle)" }}>
                     <div className="flex items-center justify-center gap-2">
                       <CalendarDays size={13} style={{ color: "var(--accent-green)" }} />
                       <span className="text-[0.62rem] font-semibold" style={{ color: "var(--accent-green)" }}>
-                        {nextWorkout.daysFromNow === 1 ? "Mañana" : nextWorkout.dayName}
+                        {nextWorkout.daysFromNow === 1 ? t("dashboard.tomorrow") : nextWorkout.dayName}
                       </span>
                     </div>
                     <div className="text-[0.72rem] font-bold mt-1" style={{ color: "var(--text)" }}>
@@ -230,7 +231,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-3 gap-2.5 mb-4">
               <div className="stat-block">
                 <div className="stat-value">{streak}</div>
-                <div className="stat-label">racha</div>
+                <div className="stat-label">{t("dashboard.streak")}</div>
               </div>
               <button
                 onClick={() => setCheckinOpen(true)}
@@ -244,7 +245,7 @@ export default function Dashboard() {
               </button>
               <div className="stat-block">
                 <div className="stat-value" style={{ color: "var(--accent)" }}>F{phase.id}</div>
-                <div className="stat-label">fase</div>
+                <div className="stat-label">{t("dashboard.phase")}</div>
               </div>
             </div>
           </StaggerItem>
@@ -259,20 +260,20 @@ export default function Dashboard() {
             <Link href="/nutrition" className="no-underline text-inherit">
               <div className="card mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="section-label">Macros Hoy</span>
+                  <span className="section-label">{t("dashboard.macrosToday")}</span>
                   <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
                 </div>
                 <div className="space-y-2.5">
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-[0.68rem] font-medium">Proteína</span>
+                      <span className="text-[0.68rem] font-medium">{t("dashboard.protein")}</span>
                       <span className="text-[0.68rem] font-bold">{todayProtein}/{macroTargets.protein}g</span>
                     </div>
                     <div className="progress-bar"><div className="progress-fill" style={{ width: `${proteinPct}%`, background: "var(--accent)" }} /></div>
                   </div>
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-[0.68rem] font-medium">Calorías</span>
+                      <span className="text-[0.68rem] font-medium">{t("dashboard.calories")}</span>
                       <span className="text-[0.68rem] font-bold">{todayCalories}/{macroTargets.calories}</span>
                     </div>
                     <div className="progress-bar"><div className="progress-fill" style={{ width: `${calPct}%`, background: "var(--accent-orange)" }} /></div>
@@ -318,8 +319,8 @@ export default function Dashboard() {
             <StaggerItem className="tablet-full">
               <div className="card mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="section-label">Actividad Reciente</span>
-                  <Link href="/log" className="text-[0.65rem] no-underline font-semibold" style={{ color: "var(--accent)" }}>Ver todo →</Link>
+                  <span className="section-label">{t("dashboard.recentActivity")}</span>
+                  <Link href="/log" className="text-[0.65rem] no-underline font-semibold" style={{ color: "var(--accent)" }}>{t("dashboard.viewAll")}</Link>
                 </div>
                 <div className="space-y-0">
                   {recentSessions.map((s, i) => (
@@ -369,9 +370,9 @@ export default function Dashboard() {
                     <Moon size={16} style={{ color: "var(--accent-violet)" }} />
                   </div>
                   <div>
-                    <div className="text-[0.75rem] font-semibold">Sueño</div>
+                    <div className="text-[0.75rem] font-semibold">{t("sleep.title")}</div>
                     <div className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
-                      {checkin?.sleepHours ? `${checkin.sleepHours}h anoche` : "Registrá tu sueño"}
+                      {checkin?.sleepHours ? `${checkin.sleepHours}h` : t("dashboard.logSleep")}
                     </div>
                   </div>
                 </div>

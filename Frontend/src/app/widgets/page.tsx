@@ -7,6 +7,8 @@ import { getSessions, type WorkoutSession } from "@/lib/storage";
 import { getProfileData } from "@/data/profile";
 import { getSettings } from "@/lib/storage";
 
+import { PageTransition } from "@/components/motion";
+import { t } from "@/lib/i18n";
 function calcStreak(sessions: WorkoutSession[]): number {
   if (!sessions.length) return 0;
   const dates = [...new Set(sessions.map((s) => s.date))].sort().reverse();
@@ -53,35 +55,35 @@ export default function WidgetsPage() {
 
   const widgets = [
     {
-      title: "Racha Actual",
-      value: `${streak} días`,
+      title: t("widgets.currentStreak"),
+      value: `${streak} ${t("widgets.days")}`,
       icon: Flame,
       gradient: "from-[#FF9500] to-[#FF3B30]",
-      sub: streak >= 7 ? "🔥 ¡Imparable!" : streak >= 3 ? "💪 ¡Seguí así!" : "¡Empezá hoy!",
+      sub: streak >= 7 ? t("widgets.unstoppable") : streak >= 3 ? t("widgets.keepItUp") : t("widgets.startToday"),
     },
     {
-      title: "Esta Semana",
-      value: `${thisWeek} entrenos`,
+      title: t("widgets.thisWeek"),
+      value: `${thisWeek} ${t("widgets.workouts")}`,
       icon: Target,
       gradient: "from-[#30D158] to-[#34C759]",
-      sub: `Meta: 5 por semana`,
+      sub: t("widgets.weeklyGoal"),
     },
     {
-      title: "Total Sesiones",
+      title: t("widgets.totalSessions"),
       value: `${totalSessions}`,
       icon: Dumbbell,
       gradient: "from-[var(--accent)] to-[var(--accent)]",
-      sub: "Desde que empezaste",
+      sub: t("widgets.sinceBegan"),
     },
     {
-      title: "Volumen Total",
+      title: t("widgets.totalVolume"),
       value: `${(totalVolume / 1000).toFixed(0)}t`,
       icon: TrendingUp,
       gradient: "from-[#AF52DE] to-[#5856D6]",
-      sub: `${totalVolume.toLocaleString()} ${unit} movidos`,
+      sub: `${totalVolume.toLocaleString()} ${unit} ${t("widgets.moved")}`,
     },
     {
-      title: "Peso Actual",
+      title: t("widgets.currentWeight"),
       value: `${prof.weight} ${unit}`,
       icon: Trophy,
       gradient: "from-[#FF2D55] to-[#FF375F]",
@@ -90,14 +92,15 @@ export default function WidgetsPage() {
   ];
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-5 pb-6">
       <button onClick={() => router.back()} className="flex items-center gap-1 text-sm mb-4 bg-transparent border-none cursor-pointer p-0" style={{ color: "var(--text-muted)" }}>
-        <ChevronLeft size={16} /> Volver
+        <ChevronLeft size={16} /> {t("common.back")}
       </button>
 
-      <h1 className="text-xl font-black tracking-tight mb-1">Quick Stats</h1>
+      <h1 className="text-xl font-black tracking-tight mb-1">{t("widgets.title")}</h1>
       <p className="text-[0.7rem] mb-5" style={{ color: "var(--text-muted)" }}>
-        Widgets rápidos con tus estadísticas. En Android, mantené presionado el ícono de la app para accesos directos.
+        {t("widgets.description")}
       </p>
 
       <div className="grid grid-cols-2 gap-3">
@@ -116,7 +119,7 @@ export default function WidgetsPage() {
       </div>
 
       <div className="card mt-5 p-4">
-        <div className="text-[0.75rem] font-bold mb-2">📱 Widget Android</div>
+        <div className="text-[0.75rem] font-bold mb-2">{t("widgets.androidWidget")}</div>
         <p className="text-[0.65rem] leading-relaxed" style={{ color: "var(--text-muted)" }}>
           Cuando esta app está instalada como APK, podés añadir un widget de acceso rápido
           a tu escritorio de Android que muestra tu racha y los entrenos de la semana.
@@ -124,5 +127,6 @@ export default function WidgetsPage() {
         </p>
       </div>
     </main>
+    </PageTransition>
   );
 }

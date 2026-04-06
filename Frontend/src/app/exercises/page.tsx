@@ -36,6 +36,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 type View = "map" | "library" | "ranking";
 type SortOption = "name" | "difficulty" | "favorites";
 
+import { PageTransition } from "@/components/motion";
 const SORT_LABELS: Record<SortOption, string> = {
   name: "A-Z",
   difficulty: "Dificultad",
@@ -151,6 +152,7 @@ export default function ExercisesPage() {
   const hasRecommendations = recommendations.some((r) => r.priority === "high" || r.priority === "medium");
 
   return (
+    <PageTransition>
     <PullToRefresh onRefresh={loadData}>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-24">
       {/* Header */}
@@ -609,6 +611,7 @@ export default function ExercisesPage() {
       />
     </main>
     </PullToRefresh>
+    </PageTransition>
   );
 }
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { APP_VERSION, checkForUpdate } from "@/lib/version";
 import { t } from "@/lib/i18n";
 
+import { PageTransition } from "@/components/motion";
 const APK_URL =
   "https://github.com/Lucas23-IECI/PersonalTrainerApp/releases/latest/download/mark-pt.apk";
 
@@ -44,6 +45,7 @@ export default function DescargarPage() {
   }
 
   return (
+    <PageTransition>
     <div
       className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
       style={{ background: "var(--bg)" }}
@@ -178,5 +180,6 @@ export default function DescargarPage() {
         <span className="text-xs">{t("download.autoChecks")}</span>
       </div>
     </div>
+    </PageTransition>
   );
 }

@@ -58,6 +58,7 @@ import { t } from "@/lib/i18n";
 type Tab = "library" | "routines";
 
 // ── Category labels ──
+import { PageTransition } from "@/components/motion";
 const CATEGORY_KEYS: Record<LibraryProgram["category"], string> = {
   strength: "programs.strength",
   hypertrophy: "programs.hypertrophy",
@@ -418,6 +419,7 @@ export default function RoutinesPage() {
   );
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-28" onClick={() => { if (menuOpen) setMenuOpen(null); }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
@@ -774,5 +776,6 @@ export default function RoutinesPage() {
         </div>
       )}
     </main>
+    </PageTransition>
   );
 }

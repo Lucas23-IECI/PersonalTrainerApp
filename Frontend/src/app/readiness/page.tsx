@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  ShieldCheck,
-  AlertTriangle,
   TrendingUp,
   TrendingDown,
   Minus,

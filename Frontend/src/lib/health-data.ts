@@ -1,4 +1,5 @@
 // =============================================
+import { safeGetItem, safeSetItem, safeRemoveItem } from "@/lib/storage";
 // Health data types, storage, and recovery score
 // Cached locally from Google Fit / Health Connect
 // =============================================
@@ -51,12 +52,12 @@ const GFIT_LAST_SYNC_KEY = "mark-pt-gfit-last-sync";
 // ── Auth storage ──
 
 export function saveGoogleFitAuth(auth: GoogleFitAuth): void {
-  localStorage.setItem(GFIT_AUTH_KEY, JSON.stringify(auth));
+  safeSetItem(GFIT_AUTH_KEY, JSON.stringify(auth));
 }
 
 export function getGoogleFitAuth(): GoogleFitAuth | null {
   try {
-    const raw = localStorage.getItem(GFIT_AUTH_KEY);
+    const raw = safeGetItem(GFIT_AUTH_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -65,8 +66,8 @@ export function getGoogleFitAuth(): GoogleFitAuth | null {
 }
 
 export function clearGoogleFitAuth(): void {
-  localStorage.removeItem(GFIT_AUTH_KEY);
-  localStorage.removeItem(GFIT_LAST_SYNC_KEY);
+  safeRemoveItem(GFIT_AUTH_KEY);
+  safeRemoveItem(GFIT_LAST_SYNC_KEY);
 }
 
 export function isGoogleFitConnected(): boolean {
@@ -78,7 +79,7 @@ export function isGoogleFitConnected(): boolean {
 
 function getHealthCache(): Record<string, HealthSnapshot> {
   try {
-    const raw = localStorage.getItem(HEALTH_CACHE_KEY);
+    const raw = safeGetItem(HEALTH_CACHE_KEY);
     if (!raw) return {};
     return JSON.parse(raw);
   } catch {
@@ -87,7 +88,7 @@ function getHealthCache(): Record<string, HealthSnapshot> {
 }
 
 function saveHealthCache(cache: Record<string, HealthSnapshot>): void {
-  localStorage.setItem(HEALTH_CACHE_KEY, JSON.stringify(cache));
+  safeSetItem(HEALTH_CACHE_KEY, JSON.stringify(cache));
 }
 
 export function cacheHealthData(snapshot: HealthSnapshot): void {
@@ -118,11 +119,11 @@ export function getHealthForRange(startDate: string, endDate: string): HealthSna
 // ── Sync tracking ──
 
 export function getLastSyncDate(): string | null {
-  return localStorage.getItem(GFIT_LAST_SYNC_KEY);
+  return safeGetItem(GFIT_LAST_SYNC_KEY);
 }
 
 export function setLastSyncDate(iso: string): void {
-  localStorage.setItem(GFIT_LAST_SYNC_KEY, iso);
+  safeSetItem(GFIT_LAST_SYNC_KEY, iso);
 }
 
 // ── Recovery Score ──

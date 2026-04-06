@@ -17,6 +17,7 @@ import SleepChart from "@/components/sleep/SleepChart";
 import Link from "next/link";
 import { ArrowLeft, Moon, Plus, Target, TrendingUp, Lightbulb } from "lucide-react";
 import { PageTransition } from "@/components/motion";
+import { t } from "@/lib/i18n";
 
 export default function SleepPage() {
   const [logOpen, setLogOpen] = useState(false);
@@ -45,10 +46,10 @@ export default function SleepPage() {
             </Link>
             <div>
               <h1 className="text-[1.1rem] font-black tracking-tight flex items-center gap-2">
-                <Moon size={18} style={{ color: "#5E5CE6" }} /> Sueño
+                <Moon size={18} style={{ color: "#5E5CE6" }} /> {t("sleep.title")}
               </h1>
               <p className="text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
-                Meta: {goal}h por noche
+                {t("sleep.goalPerNight").replace("{n}", String(goal))}
               </p>
             </div>
           </div>
@@ -57,14 +58,14 @@ export default function SleepPage() {
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[0.72rem] font-bold border-none cursor-pointer"
             style={{ background: "#5E5CE6", color: "#fff" }}
           >
-            <Plus size={14} /> Registrar
+            <Plus size={14} /> {t("sleep.register")}
           </button>
         </div>
 
         {/* Today summary */}
         <div className="card mb-4" style={{ borderLeft: "3px solid #5E5CE6" }}>
           <div className="text-[0.6rem] uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
-            Hoy
+            {t("common.today")}
           </div>
           {todayCheckin?.sleepHours ? (
             <div className="flex items-center gap-4">
@@ -114,7 +115,7 @@ export default function SleepPage() {
               {avg7}h
             </div>
             <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>
-              Promedio 7 días
+              {t("sleep.avg7")}
             </div>
           </div>
           <div className="card text-center py-3">
@@ -123,7 +124,7 @@ export default function SleepPage() {
               {avg30}h
             </div>
             <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>
-              Promedio 30 días
+              {t("sleep.avg30")}
             </div>
           </div>
           <div className="card text-center py-3">
@@ -132,7 +133,7 @@ export default function SleepPage() {
               {consistency}%
             </div>
             <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>
-              Consistencia 30d
+              {t("sleep.consistency")}
             </div>
           </div>
           <div className="card text-center py-3">
@@ -141,7 +142,7 @@ export default function SleepPage() {
               {qualityAvg > 0 ? `${qualityAvg}/5` : "—"}
             </div>
             <div className="text-[0.5rem] uppercase" style={{ color: "var(--text-muted)" }}>
-              Calidad Prom
+              {t("sleep.qualityAvg")}
             </div>
           </div>
         </div>
@@ -157,7 +158,7 @@ export default function SleepPage() {
             <div className="flex items-center gap-2 mb-3">
               <Lightbulb size={14} style={{ color: "#FFD700" }} />
               <span className="text-[0.65rem] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-                Recomendaciones
+                {t("sleep.recommendations")}
               </span>
             </div>
             <div className="space-y-2">

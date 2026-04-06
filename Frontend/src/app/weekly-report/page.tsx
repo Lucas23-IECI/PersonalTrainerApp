@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { PageTransition } from "@/components/motion";
 interface WeeklyStats {
   sessionsCount: number;
   totalVolume: number;
@@ -175,6 +176,7 @@ export default function WeeklyReportPage() {
   const maxHits = topMuscles.length > 0 ? topMuscles[0][1] : 1;
 
   return (
+    <PageTransition>
     <div className="min-h-screen pb-24" style={{ background: "var(--bg)" }}>
       {/* Header */}
       <div
@@ -497,5 +499,6 @@ export default function WeeklyReportPage() {
         )}
       </div>
     </div>
+    </PageTransition>
   );
 }

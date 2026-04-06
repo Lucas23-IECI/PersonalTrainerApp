@@ -1,4 +1,5 @@
 // =============================================
+import { safeGetItem, safeSetItem } from "@/lib/storage";
 // Custom Exercises CRUD (3.8) + Clone (3.10)
 // User-created exercises stored in localStorage
 // =============================================
@@ -30,7 +31,7 @@ function generateId(): string {
 function load(): CustomExercise[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeGetItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -38,7 +39,7 @@ function load(): CustomExercise[] {
 }
 
 function persist(data: CustomExercise[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  safeSetItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 // ── CRUD ──

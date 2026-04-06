@@ -3,7 +3,7 @@
 // RPE-based, no stupid jumps, smart suggestions
 // =============================================
 
-import { getSessions, type WorkoutSession, type LoggedSet } from "./storage";
+import { getSessions, type WorkoutSession, type LoggedSet, safeGetItem, safeSetItem} from "./storage";
 import { type ProgramExercise } from "@/data/programs";
 
 export interface ProgressionSuggestion {
@@ -348,11 +348,11 @@ const ACTIVE_RULE_KEY = "mark-pt-progression-rule";
 
 export function getActiveRuleId(): string {
   if (typeof window === "undefined") return PROGRESSION_RULES[0].id;
-  return localStorage.getItem(ACTIVE_RULE_KEY) || PROGRESSION_RULES[0].id;
+  return safeGetItem(ACTIVE_RULE_KEY) || PROGRESSION_RULES[0].id;
 }
 
 export function setActiveRuleId(ruleId: string): void {
-  localStorage.setItem(ACTIVE_RULE_KEY, ruleId);
+  safeSetItem(ACTIVE_RULE_KEY, ruleId);
 }
 
 export function getActiveRuleConfig(): ProgressionRuleConfig {

@@ -13,6 +13,8 @@ import {
   today,
   type WorkoutSession,
   type DailyCheckin,
+  safeGetItem,
+  safeSetItem,
 } from "./storage";
 import { getSmartRecoveryMap, type SmartRecoveryInfo } from "./muscle-recovery";
 import { calculateFatigue, getFatigueHistory, type FatigueScore } from "./deload";
@@ -116,7 +118,7 @@ function sessionSets(session: WorkoutSession): number {
 function loadReadinessHistory(): { date: string; score: number }[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(READINESS_HISTORY_KEY);
+    const raw = safeGetItem(READINESS_HISTORY_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -124,7 +126,7 @@ function loadReadinessHistory(): { date: string; score: number }[] {
 }
 
 function saveReadinessHistory(entries: { date: string; score: number }[]) {
-  localStorage.setItem(READINESS_HISTORY_KEY, JSON.stringify(entries.slice(-30)));
+  safeSetItem(READINESS_HISTORY_KEY, JSON.stringify(entries.slice(-30)));
 }
 
 // ── Sleep Component (0-25) ──

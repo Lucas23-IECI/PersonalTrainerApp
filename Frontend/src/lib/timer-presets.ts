@@ -1,4 +1,5 @@
 // ── Timer mode definitions and presets ──
+import { safeGetItem, safeSetItem } from "@/lib/storage";
 
 export type TimerMode = "tabata" | "emom" | "amrap" | "custom";
 
@@ -64,7 +65,7 @@ export interface TimerSession {
 export function getTimerHistory(): TimerSession[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(TIMER_HISTORY_KEY);
+    const raw = safeGetItem(TIMER_HISTORY_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -76,5 +77,5 @@ export function saveTimerSession(session: TimerSession): void {
   all.unshift(session);
   // Keep max 50 sessions
   if (all.length > 50) all.length = 50;
-  localStorage.setItem(TIMER_HISTORY_KEY, JSON.stringify(all));
+  safeSetItem(TIMER_HISTORY_KEY, JSON.stringify(all));
 }

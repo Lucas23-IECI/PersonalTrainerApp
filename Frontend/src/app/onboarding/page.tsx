@@ -9,6 +9,7 @@ import { Dumbbell, ChevronRight, ChevronLeft, User, Ruler, Target, Calendar, Awa
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
+import { PageTransition } from "@/components/motion";
 const EXPERIENCE_OPTIONS = [
   { value: "beginner", labelKey: "onboarding.beginner", descKey: "onboarding.beginnerDesc" },
   { value: "intermediate", labelKey: "onboarding.intermediate", descKey: "onboarding.intermediateDesc" },
@@ -104,6 +105,7 @@ export default function OnboardingPage() {
   const progress = (step / 7) * 100;
 
   return (
+    <PageTransition>
     <main className="max-w-[420px] mx-auto px-5 min-h-screen flex flex-col">
       {/* PROGRESS BAR */}
       <div className="pt-6 mb-2">
@@ -365,5 +367,6 @@ export default function OnboardingPage() {
         )}
       </div>
     </main>
+    </PageTransition>
   );
 }

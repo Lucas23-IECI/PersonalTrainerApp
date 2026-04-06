@@ -20,6 +20,7 @@ import {
 import { t } from "@/lib/i18n";
 import PullToRefresh from "@/components/PullToRefresh";
 
+import { PageTransition } from "@/components/motion";
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
 const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] as const;
 
@@ -285,6 +286,7 @@ export default function LogPage() {
   const selectedDateStats = selectedDate ? dayStats[selectedDate] : null;
 
   return (
+    <PageTransition>
     <PullToRefresh onRefresh={loadSessions}>
     <main className="max-w-[600px] md:max-w-[960px] mx-auto px-4 py-5">
       <h1 className="text-[1.3rem] font-black tracking-tight mb-1">{t("common.history")}</h1>
@@ -771,5 +773,6 @@ export default function LogPage() {
       ))}
     </main>
     </PullToRefresh>
+    </PageTransition>
   );
 }

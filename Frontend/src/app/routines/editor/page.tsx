@@ -29,6 +29,7 @@ import {
   type BatchSuggestion,
 } from "@/lib/progression";
 
+import { PageTransition } from "@/components/motion";
 function RoutineEditorContent() {
   const router = useRouter();
   const params = useSearchParams();
@@ -496,8 +497,10 @@ function RoutineEditorContent() {
 
 export default function RoutineEditorPage() {
   return (
+    <PageTransition>
     <Suspense fallback={<div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>Cargando...</div>}>
       <RoutineEditorContent />
     </Suspense>
+    </PageTransition>
   );
 }

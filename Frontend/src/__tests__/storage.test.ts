@@ -27,6 +27,10 @@ describe('storage', () => {
         reminderMinute: 30,
         workoutView: 'carousel',
         sleepGoal: 7,
+        accentColor: 'blue',
+        customTabs: ['/', '/workout', '/exercises', '/nutrition', '/log', '/profile'],
+        layoutDensity: 'default',
+        fontScale: 1,
       };
       saveSettings(custom);
       const loaded = getSettings();

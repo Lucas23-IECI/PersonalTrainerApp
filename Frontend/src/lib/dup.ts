@@ -1,4 +1,5 @@
 // =============================================
+import { safeGetItem, safeSetItem } from "@/lib/storage";
 // 5.5 — DUP (Daily Undulating Periodization)
 // Auto-rotates rep/load/RPE schemes per session
 // =============================================
@@ -50,7 +51,7 @@ interface DUPState {
 function getState(): DUPState {
   if (typeof window === "undefined") return { enabled: false, counters: {} };
   try {
-    const raw = localStorage.getItem(DUP_KEY);
+    const raw = safeGetItem(DUP_KEY);
     if (!raw) return { enabled: false, counters: {} };
     return JSON.parse(raw);
   } catch {
@@ -59,7 +60,7 @@ function getState(): DUPState {
 }
 
 function saveState(state: DUPState): void {
-  localStorage.setItem(DUP_KEY, JSON.stringify(state));
+  safeSetItem(DUP_KEY, JSON.stringify(state));
 }
 
 export function isDUPEnabled(): boolean {

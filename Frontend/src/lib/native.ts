@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { safeSetItem, safeRemoveItem } from "@/lib/storage";
 
 const WORKOUT_NOTIFICATION_ID = 99999;
 
@@ -110,7 +111,7 @@ export async function scheduleDailyReminder(hour: number, minute: number) {
     } catch { /* silently fail */ }
   } else if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
     // Web: store preference, no repeating schedule available
-    localStorage.setItem("mark-pt-reminder-web", JSON.stringify({ hour, minute }));
+    safeSetItem("mark-pt-reminder-web", JSON.stringify({ hour, minute }));
   }
 }
 
@@ -122,7 +123,7 @@ export async function cancelDailyReminder() {
     } catch { /* silently fail */ }
   }
   if (typeof window !== 'undefined') {
-    localStorage.removeItem("mark-pt-reminder-web");
+    safeRemoveItem("mark-pt-reminder-web");
   }
 }
 

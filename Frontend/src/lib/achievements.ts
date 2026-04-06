@@ -12,6 +12,8 @@ import {
   getProgressPhotos,
   getBodyMeasurements,
   type WorkoutSession,
+  safeGetItem,
+  safeSetItem,
 } from "./storage";
 
 // === Types ===
@@ -64,7 +66,7 @@ const BADGES_KEY = "mark-pt-badges";
 export function getUnlockedBadges(): UnlockedBadge[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(BADGES_KEY);
+    const raw = safeGetItem(BADGES_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -72,7 +74,7 @@ export function getUnlockedBadges(): UnlockedBadge[] {
 }
 
 function saveUnlockedBadges(badges: UnlockedBadge[]) {
-  localStorage.setItem(BADGES_KEY, JSON.stringify(badges));
+  safeSetItem(BADGES_KEY, JSON.stringify(badges));
 }
 
 // === Badge Definitions (~35) ===

@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.3.0';
+export const APP_VERSION = '3.4.0';
 export const APP_BUILD_TS = Date.now();
 
 export async function checkForUpdate(): Promise<{ hasUpdate: boolean; downloadUrl: string; latestVersion: string }> {

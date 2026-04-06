@@ -24,6 +24,7 @@ import {
   Link2,
 } from "lucide-react";
 
+import { PageTransition } from "@/components/motion";
 export default function WorkoutEditorPage() {
   const router = useRouter();
   const phase = getCurrentPhase();
@@ -117,6 +118,7 @@ export default function WorkoutEditorPage() {
   }
 
   return (
+    <PageTransition>
     <main className="max-w-[540px] mx-auto px-4 pt-4 pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -347,5 +349,6 @@ export default function WorkoutEditorPage() {
         );
       })}
     </main>
+    </PageTransition>
   );
 }

@@ -12,6 +12,7 @@ import { MUSCLE_LABELS } from "@/data/exercises";
 import { ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
+import { PageTransition } from "@/components/motion";
 interface YearStats {
   year: number;
   totalSessions: number;
@@ -371,6 +372,7 @@ export default function YearReviewPage() {
   const totalSlides = slides.length;
 
   return (
+    <PageTransition>
     <div className="min-h-screen flex flex-col" style={{ background: "#000" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 z-10">
@@ -459,5 +461,6 @@ export default function YearReviewPage() {
         </button>
       </div>
     </div>
+    </PageTransition>
   );
 }
