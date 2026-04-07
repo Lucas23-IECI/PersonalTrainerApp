@@ -10,6 +10,7 @@ import MuscleRadar, {
   getRegionHits,
 } from "@/components/MuscleMap";
 import BodyMap from "@/components/BodyMap";
+import { BodyMapMini } from "@/components/BodyMap";
 import {
   exerciseLibrary,
   MUSCLE_LABELS,
@@ -30,7 +31,7 @@ import { getAllExercises } from "@/lib/custom-exercises";
 import { getExerciseHistory } from "@/lib/progression";
 import { getFavorites, toggleFavorite } from "@/lib/exercise-favorites";
 import { getExerciseImage, hasWgerMapping } from "@/lib/wger-api";
-import { Search, ChevronDown, ChevronUp, Target, BookOpen, Trophy, Star, Settings, BarChart3, Activity } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, ChevronRight, Target, BookOpen, Trophy, Star, Settings, BarChart3, Activity, ArrowLeft, Dumbbell } from "lucide-react";
 import PullToRefresh from "@/components/PullToRefresh";
 
 type View = "map" | "library" | "ranking";
@@ -65,7 +66,7 @@ export default function ExercisesPage() {
   const [goals, setGoals] = useState<Record<string, { min: number; max: number }>>({});
   const [recommendations, setRecommendations] = useState<DailyRecommendation[]>([]);
   const [search, setSearch] = useState("");
-  const [expandedEx, setExpandedEx] = useState<string | null>(null);
+  const [detailExercise, setDetailExercise] = useState<LibraryExercise | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [favoritesSet, setFavoritesSet] = useState<Set<string>>(new Set());
   const [showGoals, setShowGoals] = useState(false);
@@ -189,7 +190,7 @@ export default function ExercisesPage() {
               setSelectedMuscle(null);
               setSelectedRegion(null);
               setSearch("");
-              setExpandedEx(null);
+              setDetailExercise(null);
               setCategoryFilter(null);
             }}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all"
@@ -378,8 +379,7 @@ export default function ExercisesPage() {
 
                 <ExerciseList
                   exercises={unique}
-                  expandedEx={expandedEx}
-                  onToggle={(id) => setExpandedEx(expandedEx === id ? null : id)}
+                  onSelect={setDetailExercise}
                   favoritesSet={favoritesSet}
                   onToggleFav={handleToggleFavorite}
                 />
@@ -493,11 +493,11 @@ export default function ExercisesPage() {
             ))}
           </div>
 
-          {/* Muscle chips */}
-          <div className="flex flex-wrap gap-1.5 mb-4">
+          {/* Muscle chips (horizontal scroll) */}
+          <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
             <button
               onClick={() => { setSelectedMuscle(null); setSearch(""); }}
-              className="px-3 py-1.5 rounded-full text-[0.7rem] font-semibold transition-colors"
+              className="px-3 py-1.5 rounded-full text-[0.7rem] font-semibold transition-colors whitespace-nowrap shrink-0"
               style={{
                 background: !selectedMuscle ? "var(--accent)" : "var(--bg-card)",
                 color: !selectedMuscle ? "white" : "var(--text-secondary)",
@@ -510,7 +510,7 @@ export default function ExercisesPage() {
                 <button
                   key={m}
                   onClick={() => { setSelectedMuscle(m === selectedMuscle ? null : m as MuscleGroup); setSearch(""); }}
-                  className="px-3 py-1.5 rounded-full text-[0.7rem] font-semibold transition-colors"
+                  className="px-3 py-1.5 rounded-full text-[0.7rem] font-semibold transition-colors whitespace-nowrap shrink-0"
                   style={{
                     background: selectedMuscle === m ? "var(--accent)" : "var(--bg-card)",
                     color: selectedMuscle === m ? "white" : "var(--text-secondary)",
@@ -542,8 +542,7 @@ export default function ExercisesPage() {
 
           <ExerciseList
             exercises={filteredExercises}
-            expandedEx={expandedEx}
-            onToggle={(id) => setExpandedEx(expandedEx === id ? null : id)}
+            onSelect={setDetailExercise}
             favoritesSet={favoritesSet}
             onToggleFav={handleToggleFavorite}
           />
@@ -598,6 +597,11 @@ export default function ExercisesPage() {
         </div>
       )}
 
+      {/* Full-screen exercise detail overlay */}
+      {detailExercise && (
+        <ExerciseDetailView exercise={detailExercise} onBack={() => setDetailExercise(null)} />
+      )}
+
       {/* Modals */}
       <MuscleGoalsEditor
         isOpen={showGoals}
@@ -616,77 +620,32 @@ export default function ExercisesPage() {
 }
 
 /* ────────────────────────────────────────────────────── */
-/*  ExerciseList                                          */
+/*  ExerciseList (cards with thumbnails)                  */
 /* ────────────────────────────────────────────────────── */
 
 function ExerciseList({
   exercises,
-  expandedEx,
-  onToggle,
+  onSelect,
   favoritesSet,
   onToggleFav,
 }: {
   exercises: LibraryExercise[];
-  expandedEx: string | null;
-  onToggle: (id: string) => void;
+  onSelect: (ex: LibraryExercise) => void;
   favoritesSet?: Set<string>;
   onToggleFav?: (name: string) => void;
 }) {
   return (
     <div className="flex flex-col gap-2">
       {exercises.map((ex) => {
-        const isOpen = expandedEx === ex.id;
         const isFav = favoritesSet?.has(ex.name) ?? false;
         return (
-          <div key={ex.id} className="card">
-            <div
-              onClick={() => onToggle(ex.id)}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
-                  style={{
-                    background: "rgba(44,107,237,0.1)",
-                    color: "var(--accent)",
-                  }}
-                >
-                  {CATEGORY_LABELS[ex.category]?.[0] || "E"}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate flex items-center gap-1.5" style={{ color: "var(--text)" }}>
-                    {ex.name}
-                    {isFav && <Star size={12} fill="#FFD60A" stroke="#FFD60A" className="shrink-0" />}
-                  </div>
-                  <div className="flex gap-1 mt-0.5 flex-wrap">
-                    {ex.primaryMuscles.map((m) => (
-                      <span key={m} className="badge badge-blue text-[0.55rem]">
-                        {MUSCLE_LABELS[m]}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 ml-2 shrink-0">
-                {onToggleFav && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onToggleFav(ex.name); }}
-                    className="bg-transparent border-none cursor-pointer p-1"
-                    style={{ color: isFav ? "#FFD60A" : "var(--text-muted)" }}
-                  >
-                    <Star size={16} fill={isFav ? "#FFD60A" : "none"} />
-                  </button>
-                )}
-                <div style={{ color: "var(--text-muted)" }}>
-                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </div>
-              </div>
-            </div>
-
-            {isOpen && (
-              <ExerciseDetail exercise={ex} />
-            )}
-          </div>
+          <ExerciseCard
+            key={ex.id}
+            exercise={ex}
+            isFav={isFav}
+            onClick={() => onSelect(ex)}
+            onToggleFav={onToggleFav}
+          />
         );
       })}
     </div>
@@ -694,15 +653,21 @@ function ExerciseList({
 }
 
 /* ────────────────────────────────────────────────────── */
-/*  ExerciseDetail                                        */
+/*  ExerciseCard (with image thumbnail)                   */
 /* ────────────────────────────────────────────────────── */
 
-function ExerciseDetail({ exercise: ex }: { exercise: LibraryExercise }) {
+function ExerciseCard({
+  exercise: ex,
+  isFav,
+  onClick,
+  onToggleFav,
+}: {
+  exercise: LibraryExercise;
+  isFav: boolean;
+  onClick: () => void;
+  onToggleFav?: (name: string) => void;
+}) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const history = useMemo(() => {
-    const h = getExerciseHistory(ex.name, 1);
-    return h.length > 0 ? h[0] : null;
-  }, [ex.name]);
 
   useEffect(() => {
     if (!hasWgerMapping(ex.name)) return;
@@ -714,87 +679,215 @@ function ExerciseDetail({ exercise: ex }: { exercise: LibraryExercise }) {
   }, [ex.name]);
 
   return (
-    <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-      {history && (
+    <div className="card cursor-pointer" onClick={onClick}>
+      <div className="flex items-center gap-3">
+        {/* Thumbnail */}
         <div
-          className="mb-3 px-3 py-2 rounded-lg text-[0.65rem]"
-          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
+          className="w-12 h-12 rounded-lg overflow-hidden shrink-0 flex items-center justify-center"
+          style={{ background: "var(--bg-elevated)" }}
         >
-          <span style={{ color: "var(--text-muted)" }}>Último: </span>
-          <span className="font-semibold" style={{ color: "var(--accent)" }}>
-            {history.topSet.weight}kg × {history.topSet.reps}
-          </span>
-          <span style={{ color: "var(--text-muted)" }}> · RPE {history.avgRpe.toFixed(1)} · {new Date(history.date).toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short" })}</span>
+          {imageUrl ? (
+            <img src={imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+          ) : (
+            <Dumbbell size={20} style={{ color: "var(--accent)", opacity: 0.5 }} />
+          )}
         </div>
-      )}
 
-      {imageUrl && (
-        <div className="mb-3 rounded-lg overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
-          <img
-            src={imageUrl}
-            alt={ex.name}
-            className="w-full h-36 object-contain"
-            loading="lazy"
-          />
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        <div>
-          <span className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            Categoría
-          </span>
-          <div className="text-xs font-medium mt-0.5" style={{ color: "var(--text-secondary)" }}>
-            {CATEGORY_LABELS[ex.category] || ex.category}
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold truncate flex items-center gap-1.5" style={{ color: "var(--text)" }}>
+            {ex.name}
+            {isFav && <Star size={12} fill="#FFD60A" stroke="#FFD60A" className="shrink-0" />}
           </div>
-        </div>
-        <div>
-          <span className="text-[0.6rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            Dificultad
-          </span>
-          <div className="text-xs font-medium mt-0.5 capitalize" style={{ color: "var(--text-secondary)" }}>
-            {ex.difficulty}
-          </div>
-        </div>
-      </div>
-
-      {ex.secondaryMuscles.length > 0 && (
-        <div className="mb-3">
-          <span className="text-[0.6rem] uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
-            Secundarios
-          </span>
-          <div className="flex gap-1 flex-wrap">
-            {ex.secondaryMuscles.map((m) => (
-              <span key={m} className="badge text-[0.55rem]">
+          <div className="flex gap-1 mt-0.5 flex-wrap">
+            {ex.primaryMuscles.map((m) => (
+              <span key={m} className="badge badge-blue text-[0.55rem]">
                 {MUSCLE_LABELS[m]}
               </span>
             ))}
           </div>
         </div>
-      )}
 
-      {ex.instructions && (
-        <div className="mb-2">
-          <span className="text-[0.6rem] uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
-            Instrucciones
-          </span>
-          <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            {ex.instructions}
-          </p>
+        {/* Actions */}
+        <div className="flex items-center gap-1 ml-2 shrink-0">
+          {onToggleFav && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleFav(ex.name); }}
+              className="bg-transparent border-none cursor-pointer p-1"
+              style={{ color: isFav ? "#FFD60A" : "var(--text-muted)" }}
+            >
+              <Star size={16} fill={isFav ? "#FFD60A" : "none"} />
+            </button>
+          )}
+          <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
         </div>
-      )}
+      </div>
+    </div>
+  );
+}
 
-      {ex.tips && (
-        <div
-          className="text-xs py-2 px-3 rounded-lg mt-2"
-          style={{
-            background: "rgba(44,107,237,0.06)",
-            color: "var(--accent)",
-          }}
+/* ────────────────────────────────────────────────────── */
+/*  ExerciseDetailView (full-screen overlay)              */
+/* ────────────────────────────────────────────────────── */
+
+function ExerciseDetailView({ exercise: ex, onBack }: { exercise: LibraryExercise; onBack: () => void }) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [tab, setTab] = useState<"detail" | "history">("detail");
+  const history = useMemo(() => getExerciseHistory(ex.name, 10), [ex.name]);
+
+  useEffect(() => {
+    if (!hasWgerMapping(ex.name)) return;
+    let cancelled = false;
+    getExerciseImage(ex.name).then((url) => {
+      if (!cancelled && url) setImageUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [ex.name]);
+
+  const DIFF_LABELS: Record<string, string> = { beginner: "Principiante", intermediate: "Intermedio", advanced: "Avanzado" };
+  const DIFF_COLORS: Record<string, string> = { beginner: "#34C759", intermediate: "#FFD60A", advanced: "#FF453A" };
+
+  return (
+    <div className="fixed inset-0 z-50" style={{ background: "var(--bg)" }}>
+      <div className="max-w-[540px] mx-auto px-4 pt-4 pb-24 h-full overflow-y-auto">
+        {/* Back button */}
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1 mb-4 text-sm font-semibold"
+          style={{ color: "var(--accent)" }}
         >
-          {ex.tips}
+          <ArrowLeft size={18} />
+          Volver
+        </button>
+
+        {/* Exercise name */}
+        <h1 className="text-xl font-extrabold tracking-tight mb-1" style={{ color: "var(--text)" }}>
+          {ex.name}
+        </h1>
+        <div className="flex gap-2 items-center mb-4">
+          <span
+            className="px-2 py-0.5 rounded-full text-[0.65rem] font-semibold"
+            style={{ background: "rgba(44,107,237,0.1)", color: "var(--accent)" }}
+          >
+            {CATEGORY_LABELS[ex.category] || ex.category}
+          </span>
+          <span
+            className="px-2 py-0.5 rounded-full text-[0.65rem] font-semibold"
+            style={{ background: `${DIFF_COLORS[ex.difficulty]}20`, color: DIFF_COLORS[ex.difficulty] }}
+          >
+            {DIFF_LABELS[ex.difficulty] || ex.difficulty}
+          </span>
         </div>
-      )}
+
+        {/* Exercise image */}
+        {imageUrl && (
+          <div className="rounded-xl overflow-hidden mb-4" style={{ background: "var(--bg-card)" }}>
+            <img src={imageUrl} alt={ex.name} className="w-full h-48 object-contain" />
+          </div>
+        )}
+
+        {/* Body map mini (front + back) */}
+        <div className="card mb-4">
+          <p className="text-xs font-semibold mb-2" style={{ color: "var(--text)" }}>Músculos Trabajados</p>
+          <BodyMapMini primaryMuscles={ex.primaryMuscles} secondaryMuscles={ex.secondaryMuscles} />
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {ex.primaryMuscles.map((m) => (
+              <span key={m} className="badge badge-blue text-[0.55rem]">{MUSCLE_LABELS[m]}</span>
+            ))}
+            {ex.secondaryMuscles.map((m) => (
+              <span key={m} className="badge text-[0.55rem]">{MUSCLE_LABELS[m]}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 p-1 rounded-xl mb-4" style={{ background: "var(--bg-card)" }}>
+          {(["detail", "history"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="flex-1 py-2 rounded-lg text-xs font-bold transition-all"
+              style={{
+                background: tab === t ? "var(--accent)" : "transparent",
+                color: tab === t ? "white" : "var(--text-muted)",
+              }}
+            >
+              {t === "detail" ? "Detalles" : "Historial"}
+            </button>
+          ))}
+        </div>
+
+        {/* Detail tab */}
+        {tab === "detail" && (
+          <div className="animate-fade-in">
+            {ex.instructions && (
+              <div className="card mb-3">
+                <p className="text-[0.65rem] uppercase tracking-wider font-semibold mb-2" style={{ color: "var(--text-muted)" }}>
+                  Instrucciones
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                  {ex.instructions}
+                </p>
+              </div>
+            )}
+            {ex.tips && (
+              <div
+                className="rounded-xl py-3 px-4 text-sm"
+                style={{ background: "rgba(44,107,237,0.06)", color: "var(--accent)" }}
+              >
+                💡 {ex.tips}
+              </div>
+            )}
+            {!ex.instructions && !ex.tips && (
+              <div className="text-center py-8">
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  No hay instrucciones disponibles para este ejercicio.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* History tab */}
+        {tab === "history" && (
+          <div className="animate-fade-in">
+            {history.length === 0 ? (
+              <div className="text-center py-8">
+                <Activity size={32} style={{ color: "var(--text-muted)", margin: "0 auto 8px" }} />
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  Aún no registraste este ejercicio.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {history.map((h, i) => (
+                  <div key={i} className="card">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-semibold" style={{ color: "var(--text)" }}>
+                        {new Date(h.date).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "short" })}
+                      </span>
+                      <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>
+                        RPE {h.avgRpe.toFixed(1)}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 flex-wrap mb-1.5">
+                      {h.sets.map((s, j) => (
+                        <span key={j} className="text-[0.65rem] px-2 py-0.5 rounded-md" style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)" }}>
+                          {s.weight}kg × {s.reps}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-4 text-[0.6rem]" style={{ color: "var(--text-muted)" }}>
+                      <span>Top: <b style={{ color: "var(--accent)" }}>{h.topSet.weight}kg × {h.topSet.reps}</b></span>
+                      <span>Vol: {h.totalVolume.toLocaleString()}kg</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

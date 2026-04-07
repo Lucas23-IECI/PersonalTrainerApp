@@ -462,11 +462,11 @@ tr:last-child td {
 /* ===== Session Inputs ===== */
 .session-input {
   width: 100%;
-  min-height: 42px;
-  padding: 8px 6px;
-  border-radius: 10px;
+  min-height: 44px;
+  padding: 10px 8px;
+  border-radius: 12px;
   border: 1px solid transparent;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   background: var(--bg-input);
   color: var(--text);

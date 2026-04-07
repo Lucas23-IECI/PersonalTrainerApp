@@ -30,15 +30,15 @@ import {
 } from "@/lib/native";
 import {
   Check, ChevronDown, Timer, Plus, Trash2, Minus as MinusIcon,
-  ArrowUp, ArrowDown, RefreshCw, Link2, MessageSquare,
+  MoreVertical,
 } from "lucide-react";
 import AddExerciseModal from "@/components/AddExerciseModal";
 import RestTimer from "@/components/RestTimer";
-import ExerciseProgressInline from "@/components/workout/ExerciseProgressInline";
+import { getExerciseImage } from "@/lib/wger-api";
 import SessionSummary from "@/components/workout/session/SessionSummary";
 import { type SessionSet, type SessionExercise, SUPERSET_COLORS, SUPERSET_TAGS, formatDuration, formatRest } from "@/components/workout/session/types";
 import SetTypeBadge, { nextSetType, isWarmupType } from "@/components/SetTypeBadge";
-import { vibrateTimerComplete, vibrateMedium, vibrateHeavy, vibrateSuccess, vibrateLight } from "@/lib/haptics";
+import { vibrateTimerComplete, vibrateSuccess, vibrateLight } from "@/lib/haptics";
 import { exerciseLibrary, type LibraryExercise, type ExerciseCategory } from "@/data/exercises";
 import WarmupGenerator from "@/components/WarmupGenerator";
 import { checkDeload, type DeloadCheck } from "@/lib/deload";
@@ -132,6 +132,8 @@ function SessionContent() {
   const [expandedSetNote, setExpandedSetNote] = useState<string | null>(null); // "exIdx-setIdx"
 
   const [swipeState, setSwipeState] = useState<{ key: string; startX: number; dx: number } | null>(null);
+  const [openMenuIdx, setOpenMenuIdx] = useState<number | null>(null);
+  const [exerciseImages, setExerciseImages] = useState<Record<string, string>>({});
 
   // Rest timer
   const [restActive, setRestActive] = useState(false);
@@ -266,6 +268,18 @@ function SessionContent() {
       total: exercises.reduce((a, e) => a + e.sets.filter((s) => !isWarmupType(s.setType)).length, 0),
     };
   }, [exercises]);
+
+  // ── Load exercise images from wger ──
+  useEffect(() => {
+    exercises.forEach((ex) => {
+      if (!exerciseImages[ex.name]) {
+        getExerciseImage(ex.name).then((url) => {
+          if (url) setExerciseImages((prev) => ({ ...prev, [ex.name]: url }));
+        });
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exercises.length]);
 
   // ── Persistent notification — updates every 10s independently ──
   useEffect(() => {
@@ -505,20 +519,8 @@ function SessionContent() {
     );
   }
 
-  function handleSwipeStart(key: string, x: number) {
-    setSwipeState({ key, startX: x, dx: 0 });
-  }
-  function handleSwipeMove(x: number) {
-    if (!swipeState) return;
-    const dx = Math.min(0, x - swipeState.startX);
-    setSwipeState((s) => s ? { ...s, dx } : null);
-  }
-  function handleSwipeEnd(exIdx: number, setIdx: number) {
-    if (swipeState && swipeState.dx < -80) {
-      removeSet(exIdx, setIdx);
-    }
-    setSwipeState(null);
-  }
+  // Swipe state kept for potential future use but handlers removed from UI
+  // Set deletion is now via the note panel's "Delete Set" button
 
   function fillFromPrevious(exIdx: number, setIdx: number) {
     const ex = exercises[exIdx];
@@ -681,6 +683,10 @@ function SessionContent() {
         {/* Stats Bar */}
         <div className="flex px-4 pb-2 gap-6">
           <div>
+            <div className="text-[0.5rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Duration</div>
+            <div className="text-[0.82rem] font-bold" style={{ color: "var(--text)" }}>{formatDuration(elapsed)}</div>
+          </div>
+          <div>
             <div className="text-[0.5rem] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Volume</div>
             <div className="text-[0.82rem] font-bold" style={{ color: "var(--text)" }}>{totalVolume.toLocaleString()} kg</div>
           </div>
@@ -717,69 +723,75 @@ function SessionContent() {
 
           return (
             <div key={exIdx} className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderLeft: ex.supersetTag ? `3px solid ${SUPERSET_COLORS[ex.supersetTag] || '#FF9500'}` : undefined }}>
-              {/* Exercise Header */}
+              {/* Exercise Header — Hevy */}
               <div className="px-4 pt-3 pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="text-[0.92rem] font-bold truncate" style={{ color: "var(--accent)" }}>{ex.name}</span>
-                    {ex.supersetTag && (
-                      <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: SUPERSET_COLORS[ex.supersetTag] || '#FF9500', color: "#fff" }}>
-                        SS-{ex.supersetTag}
-                      </span>
-                    )}
+                <div className="flex items-center gap-3">
+                  {exerciseImages[ex.name] && (
+                    <img src={exerciseImages[ex.name]} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" style={{ background: "var(--bg-elevated)" }} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[0.92rem] font-bold truncate" style={{ color: "var(--accent)" }}>{ex.name}</span>
+                      {ex.supersetTag && (
+                        <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: SUPERSET_COLORS[ex.supersetTag] || '#FF9500', color: "#fff" }}>
+                          SS-{ex.supersetTag}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[0.65rem]" style={{ color: "var(--text-muted)" }}>
+                      {completedWorking}/{workingSets.length} sets
+                    </span>
                   </div>
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <button onClick={() => moveExercise(exIdx, -1)} disabled={exIdx === 0} className="bg-transparent border-none cursor-pointer p-1 disabled:opacity-20" style={{ color: "var(--text-muted)" }}>
-                      <ArrowUp size={15} />
+                  {/* ⋮ Menu */}
+                  <div className="relative shrink-0">
+                    <button onClick={() => setOpenMenuIdx(openMenuIdx === exIdx ? null : exIdx)} className="bg-transparent border-none cursor-pointer p-2" style={{ color: "var(--text-muted)" }}>
+                      <MoreVertical size={18} />
                     </button>
-                    <button onClick={() => moveExercise(exIdx, 1)} disabled={exIdx === exercises.length - 1} className="bg-transparent border-none cursor-pointer p-1 disabled:opacity-20" style={{ color: "var(--text-muted)" }}>
-                      <ArrowDown size={15} />
-                    </button>
-                    <button onClick={() => cycleSuperset(exIdx)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: ex.supersetTag ? (SUPERSET_COLORS[ex.supersetTag] || '#FF9500') : "var(--text-muted)" }}>
-                      <Link2 size={15} />
-                    </button>
-                    <button onClick={() => { setReplaceExerciseIdx(exIdx); setShowAddExercise(true); }} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
-                      <RefreshCw size={14} />
-                    </button>
-                    <button onClick={() => removeExercise(exIdx)} className="bg-transparent border-none cursor-pointer p-1" style={{ color: "var(--text-muted)" }}>
-                      <Trash2 size={15} />
-                    </button>
+                    {openMenuIdx === exIdx && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setOpenMenuIdx(null)} />
+                        <div className="absolute right-0 top-full z-50 rounded-xl py-1 min-w-[180px] shadow-lg" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+                          <button onClick={() => { moveExercise(exIdx, -1); setOpenMenuIdx(null); }} disabled={exIdx === 0} className="w-full text-left px-4 py-2.5 text-[0.8rem] bg-transparent border-none cursor-pointer disabled:opacity-30" style={{ color: "var(--text)" }}>↑ Move Up</button>
+                          <button onClick={() => { moveExercise(exIdx, 1); setOpenMenuIdx(null); }} disabled={exIdx === exercises.length - 1} className="w-full text-left px-4 py-2.5 text-[0.8rem] bg-transparent border-none cursor-pointer disabled:opacity-30" style={{ color: "var(--text)" }}>↓ Move Down</button>
+                          <button onClick={() => { cycleSuperset(exIdx); setOpenMenuIdx(null); }} className="w-full text-left px-4 py-2.5 text-[0.8rem] bg-transparent border-none cursor-pointer" style={{ color: ex.supersetTag ? (SUPERSET_COLORS[ex.supersetTag] || '#FF9500') : "var(--text)" }}>⬡ Superset</button>
+                          <button onClick={() => { setReplaceExerciseIdx(exIdx); setShowAddExercise(true); setOpenMenuIdx(null); }} className="w-full text-left px-4 py-2.5 text-[0.8rem] bg-transparent border-none cursor-pointer" style={{ color: "var(--text)" }}>↻ Replace</button>
+                          <div style={{ borderTop: "1px solid var(--border)" }} />
+                          <button onClick={() => { removeExercise(exIdx); setOpenMenuIdx(null); }} className="w-full text-left px-4 py-2.5 text-[0.8rem] bg-transparent border-none cursor-pointer" style={{ color: "#FF3B30" }}>Remove Exercise</button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 {/* Notes */}
                 <input
                   type="text"
-                  placeholder="Agregar nota..."
+                  placeholder="Add notes here..."
                   value={ex.notes}
                   onChange={(e) => updateNotes(exIdx, e.target.value)}
-                  className="w-full text-[0.75rem] bg-transparent border-none outline-none mt-1 p-0"
+                  className="w-full text-[0.75rem] bg-transparent border-none outline-none mt-2 p-0"
                   style={{ color: "var(--text-secondary)" }}
                 />
-
-                {/* Inline Progress */}
-                <ExerciseProgressInline exerciseName={ex.name} />
 
                 {/* Rest Timer Config */}
                 <div className="flex items-center gap-2 mt-1.5">
                   <Timer size={13} style={{ color: "var(--accent)" }} />
                   <span className="text-[0.72rem] font-medium" style={{ color: "var(--accent)" }}>
-                    Rest Timer: {formatRest(ex.restSeconds)}
+                    Rest: {formatRest(ex.restSeconds)}
                   </span>
                   <button onClick={() => updateRestTime(exIdx, -15)} className="session-rest-btn"><MinusIcon size={10} /></button>
                   <button onClick={() => updateRestTime(exIdx, 15)} className="session-rest-btn"><Plus size={10} /></button>
                 </div>
               </div>
 
-              {/* Sets Table */}
+              {/* Sets Table — Hevy 5-column */}
               <div className="px-2">
                 {/* Table Header */}
-                <div className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 px-2 py-1.5 text-[0.6rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
+                <div className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 px-2 py-1.5 text-[0.6rem] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
                   <span>SET</span>
                   <span>PREV</span>
                   <span className="text-center">KG</span>
                   <span className="text-center">REPS</span>
-                  <span className="text-center">RPE</span>
                   <span className="text-center">{"\u2713"}</span>
                 </div>
 
@@ -790,61 +802,37 @@ function SessionContent() {
                   const prevSet = workingIdx !== undefined ? ex.previousSets[workingIdx] : undefined;
                   const swipeKey = `${exIdx}-${setIdx}`;
                   const isNoteOpen = expandedSetNote === swipeKey;
-                  const swipeDx = swipeState?.key === swipeKey ? swipeState.dx : 0;
 
                   return (
-                    <div key={setIdx} className="relative overflow-hidden rounded-lg mb-0.5">
-                      {/* Swipe-to-delete background */}
-                      {swipeDx < -20 && (
-                        <div className="absolute inset-y-0 right-0 flex items-center px-4 rounded-r-lg" style={{ background: '#FF3B30' }}>
-                          <Trash2 size={16} style={{ color: '#fff' }} />
-                        </div>
-                      )}
-                    <div
-                      className="grid grid-cols-[36px_1fr_1fr_1fr_42px_40px] gap-1 items-center px-2 py-1.5 relative"
-                      style={{ background: set.completed ? "rgba(48, 209, 88, 0.08)" : "var(--bg-card)", transform: `translateX(${swipeDx}px)`, transition: swipeState?.key === swipeKey ? 'none' : 'transform 0.2s' }}
-                      onTouchStart={(e) => handleSwipeStart(swipeKey, e.touches[0].clientX)}
-                      onTouchMove={(e) => handleSwipeMove(e.touches[0].clientX)}
-                      onTouchEnd={() => handleSwipeEnd(exIdx, setIdx)}
-                    >
-                      {/* Set type badge (tappable to cycle) */}
-                      <div className="flex justify-center">
-                        <SetTypeBadge
-                          type={set.setType}
-                          index={(workingIdx ?? 0) + 1}
-                          onCycle={() => {
-                            const next = nextSetType(set.setType);
-                            updateSet(exIdx, setIdx, "setType", next);
-                            updateSet(exIdx, setIdx, "isWarmup", isWarmupType(next));
-                          }}
-                        />
-                      </div>
-
-                      {/* Previous — tap to fill */}
-                      <button
-                        onClick={() => prevSet && prevSet.weight > 0 && fillFromPrevious(exIdx, setIdx)}
-                        disabled={!prevSet || prevSet.weight <= 0}
-                        className="text-[0.7rem] bg-transparent border-none p-0 text-left cursor-pointer disabled:cursor-default"
-                        style={{ color: prevSet && prevSet.weight > 0 ? "var(--accent)" : "var(--text-muted)" }}
+                    <div key={setIdx}>
+                      <div
+                        className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-1 items-center px-2 py-2 rounded-lg mb-0.5"
+                        style={{ background: set.completed ? "rgba(48, 209, 88, 0.12)" : "transparent" }}
                       >
-                        {prevSet && prevSet.weight > 0 ? `${prevSet.weight}×${prevSet.reps}` : "\u2014"}
-                      </button>
+                        {/* Set type badge */}
+                        <div className="flex justify-center">
+                          <SetTypeBadge
+                            type={set.setType}
+                            index={(workingIdx ?? 0) + 1}
+                            onCycle={() => {
+                              const next = nextSetType(set.setType);
+                              updateSet(exIdx, setIdx, "setType", next);
+                              updateSet(exIdx, setIdx, "isWarmup", isWarmupType(next));
+                            }}
+                          />
+                        </div>
 
-                      {/* Weight Input with Stepper — 6.4/6.10 */}
-                      <div className="flex items-center gap-0.5">
+                        {/* Previous — tap to fill */}
                         <button
-                          type="button"
-                          onClick={() => {
-                            const inc = getSettings().weightIncrement;
-                            const cur = set.weight ?? 0;
-                            const next = Math.max(0, cur - inc);
-                            updateSet(exIdx, setIdx, "weight", next || undefined);
-                          }}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border-none cursor-pointer text-xs font-bold flex-shrink-0"
-                          style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
+                          onClick={() => prevSet && prevSet.weight > 0 && fillFromPrevious(exIdx, setIdx)}
+                          disabled={!prevSet || prevSet.weight <= 0}
+                          className="text-[0.72rem] bg-transparent border-none p-0 text-left cursor-pointer disabled:cursor-default truncate"
+                          style={{ color: prevSet && prevSet.weight > 0 ? "var(--text-secondary)" : "var(--text-muted)" }}
                         >
-                          −
+                          {prevSet && prevSet.weight > 0 ? `${prevSet.weight}kg × ${prevSet.reps}` : "\u2014"}
                         </button>
+
+                        {/* KG — clean input, no steppers */}
                         <input
                           type="number"
                           inputMode="decimal"
@@ -856,108 +844,73 @@ function SessionContent() {
                           value={set.weight ?? ""}
                           onChange={(e) => updateSet(exIdx, setIdx, "weight", e.target.value ? parseFloat(e.target.value) : undefined)}
                           onFocus={(e) => e.target.select()}
-                          className="session-input text-center flex-1 min-w-0"
+                          className="session-input text-center"
                           style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                         />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const inc = getSettings().weightIncrement;
-                            const cur = set.weight ?? 0;
-                            updateSet(exIdx, setIdx, "weight", cur + inc);
-                          }}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border-none cursor-pointer text-xs font-bold flex-shrink-0"
-                          style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
-                        >
-                          +
-                        </button>
-                      </div>
 
-                      {/* Reps Input */}
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        pattern="[0-9]*"
-                        enterKeyHint="next"
-                        placeholder="reps"
-                        value={set.reps || ""}
-                        onChange={(e) => updateSet(exIdx, setIdx, "reps", e.target.value ? parseInt(e.target.value, 10) : 0)}
-                        onFocus={(e) => e.target.select()}
-                        className="session-input text-center"
-                        style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
-                      />
-
-                      {/* RPE Input */}
-                      <select
-                        value={set.rpe ?? ""}
-                        onChange={(e) => {
-                          const rpe = e.target.value ? parseFloat(e.target.value) : undefined;
-                          updateSet(exIdx, setIdx, "rpe", rpe);
-                          updateSet(exIdx, setIdx, "rir", rpe !== undefined ? 10 - rpe : undefined);
-                        }}
-                        className="session-input text-center text-[0.7rem] appearance-none px-0"
-                        style={{ color: set.rpe ? "var(--accent)" : "var(--text-muted)", fontWeight: 600 }}
-                      >
-                        <option value="">—</option>
-                        {[6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10].map((v) => (
-                          <option key={v} value={v}>{v}</option>
-                        ))}
-                      </select>
-
-                      {/* Complete Check */}
-                      <div className="flex justify-center gap-0.5 items-center">
-                        {set.tempo && (
-                          <span className="text-[0.45rem] font-bold px-1 rounded" style={{ color: 'var(--accent)', background: 'color-mix(in srgb, var(--accent) 12%, transparent)' }}>
-                            {set.tempo}
-                          </span>
-                        )}
-                        <button
-                          onClick={() => setExpandedSetNote(isNoteOpen ? null : swipeKey)}
-                          className="bg-transparent border-none cursor-pointer p-0"
-                          style={{ color: set.note || set.tempo ? 'var(--accent)' : 'var(--text-muted)', opacity: set.note || set.tempo ? 1 : 0.4 }}
-                        >
-                          <MessageSquare size={12} />
-                        </button>
-                        <button
-                          onClick={() => toggleSetComplete(exIdx, setIdx)}
-                          className="w-[28px] h-[28px] rounded-lg flex items-center justify-center border-none cursor-pointer transition-colors"
-                          style={{ background: set.completed ? "var(--accent-green)" : "var(--bg-elevated)", border: set.completed ? "none" : "1px solid var(--border)" }}
-                        >
-                          <Check size={14} strokeWidth={3} style={{ color: set.completed ? "#fff" : "var(--text-muted)" }} />
-                        </button>
-                      </div>
-                    </div>
-                    {/* Per-set note input */}
-                    {isNoteOpen && (
-                      <div style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                        {/* Reps */}
                         <input
-                          type="text"
-                          placeholder="Nota del set..."
-                          value={set.note || ''}
-                          onChange={(e) => updateSetNote(exIdx, setIdx, e.target.value)}
-                          className="w-full text-[0.7rem] py-1.5 px-3 bg-transparent border-none outline-none"
-                          style={{ color: 'var(--text-secondary)' }}
-                          autoFocus
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          pattern="[0-9]*"
+                          enterKeyHint="next"
+                          placeholder="reps"
+                          value={set.reps || ""}
+                          onChange={(e) => updateSet(exIdx, setIdx, "reps", e.target.value ? parseInt(e.target.value, 10) : 0)}
+                          onFocus={(e) => e.target.select()}
+                          className="session-input text-center"
+                          style={{ color: set.completed ? "var(--accent-green)" : "var(--text)", fontWeight: 600 }}
                         />
-                        {/* 4.8 Tempo input */}
-                        <div className="flex items-center gap-2 px-3 pb-1.5">
-                          <span className="text-[0.6rem] font-semibold" style={{ color: 'var(--text-muted)' }}>Tempo:</span>
-                          <input
-                            type="text"
-                            placeholder="3-1-2-0"
-                            value={set.tempo || ''}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9\-]/g, '');
-                              updateSet(exIdx, setIdx, "tempo", val || undefined);
-                            }}
-                            className="text-[0.7rem] py-0.5 px-2 rounded bg-transparent border-none outline-none w-20 text-center"
-                            style={{ color: set.tempo ? 'var(--accent)' : 'var(--text-muted)', background: 'var(--bg-elevated)' }}
-                          />
-                          <span className="text-[0.5rem]" style={{ color: 'var(--text-muted)' }}>ecc-pausa-con-pausa</span>
+
+                        {/* Check */}
+                        <div className="flex justify-center items-center gap-1">
+                          {(set.note || set.tempo) && (
+                            <button onClick={() => setExpandedSetNote(isNoteOpen ? null : swipeKey)} className="w-2.5 h-2.5 rounded-full border-none cursor-pointer p-0 shrink-0" style={{ background: "var(--accent)" }} />
+                          )}
+                          <button
+                            onClick={() => toggleSetComplete(exIdx, setIdx)}
+                            className="w-[30px] h-[30px] rounded-full flex items-center justify-center border-none cursor-pointer transition-colors"
+                            style={{ background: set.completed ? "var(--accent-green)" : "transparent", border: set.completed ? "none" : "2px solid var(--border)" }}
+                          >
+                            <Check size={16} strokeWidth={3} style={{ color: set.completed ? "#fff" : "var(--text-muted)" }} />
+                          </button>
                         </div>
                       </div>
-                    )}
+
+                      {/* Per-set note/tempo panel */}
+                      {isNoteOpen && (
+                        <div className="px-3 py-2 rounded-b-lg mb-0.5" style={{ background: "var(--bg-elevated)", borderTop: "1px solid var(--border-subtle)" }}>
+                          <input
+                            type="text"
+                            placeholder="Set note..."
+                            value={set.note || ''}
+                            onChange={(e) => updateSetNote(exIdx, setIdx, e.target.value)}
+                            className="w-full text-[0.72rem] py-1 bg-transparent border-none outline-none"
+                            style={{ color: 'var(--text-secondary)' }}
+                            autoFocus
+                          />
+                          <div className="flex items-center justify-between mt-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[0.6rem] font-semibold" style={{ color: 'var(--text-muted)' }}>Tempo:</span>
+                              <input
+                                type="text"
+                                placeholder="3-1-2-0"
+                                value={set.tempo || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9\-]/g, '');
+                                  updateSet(exIdx, setIdx, "tempo", val || undefined);
+                                }}
+                                className="text-[0.7rem] py-0.5 px-2 rounded bg-transparent border-none outline-none w-20 text-center"
+                                style={{ color: set.tempo ? 'var(--accent)' : 'var(--text-muted)', background: 'var(--bg-card)' }}
+                              />
+                            </div>
+                            <button onClick={() => removeSet(exIdx, setIdx)} className="text-[0.7rem] px-2 py-1 rounded bg-transparent border-none cursor-pointer" style={{ color: "#FF3B30" }}>
+                              Delete Set
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -967,7 +920,7 @@ function SessionContent() {
               <button
                 onClick={() => addSet(exIdx)}
                 className="w-full py-2.5 text-[0.78rem] font-semibold bg-transparent border-none cursor-pointer flex items-center justify-center gap-1"
-                style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border)" }}
+                style={{ color: "var(--accent)", borderTop: "1px solid var(--border-subtle)" }}
               >
                 <Plus size={14} /> Add Set
               </button>
